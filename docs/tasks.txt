@@ -1,0 +1,32 @@
+Post all to GitHub
+Retrieve all from GitHub
+Write deployment instructions
+Migrate to a MySQL database
+Put site up on idodeclare.org
+
+Display bubbles by selected issue by district.
+Display bubbles by selected issue by state.
+
+Separate panel for editing interests?
+Allow user to remove interest.
+Allow user to show interests by existing issues.
+
+Allow user to change password
+Allow user to reset forgotten password
+Allow user to change name, address
+Add Catcha to creating a user
+
+Beautiful layout for home page
+Beautiful layout for creation page
+Beautiful layout for reset password page
+Beautiful layout for change name, address page
+
+Layout for mobile devices
+
+Click member of Congress goes to their web page
+
+Allow sign-in as member of Congress
+Allow member of Congress to post an event
+Display events for your member of congress
+Add an option to receive notifications of events of MC by interest
+Send email of events of MC.

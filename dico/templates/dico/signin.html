@@ -1,0 +1,32 @@
+<div id="content-main">
+
+{% if authentication_error %}
+authentication error : {{authentication_error}} <br>
+{% endif %}
+
+<form action="/dico/submitsignin/?next=/dico/" method="post" id="login-form">
+  
+  <input type='hidden' name='csrfmiddlewaretoken' value='{{ csrf_token }}' />
+  <div class="form-row">
+    
+    <label for="id_username" class="required">Email address:</label> <input id="id_username" maxlength="254" name="username" type="text" />
+  </div>
+  <div class="form-row">
+    
+    <label for="id_password" class="required">Password:</label> <input id="id_password" name="password" type="password" />
+    <input type="hidden" name="next" value="/dico/" />
+  </div>
+  
+  
+  <div class="submit-row">
+    <label>&nbsp;</label><input type="submit" value="Sign in" />
+  </div>
+</form>
+
+<script type="text/javascript">
+document.getElementById('id_username').focus()
+</script>
+
+<a href="/dico/createConstituent">Create your account</a>
+</div>
+

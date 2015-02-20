@@ -1,0 +1,87 @@
+<head>
+<title>DICO features</title>
+</head>
+
+<body>
+<H1>DICO features</H1>
+
+<h2>Features Implemented as of 17-Feb-2015:</h2>
+<h3>User features</h3>
+<h4>Home page features</h4>
+<h5>Your Interests section</h5>
+<p>When a user adds an issue by clicking the "+" button, the issue is automatically
+added to the list of Your Interests.</p>
+<p>When a user adds an issue by clicking the "+" button, the issue is cleared 
+from the text entry box and focus is set to the text entry box.</p>
+<h5>All Issues section</h5>
+<p>When selecting an item from All Issues, the number of interested constituents is listed
+by district.</p>
+
+<h3>API features</h3>
+<p>getInterests event can be used to get the interests associated with a particular issue.
+
+<h3>Database Model changes</h3>
+<p>Make the primary key of the Constituents table the same as the primary key for the AuthUser table.</p>
+<p>Make the primary key of the MC table the same as the primary key for the AuthUser table.</p>
+<h2>Features Implemented as of 16-Feb-2015:</h2>
+
+<h3>User features</h3>
+<h4>Home page features</h4>
+
+<p>("Hello, " + first_name + " " + last_name) when user is logged in.
+<p>User can sign in by clicking the Sign In button and entering their
+ e-mail address and password.</p>
+<p>User can sign out by clicking the Sign Out button.</p>
+
+<h5>Your Interests section</h5>
+<p>Your Interests section appears when user is logged in. Otherwise, it is hidden.</p>
+<p>The Your Interest section has a heading: "Your Interests".
+<p>Under the heading "Your Interests", a list of issues that the user has indicated an 
+interest appears when user is logged in.</p>
+<p>Under the last issue, a text box appears with a "+" button to its right.</p>
+<p>If the user types in the name of an issue and clicks the "+" button, the issue becomes
+an interest of the logged-in user.</p>
+<h5>All Issues section</h5>
+<p>The All Issues section has a heading: "All Issues".
+<p>Under the heading "All Issues", Home page displays a select object containing all 
+issues in the system.</p>
+<p>Selecting an issue displays its internal ID to the right of the select object.</p>
+<h5>Your Members section</h5>
+<p>Your Members section appears when user is logged in. Otherwise, it is hidden.</p>
+<p>The Your Members section has a heading: "Your Members".
+<p>Under the heading "Your Members", the representative and senators of the logged-in 
+user appear, based on their district and state.</p>
+<p>The display for each member of congress includes their official picture and full 
+name.</p>
+<h5>District Map section</h5>
+<p>Below the Your Members section, a map of congressional districts appears.</p>
+<p>When mousing over a district, the district turns purple</p>
+</body>
+
+<h4>Sign In page features</h4>
+<p>User can specify their e-mail address as clear text.</p>
+<p>User can specify their password as obscured text.</p>
+<p>User can click the Sign in Button to sign in. If their credentials are correct, then
+they are taken to the home page. If their credentials are not correct, then the sign-in
+page is re-displayed with an error message at the top</p>
+<p>User can click the Create a New Account link to create a new account.</p>
+
+<h4>Create a New Account page features</h4>
+User can create a new account with the following:
+<ul>
+	<li>E-Mail address</li>
+	<li>Password</li>
+	<li>First Name</li>
+	<li>Last Name</li>
+	<li>Street Address</li>
+	<li>Zip Code</li>
+</ul>
+
+<p>User's district and state are calculated via street address and zip code and 
+stored as constituent data.</p>
+<p>User can click the Join DICO button, which creates their account, logs them in and 
+returns to the home page</p>
+<p>If the user clicks the Join DICO button and the user specifies an e-mail address 
+that is in use for another user, the Create a New Account page
+re-appears with an error message at the top: 
+<li>Error : UNIQUE constraint failed: custom_user_authuser.email</li>

@@ -161,7 +161,7 @@ if(code == 13) { //Enter keycode
 
 function show_my_interests() {
   $.post("/dico/getmyissues/", { csrfmiddlewaretoken: '{{ csrf_token }}'}, function(json){
-    var s = "<ul>";
+    var s = "<ul>"
     var issues = json['issues'];
     for (i = 0; i < issues.length; ++i) {
     	issue = issues[i];

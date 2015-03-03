@@ -72,12 +72,31 @@ path {
   left: 0;
 }
 
+circle {
+  fill: #888;
+}
+
+.bubble {
+  fill: #FCC;
+  fill-opacity: 0.5;
+  stroke: white;
+  stroke-width: 0.5px;
+}
+
 </style>
 
 <head>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>
 
+var stateCodes = ["", 
+	"AL", "AK", "AS", "AZ", "AR", "CA", "??", "CO", "CT", "DE", 
+	"DC", "FL", "GA", "GU", "HI", "ID", "IL", "IN", "IA", "KS", 
+	"KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", 
+	"NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", 
+	"OR", "PA", "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VT", 
+	"VA", "VI", "WA", "WV", "WI", "WY"];
+		
 function htmlDecode(input){
   var e = document.createElement('div');
   e.innerHTML = input;
@@ -106,23 +125,17 @@ $(document).ready (function() {
 		selectElement.appendChild(newOption);
 	}
 	
-	change_issue(issue_select.value);
-	
 	addHandlers();
 	
 	show_map();
+	
+	change_issue(issue_select.value);
 });
 
 function addHandlers() {
   $("#issue_select").change( function() { change_issue(issue_select.value) });
   $("#add_interest_button").click( function() { add_interest(id_newIssue.value) });
-  $('#id_newIssue').keypress(function(event){
-	var keycode = (event.keyCode ? event.keyCode : event.which);
-	if(keycode == '13'){
-		add_interest(id_newIssue.value);	
-	}
-	event.stopPropagation();
-});}
+  }
 
 function change_issue(newIssue) {
   $.getJSON("/dico/getinterests/", { pk: newIssue}, function(json){
@@ -131,9 +144,41 @@ function change_issue(newIssue) {
     	s = json['error'];
     } else {
     	var interests = json['interests'];
+    	var countMax = d3.max(interests, function(d) {return d.constituent_count; })
+    	
+    	if (countMax < 10) { countMax = 10; }
+    	
+    	var svg = d3.select("#mapFrame").select("svg");
+    	var circles = svg.selectAll(".bubble");
+    	
+    	rScale = d3.scale.linear()
+    				.domain([0, countMax])
+    				.range([0, 30]);
+
+    	// Clear the radii of all of the circles.
+    	circles.attr("r", 0);
+    	
 		for (i = 0; i < interests.length; ++i) {
 			var interest = interests[i];
 			s = s + interest['state'] + "-" + interest['district'] + ": " + interest['constituent_count'] + "<br>"
+			
+			// Handle the special case for 'DC' here. The case for states with only one district
+			// is handled elsewhere.
+			var interestID;
+			
+			if (interest['state'] == 'DC') {
+				interestID=100*stateCodes.indexOf(interest['state']) + 98;
+			} else {
+				interestID=100*stateCodes.indexOf(interest['state']) + interest['district'];
+			}
+			
+			var ba = circles.filter(function() { return (this.getAttribute("id")==interestID);})
+			if (ba.length == 0 && interest['district'] == 1) {
+				ba = circles.filter(function() { return (this.getAttribute("id")==interestID-1);})
+			}
+			if (ba.length > 0) {
+				ba[0][0].setAttribute("r", rScale(interest['constituent_count']));
+			}
 		}
 	}
     $("#my_score").html('').append(s);
@@ -153,10 +198,11 @@ function add_interest(newIssueName) {
 }
 
 function enter_interest(e, inputObject){
-var code = (e.keyCode ? e.keyCode : e.which);
-if(code == 13) { //Enter keycode
- add_interest(id_newIssue.value);
-}
+	var code = (e.keyCode ? e.keyCode : e.which);
+	if(code == 13) { //Enter keycode
+	 add_interest(id_newIssue.value);
+	}
+	e.stopPropagation();
 }
 
 function show_my_interests() {
@@ -216,7 +262,6 @@ function show_my_interests() {
 {% endif %}
 </div>
 
-State: <span id="state_span"></span><br>
 District: <span id="district_span"></span><br>
 
 <div id="mapFrame">
@@ -235,16 +280,9 @@ var path = d3.geo.path()
     .projection(projection);
 
 function show_map() {
-	var stateCodes = ["", 
-		"AL", "AK", "AS", "AZ", "AR", "CA", "??", "CO", "CT", "DE", 
-		"DC", "FL", "GA", "GU", "HI", "ID", "IL", "IN", "IA", "KS", 
-		"KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", 
-		"NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", 
-		"OR", "PA", "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VT", 
-		"VA", "VI", "WA", "WV", "WI", "WY"];
+	var circleData = [];
 	
 	function mouseoverstate() {
-	  $("#state_span").html('').append("In " + this);
 	}
 
 	function mouseoverdistrict() {
@@ -264,11 +302,14 @@ function show_map() {
 	}
 
 	function mouseoutstate() {
-	  $("#state_span").html('');
 	}
 
 	function mouseoutdistrict() {
 	  $("#district_span").html('');
+	}
+	
+	function districtCircleR(d) {
+		return 20;
 	}
 
 	function ready(error, us, congress) {
@@ -276,18 +317,21 @@ function show_map() {
 
 	  var districts = congress.objects.districts;
 
+	  // add the path for all of the us land.
 	  svg.append("defs").append("path")
 		  .attr("id", "land")
 		  .datum(topojson.feature(us, us.objects.land))
-		  .attr("d", path)
-		  .on("mouseover", mouseoverstate)
-    	  .on("mouseout", mouseoutstate);
+		  .attr("d", path);
 
 	  svg.append("clipPath")
 		  .attr("id", "clip-land")
 		.append("use")
 		  .attr("xlink:href", "#land");
 
+	  circleData = [];
+	  
+	  // Count the circleArray positions manually in case the indexes are not continuous.
+	  i = 0;
 	  var district = svg.append("g")
 		  .attr("class", "land")
 		  .attr("clip-path", "url(#clip-land)")
@@ -296,12 +340,23 @@ function show_map() {
 		.enter().append("path")
 		  .attr("d", path)
 		  .on("mouseover", mouseoverdistrict)
-    	  .on("mouseout", mouseoutdistrict);
+    	  .on("mouseout", mouseoutdistrict)
+    	  .each(function(d){
+    	  		// Get the centroid or, if the centroid is degenerate, the bounds.
+    	  		centroid = path.centroid(d);
+    	  		if (isNaN(centroid[0]))
+    	  			centroid = path.bounds(d);
+
+				if (!isNaN(centroid[0])) {
+					circleData[i] = {"cx": centroid[0], "cy": centroid[1], "r": 0, "id": d.id};
+					i++;
+				}
+	  		});
 
 	  district
     	  .append("title")
 		  .text(function(d) { return d.id; });
-
+	  
 	  svg.append("path")
 		  .attr("class", "border border--district")
 		  .datum(topojson.mesh(congress, congress.objects.districts, function(a, b) { return a !== b && (a.id / 1000 | 0) === (b.id / 1000 | 0); }))
@@ -311,6 +366,17 @@ function show_map() {
 		  .attr("class", "border border--state")
 		  .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
 		  .attr("d", path);
+	  	  
+	  circles = svg.selectAll("circle")
+	     .data(circleData)
+	     .enter()
+	     .append("circle")
+    	 .attr("class", "bubble")
+		  .attr("cx", function(d, i) { return d.cx; })
+    	  .attr("cy", function(d) { return d.cy; })
+    	  .attr("r", function(d) { return d.r; })
+    	  .attr("id", function(d) { return d.id; });
+	  
 	}
 
 	// Remove any lingering contents from the mapFrame.

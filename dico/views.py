@@ -97,7 +97,7 @@ def createConstituent(request):
 def getDistrict(address):
     results = Geocoder.geocode(address)
     if not results.valid_address:
-        raise ValueException("the street address and zip code are not recognized")
+        raise ValueError("the street address and zip code are not recognized")
     
     coordinates = results[0].coordinates
     
@@ -125,7 +125,7 @@ def submitCreateConstituent(request):
             if user.is_active:
                 login(request, user)
                 if request.user is None:
-                	raise ValueException('request.user is None')
+                	raise ValueError('request.user is None')
                 return redirect('/dico/')
             else:
                 return redirect('/dico/signin/?authentication_error=disabled_account')

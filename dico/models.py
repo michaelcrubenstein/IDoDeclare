@@ -68,14 +68,14 @@ class ConstituentManager(models.Manager):
             raise e
     
 class Constituent(models.Model):
-#     fiveCharacterValidator = RegexValidator(r'^.....$', message='Zip codes are five digits only.')
-#     zipcodeValidator = RegexValidator(r'^[0-9]+$', message='Zip codes are five digits only.')
+    fiveCharacterValidator = RegexValidator(r'^.....$', message='Zip codes are five digits only.')
+    zipcodeValidator = RegexValidator(r'^[0-9][0-9][0-9][0-9][0-9]$', message='Zip codes are five digits only.')
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, primary_key=True);
     
     ### Our own class fields ###
     streetAddress = models.CharField(max_length=100, db_column='street_address')
-    zipCode = models.IntegerField(db_column='zip_code', validators=[MinValueValidator(0), MaxValueValidator(99999)])
+    zipCode = models.CharField(max_length=5, db_column='zip_code', validators=[fiveCharacterValidator, zipcodeValidator])
     district = models.IntegerField(db_index=True)
     state = models.CharField(max_length=2, db_index=True)
 

@@ -130,6 +130,19 @@ class Constituent(models.Model):
             interest = ConstituentInterest.create_interest(constituent, name)
         return interest
             
+    # Remove an interest to the named issue for the specified user.
+    # If the user is not interested, return an exception.    
+    def delete_interest(user, name):
+        constituent = Constituent.get_constituent(user)
+        if constituent is None:
+            return None
+        
+        interest = ConstituentInterest.get_interest(constituent, name)
+        if interest is None:
+            raise ValueError("the specified user is not currently interested in the issue '%s'" % name);
+        
+        ConstituentInterest.delete_interest(constituent, name)
+            
 class MC(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, primary_key=True);
     
@@ -169,6 +182,11 @@ class ConstituentInterest(models.Model):
     		issue = query_set.get()
     	return ConstituentInterest.objects.create(constituent=constituent, issue=issue)
 
+    def delete_interest(constituent, name):
+        query_set = ConstituentInterest.objects.filter(constituent_id=constituent.pk). \
+            filter(issue__name=name)
+        query_set.delete()
+            
     def __str__(self):
         return str(self.constituent) + ': ' + str(self.issue)
 

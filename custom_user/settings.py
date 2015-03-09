@@ -83,5 +83,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# Static root is the actual location of the static files.
+STATIC_ROOT = os.path.dirname(BASE_DIR) + '/public/static/'
+
 # Sunlight API Key
 SUNLIGHT_API_KEY = 'f9defbcc52934ab38960bd1415ad3906'

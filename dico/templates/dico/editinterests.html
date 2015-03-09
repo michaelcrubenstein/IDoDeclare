@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>I Do Declare</title>
+
+    <!-- Bootstrap -->
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+	<!-- Styles for this web page -->
+	<style>
+
+	</style>
+
+
+  </head>
+  <body>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+
+	<!-- Scripts for this web page -->
+	<script type="text/JavaScript">
+
+		function htmlDecode(input){
+		  var e = document.createElement('div');
+		  e.innerHTML = input;
+		  return e.childNodes[0].nodeValue;
+		}
+		
+		function htmlEncode(input){
+			str = $('<div>').text(input).html();
+		    return String(str).replace(/ /g, '&nbsp;');
+		}
+		
+		function oneWordTitleCase(input) {
+			return i[0].toUpperCase() + i.substring(1);
+		}
+		
+		function validIssueName(input){
+			return input.split(" ").map(function(i){return oneWordTitleCase(i)}).join(" ");
+		}
+
+		var issueObject;
+
+		$(document).ready (function() {
+			// Display all of the interests in the system.
+			myString = htmlDecode("{{ issue_list }}");
+			issueObject = $.parseJSON(myString);
+	
+			// Display the interests of the currently logged-in user.
+			show_my_interests();
+
+			addHandlers();
+		});
+
+		function addHandlers() {
+		  $("#add_interest_button").click( function() { add_interest(id_newIssue.value) });
+		  }
+
+		function add_interest(newIssueName) {
+		  $.post("/dico/submitnewissue/", { csrfmiddlewaretoken: '{{ csrf_token }}', 'newissue': newIssueName}, function(json){
+			if (json['success']) {
+				show_my_interests();
+				if (newIssueName == id_newIssue.value) {
+					$("#id_newIssue").val('');
+					$("#id_newIssue").focus();
+				}
+			}
+			else {
+				alert("Sorry, " + json['error']);
+			}
+		  });
+		}
+
+		function enter_interest(e, inputObject){
+			var code = (e.keyCode ? e.keyCode : e.which);
+			if(code == 13) { //Enter keycode
+			 add_interest(id_newIssue.value);
+			}
+			e.stopPropagation();
+		}
+		
+		function remove_interest(issueName) {
+		  $.post("/dico/submitdeleteinterest/", { csrfmiddlewaretoken: '{{ csrf_token }}', 'oldinterest': issueName}, function(json){
+			if (json['success']) {
+				show_my_interests();
+			}
+			else {
+				alert("Sorry, " + json['error']);
+			}
+		  });
+		}
+
+		function hasIssue(issues, oldName) {
+			var i;
+			for (i = 0; i < issues.length; ++i) {
+				if (issues[i]['name'] == oldName) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		function show_my_interests() {
+		  $.post("/dico/getmyissues/", { csrfmiddlewaretoken: '{{ csrf_token }}'}, function(json){
+			var s = "<ul>";
+			var issues = json['issues'];
+			$("#my_interests").empty();
+			var ul = document.createElement( "ul" );
+			$(ul).addClass("list-unstyled");
+			$("#my_interests").append(ul);
+			
+			for (i = 0; i < issues.length; ++i) {
+				issue = issues[i];
+				var li = document.createElement("li");
+				var newButton = document.createElement("button");
+				var newSpan = document.createElement("span");
+				$(ul).append(li);
+				$(newButton).append(htmlEncode(issue['name']));
+				$(li).append(newButton);
+				$(newButton).addClass("btn btn-link btn-xs");
+				$(newButton).append(newSpan);
+				$(newSpan).addClass("glyphicon glyphicon-remove");
+				$(newButton).attr("issueName", issue['name']);
+				$(newButton).click(function() {
+					remove_interest($(this).attr("issueName"));
+				});
+			}
+
+			// Remove any lingering contents from the mapFrame.
+			$("#issue_div").empty();
+			selectElement = document.getElementById("issue_div");
+	
+			// Add an option for each issue to the select object.
+			for (i = 0; i < issueObject.length; ++i) {
+				if (!hasIssue(issues, issueObject[i].name))
+				{
+					newOption = document.createElement('button');
+					newOption.innerHTML = '<span class="glyphicon glyphicon-chevron-left" /> ' + 
+						htmlEncode(issueObject[i].name);
+					newOption.issueName = issueObject[i].name;
+					$(newOption).click(function() { alert(this.issueName); add_interest(this.issueName); });
+					selectElement.appendChild(newOption);
+				}
+			}
+	
+
+		  });
+		}
+		
+	</script>
+
+	<div id='container' class="container">
+		<nav class="navbar navbar-default" role="navigation">
+		  <div class="container-fluid">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header">
+			  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+			  </button>
+			  <a class="navbar-brand" href="/dico/">I Do Declare</a>
+			</div>
+
+			<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			  <ul class="nav navbar-nav navbar-right">
+				<li>
+					{% if user.is_authenticated %}
+						<a href="/dico/signout/">Sign out</a>
+					{% else %}
+						<a href="/dico/signin/">Sign in</a>
+					{% endif %}
+				</li>
+				{% if user.is_authenticated %}
+				<li class="dropdown">
+				  <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
+				  <ul class="dropdown-menu" role="menu">
+					<li><a href="#">Account Settings</a></li>
+					<li><a href="#">Change Password</a></li>
+					<li class="divider"></li>
+					<li><a href="/dico/editinterests/">Edit Interests</a></li>
+				  </ul>
+				</li>
+				{% endif %}
+			  </ul>
+			</div><!-- /.navbar-collapse -->
+		  </div><!-- /.container-fluid -->
+		</nav>
+
+		<div class="row">
+			<div class="col-xs-12 col-sm-5">
+				{% if user.is_authenticated %}
+				<label class="control-label">Your Interests</label>
+				<div id='my_interests'>
+				</div>
+
+				<div class="input-group">
+				  <input type="text" id="id_newIssue" width="200" maxlength="254" name="newissue" class="form-control"
+				  		 onKeyPress="enter_interest(event, this)" />
+				  <div class="input-group-btn">
+				  	<button type="button" id="add_interest_button" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></button>
+				  </div>
+				</div>
+				{% endif %}
+			</div>
+			
+			{% if issue_list %}
+			<div class="col-xs-12 col-sm-6">
+				<form class="form-horizontal">
+					<div class="row">
+						<label for="issue_div" class="control-label">Issues Other People Care About</label>
+					</div>
+					<div id="issue_div" class="row">
+					</div>
+				</form>
+			</div>
+
+			{% endif %}
+		</div>
+
+</div> <!-- container -->
+</body>

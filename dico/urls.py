@@ -10,8 +10,12 @@ urlpatterns = patterns('',
     url(r'^submitsignin/', views.submitsignin, name='submitsignin'),
     # ex: /dico/signout/
     url(r'^signout/', views.signout, name='signout'),
+    # ex: /dico/editinterests/
+    url(r'^editinterests/', views.editinterests, name='editinterests'),
     # ex: /dico/submitnewissue/
     url(r'^submitnewissue/', views.submitnewissue, name='submitnewissue'),
+    # ex: /dico/submitdeleteinterest/
+    url(r'^submitdeleteinterest/', views.submitdeleteinterest, name='submitdeleteinterest'),
     # ex: /dico/createConstituent/
     url(r'^createConstituent/', views.createConstituent, name='createConstituent'),
     # ex: /dico/submitcreateconstituent/

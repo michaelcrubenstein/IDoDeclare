@@ -12,6 +12,7 @@ import urllib
 import json
 
 from dico.models import Issue, Constituent, ConstituentInterest, MC
+from dico.titlecase import titlecase
 
 # Create your views here.
 
@@ -22,11 +23,6 @@ def index(request):
     for i in issue_list:
         il = il + [{'name': i.name, 'id': i.id}]
         
-    if request.user.is_authenticated:
-    	interest_list = Constituent.get_interests(request.user);
-    else:
-    	interest_list = None
-    
     member_list = Constituent.get_members(request.user)
             
     context = RequestContext(request, {
@@ -68,13 +64,46 @@ def signout(request):
     logout(request)
     return redirect('/dico/')
     
+def editinterests(request):
+    template = loader.get_template('dico/editinterests.html')
+    issue_list = Issue.objects.order_by('name')
+    il = []
+    for i in issue_list:
+        il = il + [{'name': i.name, 'id': i.id}]
+        
+    if not request.user.is_authenticated:
+    	return signin(request)
+    
+    context = RequestContext(request, {
+    	'user': request.user,
+        'issue_list': json.dumps(il),
+    })
+    return HttpResponse(template.render(context))
+
 def submitnewissue(request):
-    results = {'success':False}
+    results = {'success':False, 'error': 'request format invalid'}
     if request.method == u'POST':
         try:
             POST = request.POST
             newissue = request.POST['newissue']
+            
+            # Set the new issue to titlecase and remove extraneous spaces.
+            newissue = titlecase(newissue)
+            newissue = ' '.join(newissue.split())
             Constituent.add_interest(request.user, newissue)
+            results = {'success':True}
+        except Exception as e:
+            results = {'success':False, 'error': str(e)}
+            
+    return JsonResponse(results)
+
+def submitdeleteinterest(request):
+    results = {'success':False, 'error': 'request format invalid'}
+    if request.method == u'POST':
+        try:
+            POST = request.POST
+            oldinterest = request.POST['oldinterest']
+            Constituent.delete_interest(request.user, oldinterest)
             results = {'success':True}
         except Exception as e:
             results = {'success':False, 'error': str(e)}

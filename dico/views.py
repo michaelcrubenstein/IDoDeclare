@@ -151,7 +151,7 @@ def submitCreateConstituent(request):
                 login(request, user)
                 if request.user is None:
                 	raise ValueError('request.user is None')
-                return redirect('/dico/')
+                return redirect('/dico/editinterests/')
             else:
                 return redirect('/dico/signin/?authentication_error=disabled_account')
                 # Return a 'disabled account' error message

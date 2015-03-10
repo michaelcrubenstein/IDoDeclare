@@ -42,7 +42,7 @@ label {
   Error : {{error_message}} <br>
 {% endif %}
 
-<form action="/dico/submitcreateconstituent/?next=/dico/" method="post" id="createconstituent-form">
+<form action="/dico/submitcreateconstituent/?next=/dico/editinterests/" method="post" id="createconstituent-form">
   
   <!-- This hidden input is used to prevent csrf attacks --!>
   <input type='hidden' name='csrfmiddlewaretoken' value='{{ csrf_token }}' />

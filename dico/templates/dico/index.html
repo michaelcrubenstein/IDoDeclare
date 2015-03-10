@@ -162,28 +162,10 @@
 		  return e.childNodes[0].nodeValue;
 		}
 
-		var issueObject;
-
 		$(document).ready (function() {
 			// Display the interests of the currently logged-in user.
-			{% if user.is_authenticated %}
-				show_my_interests();
-			{% endif %}
+			show_my_interests();
 
-			// Display all of the interests in the system.
-			myString = htmlDecode("{{ issue_list }}");
-			issueObject = $.parseJSON(myString);
-	
-			selectElement = document.getElementById("issue_select")
-	
-			// Add an option for each issue to the select object.
-			for (i = 0; i < issueObject.length; ++i) {
-				newOption = document.createElement('option');
-				newOption.innerHTML = issueObject[i].name;
-				newOption.value = issueObject[i].id;
-				selectElement.appendChild(newOption);
-			}
-	
 			addHandlers();
 	
 			show_map();
@@ -195,7 +177,6 @@
 
 		function addHandlers() {
 		  $("#issue_select").change( function() { change_issue(issue_select.value) });
-		  $("#add_interest_button").click( function() { add_interest(id_newIssue.value) });
 		  }
 
 		function change_issue(newIssue) {
@@ -246,36 +227,32 @@
 		  });
 		}
 
-		function add_interest(newIssueName) {
-		  $.post("/dico/submitnewissue/", { csrfmiddlewaretoken: '{{ csrf_token }}', 'newissue': newIssueName}, function(json){
-			if (json['success']) {
-				show_my_interests();
-				if (newIssueName == id_newIssue.value) {
-					$("#id_newIssue").val('');
-					$("#id_newIssue").focus();
-				}
-			}
-		  });
-		}
-
-		function enter_interest(e, inputObject){
-			var code = (e.keyCode ? e.keyCode : e.which);
-			if(code == 13) { //Enter keycode
-			 add_interest(id_newIssue.value);
-			}
-			e.stopPropagation();
-		}
-
 		function show_my_interests() {
 		  $.post("/dico/getmyissues/", { csrfmiddlewaretoken: '{{ csrf_token }}'}, function(json){
-			var s = "<ul>";
-			var issues = json['issues'];
-			for (i = 0; i < issues.length; ++i) {
-				issue = issues[i];
-				s = s + '<li><a href="/dico/' + issue['id'] + '/issue/">' + issue['name'] + '</a></li>'
+			
+			{% if user.is_authenticated %}
+				var s = "<ul>";
+				var issues = json['myIssues'];
+				for (i = 0; i < issues.length; ++i) {
+					issue = issues[i];
+					s = s + '<li><a href="/dico/' + issue['id'] + '/issue/">' + issue['name'] + '</a></li>'
+				}
+				s=s+"</ul>"
+				$("#my_interests").html('').append(s);
+			{% endif %}
+
+			var allIssues = json['allIssues'];
+
+			selectElement = document.getElementById("issue_select")
+	
+			// Add an option for each issue to the select object.
+			for (i = 0; i < allIssues.length; ++i) {
+				newOption = document.createElement('option');
+				newOption.innerHTML = allIssues[i].name;
+				newOption.value = allIssues[i].id;
+				selectElement.appendChild(newOption);
 			}
-			s=s+"</ul>"
-			$("#my_interests").html('').append(s);
+	
 		  });
 		}
 		
@@ -463,14 +440,6 @@
 				{% if user.is_authenticated %}
 				<label class="control-label">Your Interests</label>
 				<div id='my_interests'>
-				</div>
-
-				<div class="input-group">
-				  <input type="text" id="id_newIssue" width="200" maxlength="254" name="newissue" class="form-control"
-				  		 onKeyPress="enter_interest(event, this)" />
-				  <div class="input-group-btn">
-				  	<button type="button" id="add_interest_button" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></button>
-				  </div>
 				</div>
 				{% endif %}
 			</div>

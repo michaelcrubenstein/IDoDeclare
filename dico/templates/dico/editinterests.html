@@ -32,6 +32,8 @@
 
 	<!-- Scripts for this web page -->
 	<script type="text/JavaScript">
+	
+		var deferredObject;
 
 		function htmlDecode(input){
 		  var e = document.createElement('div');
@@ -52,48 +54,63 @@
 			return input.split(" ").map(function(i){return oneWordTitleCase(i)}).join(" ");
 		}
 
-		var issueObject;
+		// Display all of the interests in the system.
+		var storedcsrftoken = "{{ csrf_token }}";
 
-		$(document).ready (function() {
-			// Display all of the interests in the system.
-			myString = htmlDecode("{{ issue_list }}");
-			issueObject = $.parseJSON(myString);
-	
+		$(document).ready (function(e) {
 			// Display the interests of the currently logged-in user.
 			show_my_interests();
-
-			addHandlers();
+			check_new_interest();
+			
+			$("#add_interest_text").bind("keyup input paste", function() {
+				check_new_interest();
+			});
+			$("#add_interest_button").click(function() {
+				add_interest(add_interest_text.value);
+			});
 		});
 
-		function addHandlers() {
-		  $("#add_interest_button").click( function() { add_interest(id_newIssue.value) });
-		  }
-
 		function add_interest(newIssueName) {
-		  $.post("/dico/submitnewissue/", { csrfmiddlewaretoken: '{{ csrf_token }}', 'newissue': newIssueName}, function(json){
-			if (json['success']) {
-				show_my_interests();
-				if (newIssueName == id_newIssue.value) {
-					$("#id_newIssue").val('');
-					$("#id_newIssue").focus();
+		  deferredObject = $.post("/dico/submitnewissue/", { csrfmiddlewaretoken: storedcsrftoken, "newissue": newIssueName} 
+		  	)
+		  .done(function(json, textStatus, jqXHR)
+		  	{
+				if (json['success']) {
+					show_my_interests();
+					if (newIssueName == add_interest_text.value) {
+						$("#add_interest_text").val('');
+						$("#add_interest_text").focus();
+					}
 				}
-			}
-			else {
-				alert("Sorry, " + json['error']);
-			}
+				else {
+					alert("Sorry, " + json['error']);
+				}
+			})
+		  .fail(function(jqXHR, textStatus, errorThrown) {
+			console.log( "error: " + textStatus + "; " + errorThrown + ";");
+			console.log( jqXHR.status + "; " + jqXHR.statusText);
 		  });
 		}
 
 		function enter_interest(e, inputObject){
 			var code = (e.keyCode ? e.keyCode : e.which);
-			if(code == 13) { //Enter keycode
-			 add_interest(id_newIssue.value);
+			if(code == 13 && add_interest_text.value.length > 0) { //Enter keycode
+			 add_interest(add_interest_text.value);
 			}
 			e.stopPropagation();
 		}
 		
+		function check_new_interest(){
+			if (add_interest_text.value.length > 0) {
+				$('#add_interest_button').prop('disabled', false);
+			}
+			else {
+				$('#add_interest_button').prop('disabled', true);
+			}
+		}
+		
 		function remove_interest(issueName) {
-		  $.post("/dico/submitdeleteinterest/", { csrfmiddlewaretoken: '{{ csrf_token }}', 'oldinterest': issueName}, function(json){
+		  $.post("/dico/submitdeleteinterest/", { csrfmiddlewaretoken: storedcsrftoken, 'oldinterest': issueName}, function(json){
 			if (json['success']) {
 				show_my_interests();
 			}
@@ -114,49 +131,54 @@
 		}
 
 		function show_my_interests() {
-		  $.post("/dico/getmyissues/", { csrfmiddlewaretoken: '{{ csrf_token }}'}, function(json){
-			var s = "<ul>";
-			var issues = json['issues'];
+		  $.post("/dico/getmyissues/", { csrfmiddlewaretoken: storedcsrftoken}, function(json){
+			myIssues = json['myIssues'];
+			allIssues = json['allIssues'];
+			
 			$("#my_interests").empty();
-			var ul = document.createElement( "ul" );
+			ul = document.createElement( "ul" );
 			$(ul).addClass("list-unstyled");
 			$("#my_interests").append(ul);
 			
-			for (i = 0; i < issues.length; ++i) {
-				issue = issues[i];
-				var li = document.createElement("li");
-				var newButton = document.createElement("button");
-				var newSpan = document.createElement("span");
+			for (i = 0; i < myIssues.length; ++i) {
+				issue = myIssues[i];
+				li = document.createElement("li");
+				newButton = document.createElement("button");
+				newSpan = document.createElement("span");
+				$(newSpan).addClass("glyphicon glyphicon-remove");
 				$(ul).append(li);
-				$(newButton).append(htmlEncode(issue['name']));
 				$(li).append(newButton);
+				$(newButton).append(htmlEncode(issue['name']));
 				$(newButton).addClass("btn btn-link btn-xs");
 				$(newButton).append(newSpan);
-				$(newSpan).addClass("glyphicon glyphicon-remove");
 				$(newButton).attr("issueName", issue['name']);
 				$(newButton).click(function() {
 					remove_interest($(this).attr("issueName"));
 				});
 			}
-
+			
 			// Remove any lingering contents from the mapFrame.
 			$("#issue_div").empty();
-			selectElement = document.getElementById("issue_div");
 	
 			// Add an option for each issue to the select object.
-			for (i = 0; i < issueObject.length; ++i) {
-				if (!hasIssue(issues, issueObject[i].name))
+			for (i = 0; i < allIssues.length; ++i) {
+				issue = allIssues[i];
+				if (!hasIssue(myIssues, issue.name))
 				{
-					newOption = document.createElement('button');
-					newOption.innerHTML = '<span class="glyphicon glyphicon-chevron-left" /> ' + 
-						htmlEncode(issueObject[i].name);
-					newOption.issueName = issueObject[i].name;
-					$(newOption).click(function() { alert(this.issueName); add_interest(this.issueName); });
-					selectElement.appendChild(newOption);
+					newButton = document.createElement('button');
+					newSpan = document.createElement('span');
+					$("#issue_div").append(newButton);
+					$(newSpan).addClass("glyphicon glyphicon-chevron-left");
+					$(newButton).addClass("btn btn-link btn-xs")
+						.append(newSpan)
+						.append(htmlEncode(issue.name))
+						.attr("issuename", issue.name)
+						.click(function(e, inputObject) { 
+							add_interest($(this).attr("issuename")); 
+						})
+						;
 				}
 			}
-	
-
 		  });
 		}
 		
@@ -202,33 +224,28 @@
 
 		<div class="row">
 			<div class="col-xs-12 col-sm-5">
-				{% if user.is_authenticated %}
-				<label class="control-label">Your Interests</label>
+				<label for="my_interests" class="control-label">Your Interests</label>
 				<div id='my_interests'>
 				</div>
 
-				<div class="input-group">
-				  <input type="text" id="id_newIssue" width="200" maxlength="254" name="newissue" class="form-control"
-				  		 onKeyPress="enter_interest(event, this)" />
-				  <div class="input-group-btn">
-				  	<button type="button" id="add_interest_button" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></button>
-				  </div>
-				</div>
-				{% endif %}
 			</div>
 			
-			{% if issue_list %}
 			<div class="col-xs-12 col-sm-6">
-				<form class="form-horizontal">
-					<div class="row">
-						<label for="issue_div" class="control-label">Issues Other People Care About</label>
-					</div>
-					<div id="issue_div" class="row">
-					</div>
-				</form>
-			</div>
+				<label for="issue_div" class="control-label">Issues Other People Care About</label>
+				<div id="issue_div" class="row">
+				</div>
 
-			{% endif %}
+				<label for="new_issue_input_group" class="control-label">A New Issue You Care About</label>
+				<div id="new_issue_input_group" class="input-group">
+				  <input type="text" id="add_interest_text" width="200" maxlength="254" name="newissue" class="form-control"
+				  		 onKeyPress="enter_interest(event, this)" />
+				  <div class="input-group-btn">
+				  	<button type="button" id="add_interest_button" class="btn btn-default" >
+				  		<span class="glyphicon glyphicon-chevron-left"></span>
+				  	</button>
+				  </div>
+				</div>
+			</div>
 		</div>
 
 </div> <!-- container -->

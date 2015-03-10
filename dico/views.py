@@ -65,23 +65,19 @@ def signout(request):
     return redirect('/dico/')
     
 def editinterests(request):
-    template = loader.get_template('dico/editinterests.html')
-    issue_list = Issue.objects.order_by('name')
-    il = []
-    for i in issue_list:
-        il = il + [{'name': i.name, 'id': i.id}]
-        
     if not request.user.is_authenticated:
     	return signin(request)
     
+    template = loader.get_template('dico/editinterests.html')
+        
     context = RequestContext(request, {
     	'user': request.user,
-        'issue_list': json.dumps(il),
     })
     return HttpResponse(template.render(context))
 
 def submitnewissue(request):
-    results = {'success':False, 'error': 'request format invalid'}
+    results = {'success':False, 'error': u'request format invalid'}
+
     if request.method == u'POST':
         try:
             POST = request.POST
@@ -235,13 +231,20 @@ def getMyIssues(request):
     if request.method == u'POST':
         try:
             POST = request.POST
-            issueList = []
+            myIssues = []
             if request.user.is_authenticated:
                 interests = Constituent.get_interests(request.user)
                 for i in interests:
-                    issueList.append({'id': i.issue.id, 'name': i.issue.name})
+                    myIssues.append({'id': i.issue.id, 'name': i.issue.name})
+
+            issue_list = Issue.objects.order_by('name')
+            allIssues = []
+            for i in issue_list:
+                allIssues.append({'id': i.id, 'name': i.name})
+				
             results = {'success':True}
-            results['issues'] = issueList
+            results['myIssues'] = myIssues
+            results['allIssues'] = allIssues
         except Exception as e:
             results = {'success':False, 'error': str(e)}
             

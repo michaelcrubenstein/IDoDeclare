@@ -225,6 +225,21 @@ def getInterests(request):
             results = {'success':False, 'error': str(e)}
 
     return JsonResponse(results)
+    
+def getActiveIssues(request):
+    results = {'success':False}
+    if request.method == u'GET':
+        GET = request.GET
+        try:
+            minInterestCount = int(GET.get(u'minInterestCount', 1))
+            issueList = Issue.get_active_issues(minInterestCount)
+            results = {'success':True}
+            results['issues'] = issueList
+        except Exception as e:
+            results = {'success':False, 'error': str(e)}
+
+    return JsonResponse(results)
+	
 
 def getMyIssues(request):
     results = {'success':False}

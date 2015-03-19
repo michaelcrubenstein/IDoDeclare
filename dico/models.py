@@ -38,6 +38,21 @@ class Issue(models.Model):
 				      " ORDER BY state";
     		c.execute(sql, [self.name]);
     		return c.fetchall();
+    		
+    def get_active_issues(min_interest_count = 1):
+        with connection.cursor() as c:
+            sql = "SELECT name, id FROM " + \
+                  " (SELECT name, dico_issue.id as id, COUNT(*) as interest_count" + \
+                  "  FROM dico_issue, dico_constituentinterest" + \
+                  "  WHERE dico_issue.id = dico_constituentinterest.issue_id" + \
+                  "  GROUP BY name, dico_issue.id) p" + \
+                  " WHERE interest_count >= %s" + \
+                  " ORDER BY name";
+            c.execute(sql, [min_interest_count]);
+            active_issues = []
+            for i in c.fetchall():
+                active_issues.append({'name': i[0], 'id': i[1]})
+            return active_issues;
     
 class ConstituentManager(models.Manager):
     def create_constituent(self, username, password, email, firstname, lastname, streetaddress, zipcode, district, state):
@@ -109,13 +124,18 @@ class Constituent(models.Model):
         state = constituent.state
         district = constituent.district
         
-        senators = congress.legislators(state=state, chamber='senate')
-        reps = congress.legislators(state=state, district=district)
-        if senators is None:
-            senators=[]
-        if reps is None:
-            reps=[]
-            
+        try:
+            senators = congress.legislators(state=state, chamber='senate')
+            reps = congress.legislators(state=state, district=district)
+            if senators is None:
+                senators=[]
+            if reps is None:
+                reps=[]
+        # Catch URLError if the system is not online.
+        except Exception:
+        	senators = [];
+        	reps = [];
+        	
         return senators + reps
     
     # Add an interest to the named issue for the specified user.

@@ -110,6 +110,18 @@
 		padding-right: 0px;
 	}
 	
+	.map-select-column {
+		display: inline-block;
+    	vertical-align: bottom;
+    	float: none;
+	}
+	
+	.map-options-column {
+		display: inline-block;
+    	vertical-align: bottom;
+    	float: none;
+	}
+	
 	.member-row {
 		padding-left: 0px;
 		padding-right: 0px;
@@ -155,6 +167,10 @@
 			"NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", 
 			"OR", "PA", "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VT", 
 			"VA", "VI", "WA", "WV", "WI", "WY"];
+			
+		var districtScope = "district",
+			stateScope = "state";
+		
 		
 		function htmlDecode(input){
 		  var e = document.createElement('div');
@@ -167,20 +183,33 @@
 			show_my_interests();
 
 			addHandlers();
-	
-			show_map();
 		});
 
 		$(window).resize(function() {
 		  	resize_map();
 		});
-
-		function addHandlers() {
-		  $("#issue_select").change( function() { change_issue(issue_select.value) });
+		
+		function resetCircles() { 
+		  	if ($("#byDistrictRadio").attr("checked") == "checked") { 
+		  		change_issue($("#issue_select").val(), districtScope);
+		  	} else {
+		  		change_issue($("#issue_select").val(), stateScope);
+		  	}
 		  }
 
-		function change_issue(newIssue) {
-		  $.getJSON("/dico/getinterests/", { pk: newIssue}, function(json){
+		function addHandlers() {
+		  $("#issue_select").change( function() { resetCircles() });
+		  $("#byDistrictRadio").change( function() {
+		  	show_map($("#issue_select").val(), districtScope);
+		  });
+		  $("#byStateRadio").change( function() { 
+		  	show_map($("#issue_select").val(), stateScope);
+		  });
+		}
+		
+
+		function change_issue(newIssue, newScope) {
+		  $.getJSON("/dico/getinterests/", { pk: newIssue, scope : newScope}, function(json){
 			var s = "";
 			if (json['error']) {
 				s = json['error'];
@@ -202,20 +231,25 @@
 		
 				for (i = 0; i < interests.length; ++i) {
 					var interest = interests[i];
-					s = s + interest['state'] + "-" + interest['district'] + ": " + interest['constituent_count'] + "<br>"
-			
-					// Handle the special case for 'DC' here. The case for states with only one district
-					// is handled elsewhere.
 					var interestID;
-			
-					if (interest['state'] == 'DC') {
-						interestID=100*stateCodes.indexOf(interest['state']) + 98;
-					} else {
-						interestID=100*stateCodes.indexOf(interest['state']) + interest['district'];
+					
+					if (newScope == districtScope) {
+						s = s + interest['state'] + "-" + interest['district'] + ": " + interest['constituent_count'] + "<br>"
+						// Handle the special case for 'DC' here. The case for states with only one district
+						// is handled elsewhere.
+						if (interest['state'] == 'DC') {
+							interestID=100*stateCodes.indexOf(interest['state']) + 98;
+						} else {
+							interestID=100*stateCodes.indexOf(interest['state']) + interest['district'];
+						}
 					}
-			
+					else {
+						s = s + interest['state'] + ": " + interest['constituent_count'] + "<br>"
+						interestID=stateCodes.indexOf(interest['state']);
+					}
+
 					var ba = circles.filter(function() { return (this.getAttribute("id")==interestID);})
-					if (ba.length == 0 && interest['district'] == 1) {
+					if (ba.length == 0 && newScope == districtScope && interest['district'] == 1) {
 						ba = circles.filter(function() { return (this.getAttribute("id")==interestID-1);})
 					}
 					if (ba.length > 0) {
@@ -241,32 +275,47 @@
 				$("#my_interests").html('').append(s);
 			{% endif %}
 
-			var allIssues = json['allIssues'];
+		  	$.getJSON("/dico/getactiveissues/", { 'minInterestCount': 1}, function(json){
+		  		console.log(json);
+				var allIssues = json['issues'];
 
-			selectElement = document.getElementById("issue_select")
+				selectElement = document.getElementById("issue_select")
 	
-			// Add an option for each issue to the select object.
-			for (i = 0; i < allIssues.length; ++i) {
-				newOption = document.createElement('option');
-				newOption.innerHTML = allIssues[i].name;
-				newOption.value = allIssues[i].id;
-				selectElement.appendChild(newOption);
-			}
-	
+				// Add an option for each issue to the select object.
+				for (i = 0; i < allIssues.length; ++i) {
+					newOption = document.createElement('option');
+					newOption.innerHTML = allIssues[i].name;
+					newOption.value = allIssues[i].id;
+					selectElement.appendChild(newOption);
+				}
+				reset_map();
+			});
+
 		  });
 		}
 		
 		function resize_map() {
 			var svg = d3.select("#mapFrame").select("svg");
 			if (svg) {
-				show_map();
+				reset_map();
 			}
 		}
+		
+		function reset_map() {
+		  	if ($("#byDistrictRadio").attr("checked") == "checked") { 
+		  		show_map($("#issue_select").val(), districtScope);
+		  	} else {
+		  		show_map($("#issue_select").val(), stateScope);
+		  	}
+		}
 
-		function show_map() {
+		function show_map(newIssue, newScope) {
 			var circleData = [];
 	
 			function mouseoverstate() {
+			  stateIndex = parseInt(d3.select(this).select("title").text());
+			  s = stateCodes[stateIndex]; 
+			  $("#district_span").html('').append(s);
 			}
 
 			function mouseoverdistrict() {
@@ -286,16 +335,13 @@
 			}
 
 			function mouseoutstate() {
+			  $("#district_span").html('');
 			}
 
 			function mouseoutdistrict() {
 			  $("#district_span").html('');
 			}
 	
-			function districtCircleR(d) {
-				return 20;
-			}
-
 			function ready(error, us, congress) {
 			  if (error) return console.error(error);
 
@@ -314,26 +360,29 @@
 			var path = d3.geo.path()
 				.projection(projection);
 
-			  // add the path for all of the us land.
-			  svg.append("defs").append("path")
-				  .attr("id", "land")
-				  .datum(topojson.feature(us, us.objects.land))
-				  .attr("d", path);
+			// add the path for all of the us land.
+			svg.append("defs").append("path")
+			  .attr("id", "land")
+			  .datum(topojson.feature(us, us.objects.land))
+			  .attr("d", path);
 
-			  svg.append("clipPath")
-				  .attr("id", "clip-land")
-				.append("use")
-				  .attr("xlink:href", "#land");
+			svg.append("clipPath")
+			  .attr("id", "clip-land")
+			  .append("use")
+			    .attr("xlink:href", "#land");
 
-			  circleData = [];
+			circleData = [];
 	  
-			  // Count the circleArray positions manually in case the indexes are not continuous.
-			  i = 0;
-			  var district = svg.append("g")
-				  .attr("class", "land")
-				  .attr("clip-path", "url(#clip-land)")
-				.selectAll("path")
-				  .data(topojson.feature(congress, districts).features)
+			// Count the circleArray positions manually in case the indexes are not continuous.
+			i = 0;
+			var district = svg.append("g")
+			  .attr("class", "land")
+			  .attr("clip-path", "url(#clip-land)")
+			  .selectAll("path")
+			
+			pathNodes = null;	
+			if (newScope == districtScope) {
+				  pathNodes = district.data(topojson.feature(congress, districts).features)
 				.enter().append("path")
 				  .attr("d", path)
 				  .on("mouseover", mouseoverdistrict)
@@ -349,15 +398,35 @@
 							i++;
 						}
 					});
+			} else {
+				  pathNodes = district.data(topojson.feature(us, us.objects.states).features)
+				.enter().append("path")
+				  .attr("d", path)
+				  .on("mouseover", mouseoverstate)
+				  .on("mouseout", mouseoutstate)
+				  .each(function(d){
+						// Get the centroid or, if the centroid is degenerate, the bounds.
+						centroid = path.centroid(d);
+						if (isNaN(centroid[0]))
+							centroid = path.bounds(d);
 
-			  district
+						if (!isNaN(centroid[0])) {
+							circleData[i] = {"cx": centroid[0], "cy": centroid[1], "r": 0, "id": d.id};
+							i++;
+						}
+					});
+			}
+
+			  pathNodes
 				  .append("title")
 				  .text(function(d) { return d.id; });
 	  
+			if (newScope == districtScope) {
 			  svg.append("path")
 				  .attr("class", "border border--district")
 				  .datum(topojson.mesh(congress, congress.objects.districts, function(a, b) { return a !== b && (a.id / 1000 | 0) === (b.id / 1000 | 0); }))
 				  .attr("d", path);
+			}
 
 			  svg.append("path")
 				  .attr("class", "border border--state")
@@ -374,7 +443,13 @@
 						.attr("r", function(d) { return d.r; })
 						.attr("id", function(d) { return d.id; });
 	  
-				change_issue(issue_select.value);
+	  			change_issue(newIssue, newScope);
+	  			
+	  			// Set the label for the object when mousing over.
+	  			if (newScope == districtScope)
+	  				$("#district_label").html('').append("District:");
+	  			else
+	  				$("#district_label").html('').append("State:");
 			}
 
 			// Remove any lingering contents from the mapFrame.
@@ -394,7 +469,7 @@
 				.await(ready);
 		}
 
-		d3.select(self.frameElement).style("height", height + "px");
+		d3.select(self.frameElement).style("height", ($("#mapFrame").width() / 8 * 5) + "px");
 	</script>
 
 	<div id='container' class="container">
@@ -476,22 +551,36 @@
 
 		<div class="row">
 			{% if issue_list %}
-			<div class="col-xs-7 col-sm-8 col-md-9">
+			<div class="col-xs-7 col-sm-7 map-select-column">
+<!-- 
 				<form class="form-horizontal">
 					<div class="form-group">
+ -->
 						<label for="issue_select" class="control-label">Where People Care About</label>
 						<select id="issue_select" class="form-control">
 						</select>
+<!-- 
 					</div>
 				</form>
+ -->
 			</div>
 
 			{% endif %}
+			<div class="col-xs-4 map-options-column">
+				<label class="radio-inline">
+				  <input type="radio" name="mapOptions" id="byDistrictRadio" value=districtScope checked /> by District
+				</label>
+				<label class="radio-inline">
+				  <input type="radio" name="mapOptions" id="byStateRadio" value=stateScope /> by State
+				</label>			
+			</div>
+		</div>
 
 
+		<div class="row">
 			<div id="mapFrame" class="col-xs-12"> </div>
 			<div class="col-xs-7 col-sm-8 col-md-9">
-				<label for="district_span" class="control-label">District:</label> 
+				<label id="district_label" for="district_span" class="control-label">District:</label> 
 				<span id="district_span"></span><br>
 				<label for="my_score" id="my_label" class="control-label">Table</label> <span id="my_score"></span>
 			</div>

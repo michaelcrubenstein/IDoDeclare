@@ -133,7 +133,6 @@
 		function show_my_interests() {
 		  $.post("/dico/getmyissues/", { csrfmiddlewaretoken: storedcsrftoken}, function(json){
 			myIssues = json['myIssues'];
-			allIssues = json['allIssues'];
 			
 			$("#my_interests").empty();
 			ul = document.createElement( "ul" );
@@ -160,25 +159,28 @@
 			// Remove any lingering contents from the mapFrame.
 			$("#issue_div").empty();
 	
-			// Add an option for each issue to the select object.
-			for (i = 0; i < allIssues.length; ++i) {
-				issue = allIssues[i];
-				if (!hasIssue(myIssues, issue.name))
-				{
-					newButton = document.createElement('button');
-					newSpan = document.createElement('span');
-					$("#issue_div").append(newButton);
-					$(newSpan).addClass("glyphicon glyphicon-chevron-left");
-					$(newButton).addClass("btn btn-link btn-xs")
-						.append(newSpan)
-						.append(htmlEncode(issue.name))
-						.attr("issuename", issue.name)
-						.click(function(e, inputObject) { 
-							add_interest($(this).attr("issuename")); 
-						})
-						;
+		  	$.getJSON("/dico/getactiveissues/", { 'minInterestCount': 1}, function(json){
+				var allIssues = json['issues'];
+
+				for (i = 0; i < allIssues.length; ++i) {
+					issue = allIssues[i];
+					if (!hasIssue(myIssues, issue.name))
+					{
+						newButton = document.createElement('button');
+						newSpan = document.createElement('span');
+						$("#issue_div").append(newButton);
+						$(newSpan).addClass("glyphicon glyphicon-chevron-left");
+						$(newButton).addClass("btn btn-link btn-xs")
+							.append(newSpan)
+							.append(htmlEncode(issue.name))
+							.attr("issuename", issue.name)
+							.click(function(e, inputObject) { 
+								add_interest($(this).attr("issuename")); 
+							})
+							;
+					}
 				}
-			}
+			});
 		  });
 		}
 		

@@ -1,2 +1,8 @@
 
-*.pyc
+custom_user/__pycache__/*.pyc
+
+dico/__pycache__/*.pyc
+
+*.log
+
+*.sqlite3

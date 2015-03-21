@@ -276,7 +276,6 @@
 			{% endif %}
 
 		  	$.getJSON("/dico/getactiveissues/", { 'minInterestCount': 1}, function(json){
-		  		console.log(json);
 				var allIssues = json['issues'];
 
 				selectElement = document.getElementById("issue_select")

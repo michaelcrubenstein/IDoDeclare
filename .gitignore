@@ -1,7 +1,5 @@
 
-custom_user/__pycache__/*.pyc
-
-dico/__pycache__/*.pyc
+*.py[cod]
 
 *.log
 

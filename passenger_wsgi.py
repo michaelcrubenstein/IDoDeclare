@@ -40,5 +40,8 @@ try:
     application = get_wsgi_application()
 
 except Exception as e:
-	pass
+    log = open('/home/micrub9/idodeclare.org/passengerwsgi.log', 'a')
+    log.write("Error: %s\n" % e)
+    log.write("%s\n" % traceback.format_exc())
+    log.flush()
 

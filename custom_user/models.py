@@ -35,7 +35,7 @@ class AuthUserManager(BaseUserManager):
         if len(newPassword) > 0:
         	user.set_password(newPassword)
         	user.save()
-        self.all().filter(id=user.id).update(username=self.normalize_email(newEmail), first_name=newFirstName, last_name=newLastName);
+        self.all().filter(id=user.id).update(email=self.normalize_email(newEmail), first_name=newFirstName, last_name=newLastName);
 
 class AuthUser(AbstractBaseUser, PermissionsMixin):
     alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')

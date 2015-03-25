@@ -55,7 +55,7 @@
 					{
 						if (json['success']) {
 							closealert();
-							window.location = "/dico/editinterests.html"
+							window.location = "/dico/editinterests/"
 						}
 						else {
 							bootstrap_alert.warning(json['error']);
@@ -72,6 +72,7 @@
 
 			$("#id_username").bind("keyup input paste", checkenabled);
 			$("#id_password").bind("keyup input paste", checkenabled);
+			$("#id_confirmpassword").bind("keyup input paste", checkenabled);
 			$("#id_firstname").bind("keyup input paste", checkenabled);
 			$("#id_lastname").bind("keyup input paste", checkenabled);
 			$("#id_streetaddress").bind("keyup input paste", checkenabled);
@@ -87,6 +88,9 @@
 				$("#id_streetaddress").val() === "" ||
 				$("#id_zipcode").val() === "")
 				$( "#submit_button" ).prop( "disabled", true );
+			else if ($("#id_confirmpassword").val() != $("#id_password").val()) {
+				$( "#submit_button" ).prop( "disabled", true );
+			}
 			else
 			{
 				// Make sure the email address has an "@" sign followed by a "."
@@ -104,6 +108,18 @@
 					else	
 						$( "#submit_button" ).prop( "disabled", false );
 				}
+			}
+			
+			if ($("#id_password").val() === "" ||
+			    $("#id_confirmpassword").val() !== $("#id_password").val())
+			{
+				$( "#id_confirm_form_group" ).removeClass( "has-success");
+			    $( "#id_passwordOK" ).removeClass( "glyphicon-ok" );
+			}
+			else
+			{
+				$( "#id_confirm_form_group" ).addClass( "has-success");
+			    $( "#id_passwordOK" ).addClass( "glyphicon-ok" );
 			}
 		};
 	</script>
@@ -129,6 +145,11 @@
     
     <label for="id_password"  class="control-label sr-only">Password</label> 
     <input id="id_password" class="form-control" name="password" type="password" placeholder="Password" />
+  </div>
+  <div id="id_confirm_form_group" class="form-group has-feedback">
+    <label for="id_confirmpassword"  class="control-label sr-only">Password</label> 
+	<input id="id_confirmpassword" class="form-control" name="confirmpassword" type="password" placeholder="Confirm password" />
+    <span id="id_passwordOK" class="glyphicon form-control-feedback"></span>
   </div>
   <div class="form-group">
     

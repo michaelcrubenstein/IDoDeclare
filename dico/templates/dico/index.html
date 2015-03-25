@@ -179,6 +179,8 @@
 		}
 
 		$(document).ready (function() {
+			initmap();
+
 			// Display the interests of the currently logged-in user.
 			show_my_interests();
 
@@ -189,8 +191,49 @@
 		  	resize_map();
 		});
 		
+		function initmap() {
+			// Initialize the map.
+			var width = $("#mapFrame").width();
+			var height = width / 8 * 5;
+		
+			function ready(error, us) {
+			  if (error) return console.error(error);
+
+				var projection = d3.geo.albersUsa()
+					.scale(width * 4 / 3)
+					.translate([width / 2, height / 2]);
+
+				var path = d3.geo.path()
+					.projection(projection);
+
+				// add the path for all of the us land.
+				svg.append("defs").append("path")
+				  .attr("id", "land")
+				  .datum(topojson.feature(us, us.objects.land))
+				  .attr("d", path);
+
+				svg.append("clipPath")
+				  .attr("id", "clip-land")
+				  .append("use")
+					.attr("xlink:href", "#land");
+					
+				svg.append("g")
+				  .attr("class", "land")
+				  .attr("clip-path", "url(#clip-land)");
+			}
+
+			svg = d3.select("#mapFrame").append("svg")
+				.attr("width", width)
+				.attr("height", height);
+				
+			// json files for us state map and us districts map taken from https://gist.github.com/mbostock/4090846
+			queue()
+				.defer(d3.json, "/static/dico/us.json")
+				.await(ready);
+		}
+		
 		function resetCircles() { 
-		  	if ($("#byDistrictRadio").attr("checked") == "checked") { 
+		  	if ($("#byDistrictRadio").prop("checked")) { 
 		  		change_issue($("#issue_select").val(), districtScope);
 		  	} else {
 		  		change_issue($("#issue_select").val(), stateScope);
@@ -261,18 +304,35 @@
 		  });
 		}
 
+		function htmlEncode(input){
+			str = $('<div>').text(input).html();
+		    return String(str).replace(/ /g, '&nbsp;');
+		}
+		
 		function show_my_interests() {
 		  $.post("/dico/getmyissues/", { csrfmiddlewaretoken: '{{ csrf_token }}'}, function(json){
 			
 			{% if user.is_authenticated %}
-				var s = "<ul>";
+				$("#my_interests").empty();
+				ul = document.createElement( "ul" );
+				$(ul).addClass("list-unstyled");
+				$("#my_interests").append(ul);
+				
 				var issues = json['myIssues'];
 				for (i = 0; i < issues.length; ++i) {
 					issue = issues[i];
-					s = s + '<li><a href="/dico/' + issue['id'] + '/issue/">' + issue['name'] + '</a></li>'
+					li = document.createElement("li");
+					newButton = document.createElement("button");
+					$(ul).append(li);
+					$(li).append(newButton);
+					$(newButton).append(htmlEncode(issue['name']));
+					$(newButton).addClass("btn btn-link btn-xs");
+					$(newButton).attr("issueName", issue['name']);
+					$(newButton).click(function() {
+						// Show the events associated with this issue.
+						alert("not implemented");
+					});
 				}
-				s=s+"</ul>"
-				$("#my_interests").html('').append(s);
 			{% endif %}
 
 		  	$.getJSON("/dico/getactiveissues/", { 'minInterestCount': 1}, function(json){
@@ -344,7 +404,7 @@
 			function ready(error, us, congress) {
 			  if (error) return console.error(error);
 
-			  var districts = congress.objects.districts;
+			var districts = congress.objects.districts;
 
 			var width = $("#mapFrame").width(),
 				height = width / 8 * 5;
@@ -359,31 +419,18 @@
 			var path = d3.geo.path()
 				.projection(projection);
 
-			// add the path for all of the us land.
-			svg.append("defs").append("path")
-			  .attr("id", "land")
-			  .datum(topojson.feature(us, us.objects.land))
-			  .attr("d", path);
-
-			svg.append("clipPath")
-			  .attr("id", "clip-land")
-			  .append("use")
-			    .attr("xlink:href", "#land");
-
 			circleData = [];
 	  
 			// Count the circleArray positions manually in case the indexes are not continuous.
 			i = 0;
-			var district = svg.append("g")
-			  .attr("class", "land")
-			  .attr("clip-path", "url(#clip-land)")
-			  .selectAll("path")
+			var district = svg.select("g").selectAll("path");
 			
 			pathNodes = null;	
 			if (newScope == districtScope) {
 				  pathNodes = district.data(topojson.feature(congress, districts).features)
 				.enter().append("path")
 				  .attr("d", path)
+				  .attr("class", "district")
 				  .on("mouseover", mouseoverdistrict)
 				  .on("mouseout", mouseoutdistrict)
 				  .each(function(d){
@@ -401,6 +448,7 @@
 				  pathNodes = district.data(topojson.feature(us, us.objects.states).features)
 				.enter().append("path")
 				  .attr("d", path)
+				  .attr("class", "state")
 				  .on("mouseover", mouseoverstate)
 				  .on("mouseout", mouseoutstate)
 				  .each(function(d){
@@ -452,14 +500,13 @@
 			}
 
 			// Remove any lingering contents from the mapFrame.
-			$("#mapFrame").empty();
-
-			width = $("#mapFrame").width();
-			height = width / 8 * 5;
 			
-			var svg = d3.select("#mapFrame").append("svg")
-				.attr("width", width)
-				.attr("height", height);
+			var svg = d3.select("#mapFrame").select("svg");
+			
+			svg.selectAll(".district").remove();
+			svg.selectAll(".state").remove();
+			svg.selectAll(".border").remove();
+			svg.selectAll(".bubble").remove();
 
 			// json files for us state map and us districts map taken from https://gist.github.com/mbostock/4090846
 			queue()

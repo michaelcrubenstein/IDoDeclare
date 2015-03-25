@@ -9,6 +9,7 @@ from django.views.decorators.csrf import requires_csrf_token
 from pygeocoder import Geocoder
 from sunlight import congress
 
+import traceback
 import urllib
 import json
 
@@ -73,6 +74,21 @@ def editinterests(request):
         
     context = RequestContext(request, {
     	'user': request.user,
+    })
+    return HttpResponse(template.render(context))
+
+def account(request):
+    if not request.user.is_authenticated:
+    	return signin(request)
+    
+    template = loader.get_template('dico/account.html')
+    constituent = Constituent.get_constituent(request.user)
+    if constituent is None:
+        return index(request)
+        
+    context = RequestContext(request, {
+    	'user': request.user,
+    	'constituent': constituent
     })
     return HttpResponse(template.render(context))
 
@@ -166,6 +182,49 @@ def newConstituent(request):
         log = open('newConstituent.log', 'a')
         log.write("Error: %s\n" % type(e))
         log.write("  Message: %s\n" % str(e))
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def updateConstituent(request):
+    results = {'success':False, 'error': 'updateConstituent failed'}
+    try:
+        if request.method != "POST":
+        	raise Exception("UpdateConstituent only responds to POST requests")
+        if not request.user.is_authenticated:
+        	raise Exception("The current login is invalid")
+			
+        POST = request.POST;
+        newUsername = POST.get('newUsername', '')
+        oldPassword = POST.get('oldPassword', '')
+        newPassword = POST.get('newPassword', '')
+        newFirstName = POST.get('newFirstName', '')
+        newLastName = POST.get('newLastName', '')
+        newStreetAddress = POST.get('newStreetAddress', '')
+        newZipCode = POST.get('newZipcode', '')
+        
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            return
+		
+        if len(newStreetAddress) == 0:
+        	newStreetAddress = constituent.streetAddress
+        if len(newZipCode) == 0:
+        	newZipCode = constituent.zipCode
+			
+        districtInfo = getDistrict(newStreetAddress + " " + newZipCode)
+        
+        constituent.update_fields(newUsername, newPassword, 
+                                  newFirstName, newLastName, newStreetAddress, newZipCode, 
+                                  districtInfo[0]["state"], districtInfo[0]["district"])
+
+        results = {'success':True}
+    except IntegrityError as e:
+        results = {'success':False, 'error': 'That email address has already been used to sign up.'}
+    except Exception as e:
+        log = open('updateConstituent.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
         log.flush()
         results = {'success':False, 'error': str(e)}
     

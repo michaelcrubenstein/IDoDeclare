@@ -13,14 +13,18 @@ urlpatterns = patterns(
     url(r'^signout/', views.signout, name='signout'),
     # ex: /dico/editinterests/
     url(r'^editinterests/', views.editinterests, name='editinterests'),
+    # ex: /dico/account/
+    url(r'^account/', views.account, name='account'),
     # ex: /dico/submitnewissue/
     url(r'^submitnewissue/', views.submitnewissue, name='submitnewissue'),
     # ex: /dico/submitdeleteinterest/
     url(r'^submitdeleteinterest/', views.submitdeleteinterest, name='submitdeleteinterest'),
 	# ex: /dico/createConstituent/
     url(r'^createConstituent/', views.createConstituent, name='createConstituent'),
-	# ex: /dico/submitcreateconstituent/
+	# ex: /dico/newconstituent/
 	url(r'^newconstituent/', views.newConstituent, name='newConstituent'),
+	# ex: /dico/updateconstituent/
+	url(r'^updateconstituent/', views.updateConstituent, name='updateConstituent'),
 	# ex: /dico/issue/5/
 	url(r'^(?P<issue_id>\d+)/issue/$', views.issue, name='issue'),
 	# ex: /dico/5/

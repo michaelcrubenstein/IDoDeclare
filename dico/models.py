@@ -1,4 +1,4 @@
-from django.db import connection, models
+from django.db import connection, models, transaction
 from django.contrib.auth.models import (BaseUserManager, AbstractBaseUser, PermissionsMixin)
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
@@ -138,6 +138,25 @@ class Constituent(models.Model):
         	
         return senators + reps
     
+    # Update the properties of this constituent.    
+    def update_fields(self, newUsername, newPassword, newFirstName, newLastName, newStreetAddress, newZipCode, newState, newDistrict):
+         
+        with transaction.atomic():
+            manager = get_user_model().objects    
+            manager.update_user(self.user, newUsername, newPassword, newFirstName, newLastName)
+			
+            if len(newStreetAddress) == 0:
+                newStreetAddress = constituent.streetAddress
+            if len(newZipCode) == 0:
+                newZipCode = constituent.zipCode
+            if len(newState) == 0:
+                newState = constituent.state
+            if newDistrict < 0:
+                newDistrict = constituent.district
+            
+            Constituent.objects.filter(user_id=self.user.id) \
+                .update(streetAddress=newStreetAddress, zipCode=newZipCode, state=newState, district=newDistrict)
+    	
     # Add an interest to the named issue for the specified user.
     # If the user is already interested, return that interest.    
     def add_interest(user, name):

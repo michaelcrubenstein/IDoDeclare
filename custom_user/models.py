@@ -23,7 +23,19 @@ class AuthUserManager(BaseUserManager):
         user.is_superuser = True
         user.save(using=self._db)
         return user
-
+        
+    def update_user(self, user, newEmail, newPassword, newFirstName, newLastName):
+        if len(newEmail) == 0:
+            newEmail = user.email
+        if len(newFirstName) == 0:
+            newFirstName = user.first_name
+        if len(newLastName) == 0:
+            newLastName = user.last_name
+        
+        if len(newPassword) > 0:
+        	user.set_password(newPassword)
+        	user.save()
+        self.all().filter(id=user.id).update(username=self.normalize_email(newEmail), first_name=newFirstName, last_name=newLastName);
 
 class AuthUser(AbstractBaseUser, PermissionsMixin):
     alphanumeric = RegexValidator(r'^[0-9a-zA-Z]*$', message='Only alphanumeric characters are allowed.')

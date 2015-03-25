@@ -10,7 +10,7 @@ DONE - Allow user to show interests by existing issues.
 
 Allow user to change password
 Allow user to reset forgotten password
-Allow user to change name, address
+DONE - Allow user to change name, address
 Add Catcha to creating a user
 
 Allow user to register intensity with issue
@@ -35,9 +35,9 @@ Misplaced priority - You think this issue should not be addressed
 
 DONE - Beautiful layout for home page
 DONE - Beautiful layout for sign in page.
-Beautiful layout for user creation page
+DONE - Beautiful layout for user creation page
+DONE - Beautiful layout for change name, address page
 Beautiful layout for reset password page
-Beautiful layout for change name, address page
 
 Test layout for mobile devices
 

@@ -1,6 +1,6 @@
 Validate data in Create Constituent Page before the Join button is enabled.
 Implement Remember Me checkbox on sign-in page.
-Add a confirmation input for the password.
+DONE - Add a confirmation input for the password.
 
 DONE - Display bubbles by selected issue by state.
 

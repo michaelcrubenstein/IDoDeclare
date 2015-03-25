@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.db.utils import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.template import RequestContext, loader
@@ -129,7 +130,8 @@ def getDistrict(address):
     #Get the list of legislators for these coordinates.
     return congress.locate_districts_by_lat_lon(coordinates[0], coordinates[1])
     
-def submitCreateConstituent(request):
+def newConstituent(request):
+    results = {'success':False, 'error': 'newConstituent failed'}
     try:
         username = request.POST['username']
         password = request.POST['password']
@@ -150,17 +152,24 @@ def submitCreateConstituent(request):
             if user.is_active:
                 login(request, user)
                 if request.user is None:
-                	raise ValueError('request.user is None')
-                return redirect('/dico/editinterests/')
+                	results = {'success':False, 'error': 'user login failed.'}
+                else:
+                	results = {'success':True}
             else:
-                return redirect('/dico/signin/?authentication_error=disabled_account')
+                results = {'success':False, 'error': 'this user is disabled.'}
                 # Return a 'disabled account' error message
         else:
-            return redirect('/dico/signin/?authentication_error=invalid_login')
-            # Return an 'invalid login' error message.
+            results = {'success':False, 'error': 'This login is invalid.'}
+    except IntegrityError as e:
+        results = {'success':False, 'error': 'That email address has already been used to sign up.'}
     except Exception as e:
-    	errorMessage = urllib.parse.quote(str(e))
-    	return redirect('/dico/createConstituent/?error_message={!s}'.format(errorMessage))
+        log = open('newConstituent.log', 'a')
+        log.write("Error: %s\n" % type(e))
+        log.write("  Message: %s\n" % str(e))
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
 
 def issue(request, issue_id):
     o = Issue.objects

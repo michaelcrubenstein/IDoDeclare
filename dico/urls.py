@@ -20,7 +20,7 @@ urlpatterns = patterns(
 	# ex: /dico/createConstituent/
     url(r'^createConstituent/', views.createConstituent, name='createConstituent'),
 	# ex: /dico/submitcreateconstituent/
-	url(r'^submitcreateconstituent/', views.submitCreateConstituent, name='submitcreateconstituent'),
+	url(r'^newconstituent/', views.newConstituent, name='newConstituent'),
 	# ex: /dico/issue/5/
 	url(r'^(?P<issue_id>\d+)/issue/$', views.issue, name='issue'),
 	# ex: /dico/5/

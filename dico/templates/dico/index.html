@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load staticfiles %}
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,7 +8,7 @@
     <title>I Do Declare</title>
 
     <!-- Bootstrap -->
-    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -155,7 +156,7 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
 
 	<!-- Scripts for this web page -->
 	<script type="text/JavaScript">
@@ -228,7 +229,7 @@
 				
 			// json files for us state map and us districts map taken from https://gist.github.com/mbostock/4090846
 			queue()
-				.defer(d3.json, "/static/dico/us.json")
+				.defer(d3.json, "{% static "dico/us.json" %}")
 				.await(ready);
 		}
 		
@@ -292,10 +293,10 @@
 					}
 
 					var ba = circles.filter(function() { return (this.getAttribute("id")==interestID);})
-					if (ba.length == 0 && newScope == districtScope && interest['district'] == 1) {
+					if (ba.size() == 0 && newScope == districtScope && interest['district'] == 1) {
 						ba = circles.filter(function() { return (this.getAttribute("id")==interestID-1);})
 					}
-					if (ba.length > 0) {
+					if (ba.size() > 0) {
 						ba[0][0].setAttribute("r", rScale(interest['constituent_count']));
 					}
 				}
@@ -322,16 +323,12 @@
 				for (i = 0; i < issues.length; ++i) {
 					issue = issues[i];
 					li = document.createElement("li");
-					newButton = document.createElement("button");
+					newButton = document.createElement("a");
 					$(ul).append(li);
 					$(li).append(newButton);
 					$(newButton).append(htmlEncode(issue['name']));
 					$(newButton).addClass("btn btn-link btn-xs");
-					$(newButton).attr("issueName", issue['name']);
-					$(newButton).click(function() {
-						// Show the events associated with this issue.
-						alert("not implemented");
-					});
+					$(newButton).attr("href", "/dico/" + issue['id'] + "/issuepetitions/");
 				}
 			{% endif %}
 
@@ -374,7 +371,7 @@
 		}
 		
 		function reset_map() {
-		  	if ($("#byDistrictRadio").attr("checked") == "checked") { 
+		  	if ($("#byDistrictRadio").prop("checked")) { 
 		  		show_map($("#issue_select").val(), districtScope);
 		  	} else {
 		  		show_map($("#issue_select").val(), stateScope);
@@ -501,10 +498,9 @@
 						.attr("cx", function(d, i) { return d.cx; })
 						.attr("cy", function(d) { return d.cy; })
 						.attr("r", function(d) { return d.r; })
-						.attr("id", function(d) { return d.id; });
+						.attr("id", function(d) { return d.id; })
+						.call(function() {change_issue(newIssue, newScope); });
 	  
-	  			change_issue(newIssue, newScope);
-	  			
 	  			// Set the label for the object when mousing over.
 	  			if (newScope == districtScope)
 	  				$("#district_label").html('').append("District:");
@@ -523,8 +519,8 @@
 
 			// json files for us state map and us districts map taken from https://gist.github.com/mbostock/4090846
 			queue()
-				.defer(d3.json, "/static/dico/us.json")
-				.defer(d3.json, "/static/dico/us-congress-113.json")
+				.defer(d3.json, "{% static "dico/us.json" %}")
+				.defer(d3.json, "{% static "dico/us-congress-113.json" %}")
 				.await(ready);
 		}
 

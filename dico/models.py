@@ -19,26 +19,26 @@ class Issue(models.Model):
     # for this issue.
     # Scope can be by district or by name.
     def get_interests(self, scope='district'):
-    	with connection.cursor() as c:
-    		if scope == 'district':
-			    sql = "SELECT state, district, COUNT(*) as constituent_count" + \
-				      " FROM dico_issue, dico_constituentinterest, dico_constituent" + \
-				      " WHERE dico_issue.name = %s" + \
-				      " AND   dico_issue.id = dico_constituentinterest.issue_id" + \
-				      " AND   dico_constituentinterest.constituent_id = dico_constituent.user_id" + \
-				      " GROUP BY state, district" + \
-				      " ORDER BY state, district";
-    		else:
-			    sql = "SELECT state, COUNT(*) as constituent_count" + \
-				      " FROM dico_issue, dico_constituentinterest, dico_constituent" + \
-				      " WHERE dico_issue.name = %s" + \
-				      " AND   dico_issue.id = dico_constituentinterest.issue_id" + \
-				      " AND   dico_constituentinterest.constituent_id = dico_constituent.user_id" + \
-				      " GROUP BY state" + \
-				      " ORDER BY state";
-    		c.execute(sql, [self.name]);
-    		return c.fetchall();
-    		
+        with connection.cursor() as c:
+            if scope == 'district':
+                sql = "SELECT state, district, COUNT(*) as constituent_count" + \
+                      " FROM dico_issue, dico_constituentinterest, dico_constituent" + \
+                      " WHERE dico_issue.name = %s" + \
+                      " AND   dico_issue.id = dico_constituentinterest.issue_id" + \
+                      " AND   dico_constituentinterest.constituent_id = dico_constituent.user_id" + \
+                      " GROUP BY state, district" + \
+                      " ORDER BY state, district";
+            else:
+                sql = "SELECT state, COUNT(*) as constituent_count" + \
+                      " FROM dico_issue, dico_constituentinterest, dico_constituent" + \
+                      " WHERE dico_issue.name = %s" + \
+                      " AND   dico_issue.id = dico_constituentinterest.issue_id" + \
+                      " AND   dico_constituentinterest.constituent_id = dico_constituent.user_id" + \
+                      " GROUP BY state" + \
+                      " ORDER BY state";
+            c.execute(sql, [self.name]);
+            return c.fetchall();
+            
     def get_active_issues(min_interest_count = 1):
         with connection.cursor() as c:
             sql = "SELECT name, id FROM " + \
@@ -79,7 +79,7 @@ class ConstituentManager(models.Manager):
             try:
                 manager.delete(user)
             except Exception:
-            	pass
+                pass
             raise e
     
 class Constituent(models.Model):
@@ -115,7 +115,7 @@ class Constituent(models.Model):
             return []
             
         return ConstituentInterest.objects.filter(constituent=constituent).order_by('issue__name')
-    
+
     def get_members(user):
         constituent = Constituent.get_constituent(user)
         if constituent is None:
@@ -133,9 +133,9 @@ class Constituent(models.Model):
                 reps=[]
         # Catch URLError if the system is not online.
         except Exception:
-        	senators = [];
-        	reps = [];
-        	
+            senators = [];
+            reps = [];
+            
         return senators + reps
     
     # Update the properties of this constituent.    
@@ -144,7 +144,7 @@ class Constituent(models.Model):
         with transaction.atomic():
             manager = get_user_model().objects    
             manager.update_user(self.user, newUsername, newPassword, newFirstName, newLastName)
-			
+            
             if len(newStreetAddress) == 0:
                 newStreetAddress = constituent.streetAddress
             if len(newZipCode) == 0:
@@ -156,7 +156,7 @@ class Constituent(models.Model):
             
             Constituent.objects.filter(user_id=self.user.id) \
                 .update(streetAddress=newStreetAddress, zipCode=newZipCode, state=newState, district=newDistrict)
-    	
+        
     # Add an interest to the named issue for the specified user.
     # If the user is already interested, return that interest.    
     def add_interest(user, name):
@@ -182,8 +182,49 @@ class Constituent(models.Model):
         
         ConstituentInterest.delete_interest(constituent, name)
             
+class PetitionManager(models.Manager):
+    def create_petition(self, constituent, description):
+        petition = self.create(constituent=constituent, description=description)
+        return petition
+    
+class Petition(models.Model):
+    description = models.TextField()
+    constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
+    creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+    
+    objects = PetitionManager()
+    def __str__(self):
+        return self.description
+
+class PetitionIssueManager(models.Manager):
+    def create_petition_issue(self, constituent, petition, issueName):
+        query_set = Issue.objects.filter(name=issueName)
+        if query_set.count() == 0:
+            raise ValueError('the issue "{}" is not recognized'.format(issueName))
+        else:
+            issue = query_set.get()
+        return self.create(petition=petition, issue=issue, constituent=constituent)
+    
+class PetitionIssue(models.Model):
+    petition = models.ForeignKey(Petition, db_index=True, db_column='petition_id')
+    issue = models.ForeignKey(Issue, db_index=True, db_column='issue_id')
+    constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
+    
+    objects = PetitionIssueManager()
+
+    def __str__(self):
+        return self.issue.name + ": " + self.petition.description
+
+class PetitionVote(models.Model):
+    petition = models.ForeignKey(Petition, db_index=True, db_column='petition_id')
+    constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
+    vote = models.IntegerField(db_index=True)
+    
+    def __str__(self):
+        return self.user.email + "/" + self.petition.description + ": " + str(vote)
+
 class MC(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, primary_key=True);
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, primary_key=True, db_column='user_id');
     
     ### Our own class fields ###
     district = models.IntegerField(null=True, db_index=True)
@@ -214,12 +255,12 @@ class ConstituentInterest(models.Model):
             return None
             
     def create_interest(constituent, name):
-    	query_set = Issue.objects.filter(name=name)
-    	if query_set.count() == 0:
-    	    issue = Issue.objects.create(name=name)
-    	else:
-    		issue = query_set.get()
-    	return ConstituentInterest.objects.create(constituent=constituent, issue=issue)
+        query_set = Issue.objects.filter(name=name)
+        if query_set.count() == 0:
+            issue = Issue.objects.create(name=name)
+        else:
+            issue = query_set.get()
+        return ConstituentInterest.objects.create(constituent=constituent, issue=issue)
 
     def delete_interest(constituent, name):
         query_set = ConstituentInterest.objects.filter(constituent_id=constituent.pk). \

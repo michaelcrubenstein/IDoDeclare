@@ -5,9 +5,18 @@ from django.contrib import admin
 ##from django import forms
 
 # Register your models here.
-from dico.models import Issue, Constituent, MC, Event, ConstituentInterest, MCInterest, EventIssue
+from dico.models import Issue, Constituent, ConstituentInterest, \
+    Petition, PetitionIssue, \
+    MC, Event, MCInterest, EventIssue
 
     
+class PetitionIssueInline(admin.StackedInline):
+    model = PetitionIssue
+    extra = 1
+
+class IssueAdmin(admin.ModelAdmin):
+    inlines = [PetitionIssueInline]
+
 class ConstituentInterestInline(admin.StackedInline):
     model = ConstituentInterest
     extra = 3
@@ -45,7 +54,8 @@ class EventAdmin(admin.ModelAdmin):
 ##    ]
     inlines = [EventIssueInline]
 
-admin.site.register(Issue)
+admin.site.register(Issue, IssueAdmin)
 admin.site.register(Constituent, ConstituentAdmin)
+admin.site.register(Petition)
 admin.site.register(MC, MCAdmin)
 admin.site.register(Event, EventAdmin)

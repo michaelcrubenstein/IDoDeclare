@@ -71,7 +71,7 @@
 		});
 
 		function add_interest(newIssueName) {
-		  deferredObject = $.post("/dico/submitnewissue/", { csrfmiddlewaretoken: storedcsrftoken, "newissue": newIssueName} 
+		  deferredObject = $.post("/dico/newinterest/", { csrfmiddlewaretoken: storedcsrftoken, "newissue": newIssueName} 
 		  	)
 		  .done(function(json, textStatus, jqXHR)
 		  	{

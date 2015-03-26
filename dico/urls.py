@@ -15,18 +15,38 @@ urlpatterns = patterns(
     url(r'^editinterests/', views.editinterests, name='editinterests'),
     # ex: /dico/account/
     url(r'^account/', views.account, name='account'),
-    # ex: /dico/submitnewissue/
-    url(r'^submitnewissue/', views.submitnewissue, name='submitnewissue'),
+	# ex: /dico/issuePetitions/5/
+	url(r'^(?P<issue_id>\d+)/issuepetitions/$', views.issuePetitions, name='issuePetitions'),
+	# ex: /dico/createPetition/
+	url(r'^createpetition/$', views.createPetition, name='createPetition'),
+    # ex: /dico/newinterest/
+    url(r'^newinterest/', views.newInterest, name='newInterest'),
     # ex: /dico/submitdeleteinterest/
-    url(r'^submitdeleteinterest/', views.submitdeleteinterest, name='submitdeleteinterest'),
+    url(r'^submitdeleteinterest/', views.submitdeleteinterest, name='deleteinterest'),
 	# ex: /dico/createConstituent/
     url(r'^createConstituent/', views.createConstituent, name='createConstituent'),
 	# ex: /dico/newconstituent/
 	url(r'^newconstituent/', views.newConstituent, name='newConstituent'),
 	# ex: /dico/updateconstituent/
 	url(r'^updateconstituent/', views.updateConstituent, name='updateConstituent'),
-	# ex: /dico/issue/5/
-	url(r'^(?P<issue_id>\d+)/issue/$', views.issue, name='issue'),
+    # ex: /dico/getissuepetitions/
+    url(r'^getissuepetitions/', views.getIssuePetitions, name='getissuepetitions'),
+    # ex: /dico/newpetition/
+    url(r'^newpetition/', views.newPetition, name='newpetition'),
+    # ex: /dico/deletepetition/
+    url(r'^deletepetition/', views.deletePetition, name='deletepetition'),
+    # ex: /dico/updatepetition/
+    url(r'^updatepetition/', views.updatePetition, name='updatepetition'),
+    # ex: /dico/newpetitionissue/
+    url(r'^newpetitionissue/', views.newPetitionIssue, name='newpetitionissue'),
+    # ex: /dico/deletepetitionissue/
+    url(r'^deletepetitionissue/', views.deletePetitionIssue, name='deletepetitionissue'),
+    # ex: /dico/newpetitionvote/
+    url(r'^newpetitionvote/', views.newPetitionVote, name='newpetitionvote'),
+    # ex: /dico/deletepetitionvote/
+    url(r'^deletepetitionvote/', views.deletePetitionVote, name='deletepetitionvote'),
+    # ex: /dico/updatepetitionvote/
+    url(r'^updatepetitionvote/', views.updatePetitionVote, name='updatepetitionvote'),
 	# ex: /dico/5/
 	url(r'^(?P<constituent_id>\d+)/$', views.dashboard, name='dashboard'),
 	# ex: /dico/5/addissue/

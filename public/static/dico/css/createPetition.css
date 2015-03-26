@@ -1,0 +1,32 @@
+body {
+  padding-top: 40px;
+  padding-bottom: 40px;
+  background-color: #eee;
+}
+
+.errorAlert {
+  max-width: 330px;
+}
+
+.form-createpetition {
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+.form-createpetition .form-createpetition-heading,
+.form-createpetition .checkbox,
+.form-createpetition .textarea
+ {
+  margin-bottom: 10px;
+}
+.form-createpetition .form-control {
+  position: relative;
+  height: 100px;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  padding: 10px;
+}
+.form-createpetition .form-control:focus {
+  z-index: 2;
+}

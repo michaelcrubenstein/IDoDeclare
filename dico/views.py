@@ -13,7 +13,8 @@ import traceback
 import urllib
 import json
 
-from dico.models import Issue, Constituent, ConstituentInterest, MC
+from dico.models import Issue, Constituent, ConstituentInterest, \
+	Petition, PetitionIssue, MC
 from dico.titlecase import titlecase
 
 # Create your views here.
@@ -28,7 +29,7 @@ def index(request):
     member_list = Constituent.get_members(request.user)
             
     context = RequestContext(request, {
-    	'user': request.user,
+        'user': request.user,
         'issue_list': json.dumps(il),
         'member_list': member_list,
     })
@@ -38,12 +39,12 @@ def index(request):
 def signin(request):
     template = loader.get_template('dico/signin.html')
     if 'authentication_error' in request.GET:
-    	authenticationError = request.GET['authentication_error']
+        authenticationError = request.GET['authentication_error']
     else:
-    	authenticationError = None
-    	
+        authenticationError = None
+        
     context = RequestContext(request, {
-    	'authentication_error' : authenticationError,
+        'authentication_error' : authenticationError,
     })
     return HttpResponse(template.render(context))
 
@@ -68,18 +69,18 @@ def signout(request):
     
 def editinterests(request):
     if not request.user.is_authenticated:
-    	return signin(request)
+        return signin(request)
     
     template = loader.get_template('dico/editinterests.html')
         
     context = RequestContext(request, {
-    	'user': request.user,
+        'user': request.user,
     })
     return HttpResponse(template.render(context))
 
 def account(request):
     if not request.user.is_authenticated:
-    	return signin(request)
+        return signin(request)
     
     template = loader.get_template('dico/account.html')
     constituent = Constituent.get_constituent(request.user)
@@ -87,39 +88,70 @@ def account(request):
         return index(request)
         
     context = RequestContext(request, {
-    	'user': request.user,
-    	'constituent': constituent
+        'user': request.user,
+        'constituent': constituent
     })
     return HttpResponse(template.render(context))
 
-def submitnewissue(request):
-    results = {'success':False, 'error': u'request format invalid'}
+def createPetition(request):
+    if not request.user.is_authenticated:
+        return signin(request)
+    
+    template = loader.get_template('dico/createPetition.html')
+        
+    if 'next' in request.GET:
+        next = request.GET['next']
+    else:
+        next = request.META.HTTP_REFERER
+        
+    if 'issue' in request.GET:
+        issueID = request.GET['issue']
+        issue = Issue.objects.filter(pk=issueID).get()
 
-    if request.method == u'POST':
-        try:
-            POST = request.POST
-            newissue = request.POST['newissue']
-            
-            # Set the new issue to titlecase and remove extraneous spaces.
-            newissue = titlecase(newissue)
-            newissue = ' '.join(newissue.split())
-            Constituent.add_interest(request.user, newissue)
-            results = {'success':True}
-        except Exception as e:
-            results = {'success':False, 'error': str(e)}
+    context = RequestContext(request, {
+        'user': request.user,
+        'next': next,
+        'issue': issue,
+    })
+    return HttpResponse(template.render(context))
+
+def newInterest(request):
+    results = {'success':False, 'error': u'request format invalid'}
+    try:
+        if request.method != "POST":
+            raise Exception("newInterest only responds to POST requests")
+
+        POST = request.POST
+        newissue = request.POST['newissue']
+        
+        # Set the new issue to titlecase and remove extraneous spaces.
+        newissue = titlecase(newissue)
+        newissue = ' '.join(newissue.split())
+        Constituent.add_interest(request.user, newissue)
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
             
     return JsonResponse(results)
 
 def submitdeleteinterest(request):
     results = {'success':False, 'error': 'request format invalid'}
-    if request.method == u'POST':
-        try:
-            POST = request.POST
-            oldinterest = request.POST['oldinterest']
-            Constituent.delete_interest(request.user, oldinterest)
-            results = {'success':True}
-        except Exception as e:
-            results = {'success':False, 'error': str(e)}
+    try:
+        if request.method != "POST":
+            raise Exception("submitdeleteinterest only responds to POST requests")
+
+        POST = request.POST
+        oldinterest = request.POST['oldinterest']
+        Constituent.delete_interest(request.user, oldinterest)
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
             
     return JsonResponse(results)
 
@@ -127,12 +159,12 @@ def createConstituent(request):
     template = loader.get_template('dico/createConstituent.html')
 
     if 'error_message' in request.GET:
-    	errorMessage = request.GET['error_message']
+        errorMessage = request.GET['error_message']
     else:
-    	errorMessage = None
+        errorMessage = None
 
     context = RequestContext(request, {
-    	'error_message' : errorMessage
+        'error_message' : errorMessage
     })
     return HttpResponse(template.render(context))
     
@@ -149,6 +181,9 @@ def getDistrict(address):
 def newConstituent(request):
     results = {'success':False, 'error': 'newConstituent failed'}
     try:
+        if request.method != "POST":
+            raise Exception("newConstituent only responds to POST requests")
+
         username = request.POST['username']
         password = request.POST['password']
         firstName = request.POST['firstName']
@@ -168,9 +203,9 @@ def newConstituent(request):
             if user.is_active:
                 login(request, user)
                 if request.user is None:
-                	results = {'success':False, 'error': 'user login failed.'}
+                    results = {'success':False, 'error': 'user login failed.'}
                 else:
-                	results = {'success':True}
+                    results = {'success':True}
             else:
                 results = {'success':False, 'error': 'this user is disabled.'}
                 # Return a 'disabled account' error message
@@ -179,9 +214,8 @@ def newConstituent(request):
     except IntegrityError as e:
         results = {'success':False, 'error': 'That email address has already been used to sign up.'}
     except Exception as e:
-        log = open('newConstituent.log', 'a')
-        log.write("Error: %s\n" % type(e))
-        log.write("  Message: %s\n" % str(e))
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
         log.flush()
         results = {'success':False, 'error': str(e)}
     
@@ -191,10 +225,10 @@ def updateConstituent(request):
     results = {'success':False, 'error': 'updateConstituent failed'}
     try:
         if request.method != "POST":
-        	raise Exception("UpdateConstituent only responds to POST requests")
+            raise Exception("UpdateConstituent only responds to POST requests")
         if not request.user.is_authenticated:
-        	raise Exception("The current login is invalid")
-			
+            raise Exception("The current login is invalid")
+            
         POST = request.POST;
         newUsername = POST.get('newUsername', '')
         oldPassword = POST.get('oldPassword', '')
@@ -207,12 +241,12 @@ def updateConstituent(request):
         constituent = Constituent.get_constituent(request.user)
         if constituent is None:
             return
-		
+        
         if len(newStreetAddress) == 0:
-        	newStreetAddress = constituent.streetAddress
+            newStreetAddress = constituent.streetAddress
         if len(newZipCode) == 0:
-        	newZipCode = constituent.zipCode
-			
+            newZipCode = constituent.zipCode
+            
         districtInfo = getDistrict(newStreetAddress + " " + newZipCode)
         
         constituent.update_fields(newUsername, newPassword, 
@@ -223,17 +257,218 @@ def updateConstituent(request):
     except IntegrityError as e:
         results = {'success':False, 'error': 'That email address has already been used to sign up.'}
     except Exception as e:
-        log = open('updateConstituent.log', 'a')
+        log = open('exception.log', 'a')
         log.write("%s\n" % traceback.format_exc())
         log.flush()
         results = {'success':False, 'error': str(e)}
     
     return JsonResponse(results)
 
-def issue(request, issue_id):
-    o = Issue.objects
-    filter = o.filter(id=issue_id)
-    return HttpResponse("You're looking at the dashboard for issue %s." % filter.get())
+def newPetition(request):
+    results = {'success':False, 'error': 'newPetition failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("newPetition only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        description = request.POST['description']
+
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            raise Exception('The current login is not a constituent');
+        
+        # Do the model operation
+        petition = Petition.objects.create_petition(constituent, description)
+        issueName = request.POST.get('issue', '')
+        if len(issueName) != 0:
+            PetitionIssue.objects.create_petition_issue(constituent, petition, issueName)
+        
+        # Return the results.
+        results = {'success':True, 'petition':petition.id}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def deletePetition(request):
+    results = {'success':False, 'error': 'deletePetition failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("deletePetition only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        petition_id = request.POST['petition_id']
+
+        # Do the model operation
+        Petition.objects.filter(id=petition_id).delete();
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def updatePetition(request):
+    results = {'success':False, 'error': 'updatePetition failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("updatePetition only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        petition_id = request.POST['id']
+        description = request.POST['description']
+
+        # Do the model operation
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def newPetitionIssue(request):
+    results = {'success':False, 'error': 'newPetitionIssue failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("newPetitionIssue only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition issue info.
+        petition_id = request.POST['petition']
+        issue_id = request.POST['issue']
+        
+        # Do the model operation
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def deletePetitionIssue(request):
+    results = {'success':False, 'error': 'deletePetitionIssue failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("deletePetitionIssue only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        petition_issue_id = request.POST['id']
+
+        # Do the model operation
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def newPetitionVote(request):
+    results = {'success':False, 'error': 'newPetitionVote failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("newPetitionVote only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition issue info.
+        petition_id = request.POST['petition']
+        vote = request.POST['vote']
+        
+        # Do the model operation
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def deletePetitionVote(request):
+    results = {'success':False, 'error': 'deletePetitionVote failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("deletePetitionVote only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        petition_vote_id = request.POST['id']
+
+        # Do the model operation
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def updatePetitionVote(request):
+    results = {'success':False, 'error': 'updatePetitionVote failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("updatePetitionVote only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        petition_vote_id = request.POST['id']
+        vote = request.POST['vote']
+
+        # Do the model operation
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def issuePetitions(request, issue_id):
+    template = loader.get_template('dico/issuePetitions.html')
+    filter = Issue.objects.filter(id=issue_id)
+    context = RequestContext(request, {
+        'user': request.user,
+        'issue': filter.get(),
+    })
+    return HttpResponse(template.render(context))
 
 def dashboard(request, constituent_id):
     return HttpResponse("You're looking at the dashboard for constituent %s." % constituent_id)
@@ -307,7 +542,7 @@ def getActiveIssues(request):
             results = {'success':False, 'error': str(e)}
 
     return JsonResponse(results)
-	
+    
 
 def getMyIssues(request):
     results = {'success':False}
@@ -324,7 +559,7 @@ def getMyIssues(request):
             allIssues = []
             for i in issue_list:
                 allIssues.append({'id': i.id, 'name': i.name})
-				
+                
             results = {'success':True}
             results['myIssues'] = myIssues
             results['allIssues'] = allIssues
@@ -332,3 +567,29 @@ def getMyIssues(request):
             results = {'success':False, 'error': str(e)}
             
     return JsonResponse(results)
+    
+def getIssuePetitions(request):
+    results = {'success':False, 'error': 'getIssuePetitions failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("getIssuePetitions only responds to POST requests")
+
+        # Get the petition info.
+        issue_id = request.POST['issue']
+
+        # Do the model operation
+        petitionIssues = PetitionIssue.objects.filter(issue_id=issue_id).select_related('petition')
+        petitions = []
+        for i in petitionIssues:
+            petitions.append({'id': i.petition.id, 'description': i.petition.description})
+        
+        # Return the results.
+        results = {'success':True, 'petitions' : petitions}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+

@@ -119,7 +119,7 @@
 					$(li).append(newButton);
 					$(newButton).append(newSpan);
 					$(newButton).addClass("btn btn-link btn-xs col-xs-1");
-					$(newButton).attr("href", "/dico/" + petition['id'] + "/petition/");
+					$(newButton).attr("href", "/dico/" + petition['id'] + "/petition/?backIssue={{issue.id}}");
 					$(newSpan).addClass("glyphicon glyphicon-chevron-right");
 				}
 			}
@@ -154,27 +154,12 @@
 		<nav class="navbar navbar-default" role="navigation">
 		  <div class="container-fluid">
 			<!-- Brand and toggle get grouped for better mobile display -->
-			<div class="navbar-header">
-			  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-			  </button>
-			  <a class="navbar-brand" href="/dico/">I Do Declare</a>
+			<div class="nav navbar-nav navbar-header pull-left">
+			  <a class="navbar-text" href="/dico/"><span class="glyphicon glyphicon-chevron-left"></span>Home</a>
 			</div>
 
 			<!-- Collect the nav links, forms, and other content for toggling -->
-			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			  <ul class="nav navbar-nav navbar-right">
-			    <li>
-			    	<a href="/dico/">Home</a>
-			    </li>
-				<li>
-					{% if user.is_authenticated %}
-						<a href="/dico/signout/">Sign out</a>
-					{% else %}
-						<a href="/dico/signin/">Sign in</a>
-					{% endif %}
-				</li>
+			  <ul class="nav navbar-nav navbar-header pull-right">
 				{% if user.is_authenticated %}
 				<li class="dropdown">
 				  <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
@@ -183,11 +168,14 @@
 					<li><a href="#">Change Password</a></li>
 					<li class="divider"></li>
 					<li><a href="/dico/editinterests/">Edit Interests</a></li>
+					<li class="divider"></li>
+					<li><a href="/dico/signout/">Sign out</a></li>
 				  </ul>
 				</li>
+				{% else %}
+					<a href="/dico/signin/">Sign in</a>
 				{% endif %}
 			  </ul>
-			</div><!-- /.navbar-collapse -->
 		  </div><!-- /.container-fluid -->
 		</nav>
 

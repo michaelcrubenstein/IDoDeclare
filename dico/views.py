@@ -561,10 +561,22 @@ def issue(request, issue_id):
 
 def petition(request, petition_id):
     template = loader.get_template('dico/petition.html')
+    
+    issueID = int(request.GET.get(u'backIssue', 0))
+    if (issueID != 0):
+        issue = Issue.objects.filter(pk=issueID).get()
+        backName = issue.name
+        backURL = "/dico/" + str(issueID) + "/issue/"
+    else:
+        backName = ""
+        backURL = ""
+        
     filter = Petition.objects.filter(id=petition_id)
     context = RequestContext(request, {
         'user': request.user,
         'petition': filter.get(),
+        'backName' : backName,
+        'backURL' : backURL,
     })
     return HttpResponse(template.render(context))
 

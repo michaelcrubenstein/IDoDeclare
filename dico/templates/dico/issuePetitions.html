@@ -89,14 +89,16 @@
 				for (i = 0; i < petitions.length; ++i) {
 					petition = petitions[i];
 					li = document.createElement("div");
+					pDiv = document.createElement("div");
 					newParagraph = document.createElement("p");
 					$("#id_issue_petitions").append(li);
-					$(li).append(newParagraph);
+					$(li).append(pDiv);
 
 					$(li).addClass("row");
 
-					$(newParagraph).addClass("col-xs-10");
-					$(newParagraph).append(htmlEncode(petition['description']));
+					$(pDiv).addClass("col-xs-10");
+					$(pDiv).append(newParagraph);
+					$(newParagraph).append(petition['description']);
 					
 					<!-- Add a button to delete the petition -->
 					newButton = document.createElement("button");
@@ -194,10 +196,18 @@
 		<div class="row">
 			<div class="col-xs-12">
 				<h3 id='id_issue_title' issueID='{{issue.id}}'>{{issue.name}}</h3>
+			</div>
+			<div class="col-xs-12">
 				<p>What actions should Congress take on this issue?</p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
 				<label for="id_issue_petitions" class="control-label">Actions</label>
 				<a class="btn btn-sm btn-link" 
 				    href="/dico/createpetition?issue={{issue.id}}&next=/dico/{{issue.id}}/issue/">Create an Action</a>
+			</div>
+		</div>
 				<div id='id_issue_petitions'>
 				</div>
 

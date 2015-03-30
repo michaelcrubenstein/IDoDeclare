@@ -1,0 +1,33 @@
+.petition-description {
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+
+.issue-column {
+	background: #DDD;
+}
+
+.lightbackground {
+		background: #EEE;
+}
+
+.toplabel {
+		padding-top: 3px
+		vertical-align: text-top;
+  		margin: 0 auto;
+}
+
+.bottompadding {
+		padding-bottom: 3px
+}
+
+.argument-container {
+    margin-top: 20px;
+    border: 1px #e4e4e4 solid;
+/* 
+    box-shadow: 2px 2px 5px rgba(0,0,0,.25);
+    padding:5px 10px 5px 10px;
+ */
+}
+	

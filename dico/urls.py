@@ -15,10 +15,14 @@ urlpatterns = patterns(
     url(r'^editinterests/', views.editinterests, name='editinterests'),
     # ex: /dico/account/
     url(r'^account/', views.account, name='account'),
-	# ex: /dico/issuePetitions/5/
-	url(r'^(?P<issue_id>\d+)/issuepetitions/$', views.issuePetitions, name='issuePetitions'),
+	# ex: /dico/issue/5/
+	url(r'^(?P<issue_id>\d+)/issue/$', views.issue, name='issue'),
+	# ex: /dico/petition/5/
+	url(r'^(?P<petition_id>\d+)/petition/$', views.petition, name='petition'),
 	# ex: /dico/createPetition/
 	url(r'^createpetition/$', views.createPetition, name='createPetition'),
+	# ex: /dico/addpetitionissue/5/
+	url(r'^(?P<petition_id>\d+)/addpetitionissue/$', views.addpetitionissue, name='addpetitionissue'),
     # ex: /dico/newinterest/
     url(r'^newinterest/', views.newInterest, name='newInterest'),
     # ex: /dico/submitdeleteinterest/
@@ -37,10 +41,16 @@ urlpatterns = patterns(
     url(r'^deletepetition/', views.deletePetition, name='deletepetition'),
     # ex: /dico/updatepetition/
     url(r'^updatepetition/', views.updatePetition, name='updatepetition'),
+    # ex: /dico/getpetitionissues/
+    url(r'^getpetitionissues/', views.getPetitionIssues, name='getpetitionissues'),
+    # ex: /dico/getpetitionarguments/
+    url(r'^getpetitionarguments/', views.getPetitionArguments, name='getpetitionarguments'),
     # ex: /dico/newpetitionissue/
     url(r'^newpetitionissue/', views.newPetitionIssue, name='newpetitionissue'),
     # ex: /dico/deletepetitionissue/
     url(r'^deletepetitionissue/', views.deletePetitionIssue, name='deletepetitionissue'),
+    # ex: /dico/getpetitionvotes/
+    url(r'^getpetitionvotes/', views.getPetitionVotes, name='getpetitionvotes'),
     # ex: /dico/newpetitionvote/
     url(r'^newpetitionvote/', views.newPetitionVote, name='newpetitionvote'),
     # ex: /dico/deletepetitionvote/

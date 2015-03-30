@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>I Do Declare</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/petition.css" %}" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+	<!-- Styles for this web page -->
+	<style>
+
+	</style>
+
+
+  </head>
+  <body>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+
+	<!-- Scripts for this web page -->
+	<script type="text/JavaScript">
+	
+		var deferredObject;
+
+		function htmlDecode(input){
+		  var e = document.createElement('div');
+		  e.innerHTML = input;
+		  return e.childNodes[0].nodeValue;
+		}
+		
+		function htmlEncode(input){
+			str = $('<div>').text(input).html();
+		    return String(str).replace(/ /g, '&nbsp;');
+		}
+		
+		// Display all of the interests in the system.
+		var storedcsrftoken = "{{ csrf_token }}";
+
+		$(document).ready (function(e) {
+			<!-- Block of code for an alert area at the top of the window -->
+			$(".close").click(function(){
+				$("#myAlert").alert();
+			});
+			
+			bootstrap_alert = function() {}
+			bootstrap_alert.warning = function(message) {
+            	$('#myAlert').html('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+        	}
+        	closealert = function() { 
+        		$('#myAlert').html('');
+        	}
+			
+			$("#add_supporting_argument_button").click(function() {
+				add_argument(1, new_supporting_argument_text.value, new_supporting_argument_text);
+			});
+
+			$("#add_opposing_argument_button").click(function() {
+				add_argument(0, new_opposing_argument_text.value, new_opposing_argument_text);
+			});
+			
+			// Display the issues associated with the current petition.
+			show_petition_issues();
+
+			// Display the arguments of the current petition.
+			show_petition_arguments();
+			show_petition_votes(true);
+			
+			// After showing the petition votes, set the change methods of the radio buttons
+			// for the current user's vote.
+			$("#supportRadio").change(function() {
+				cast_vote(1);
+			});
+			
+			$("#opposeRadio").change(function() {
+				cast_vote(0);
+			});
+			
+			$("#noOpinionRadio").change(function() {
+				vote_no_opinion();
+			});
+			
+		});
+
+		function show_petition_issues() {
+		  $.post("/dico/getpetitionissues/", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
+		  	if (json['success']) {
+				issues = json['issues'];
+			
+				$("#id_petition_issues").empty();
+			
+				for (i = 0; i < issues.length; ++i) {
+					issue = issues[i];
+					li = document.createElement("div");
+					$(li).addClass("row");
+					$("#id_petition_issues").append(li);
+					newButton = document.createElement("a");
+					newDiv = document.createElement("div");
+					$(li).append(newDiv);
+					$(newDiv).append(newButton);
+					$(newDiv).addClass("col-xs-9");
+					$(newButton).append(htmlEncode(issue['name']));
+					$(newButton).addClass("btn btn-link btn-xs");
+					$(newButton).attr("href", "/dico/" + issue['id'] + "/issue/");
+
+					<!-- Add a button to delete the issue from the petition -->
+					newButton = document.createElement("button");
+					newSpan = document.createElement("span");
+					$(li).append(newButton);
+					$(newButton).append(newSpan);
+					$(newButton).addClass("btn btn-link btn-xs col-xs-1");
+					$(newButton).attr("issueID", issue['id']);
+					$(newButton).click(function() {
+						closealert();
+						remove_issue(li, $(this).attr("issueID"));
+					});
+					$(newSpan).addClass("glyphicon glyphicon-remove");
+				}
+			}
+			else
+				bootstrap_alert.warning(json['error']);
+		  });
+		}
+		
+		function remove_issue(li, issue_id) {
+		  $.post("/dico/deletepetitionissue/", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : "{{petition.id}}", "issue_id" : issue_id }, function(json){
+		  	if (json['success']) {
+		  		$(li).remove();
+			}
+			else
+				bootstrap_alert.warning(json['error']);
+		    });
+		}
+		
+		function show_petition_arguments() {
+		  $.post("/dico/getpetitionarguments/", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
+		  	if (json['success']) {
+				supportingArguments = json['supportingArguments'];
+				opposingArguments = json['opposingArguments'];
+			
+				$("#id_supporting_arguments").empty();
+				if (supportingArguments.length == 0) {
+					append_zero_arguments($("#id_supporting_arguments"));
+				} else {
+					for (i = 0; i < supportingArguments.length; ++i) {
+						append_argument(1, supportingArguments[i], $("#id_supporting_arguments"));
+					}
+				}
+				$("#id_opposing_arguments").empty();
+				if (opposingArguments.length == 0) {
+					append_zero_arguments($("#id_opposing_arguments"));
+				} else {
+					for (i = 0; i < opposingArguments.length; ++i) {
+						append_argument(opposingArguments[i], $("#id_opposing_arguments"));
+					}
+				}
+			}
+			else
+				bootstrap_alert.warning(json['error']);
+		  });
+		}
+		
+		function append_zero_arguments(containerObj) {
+			li = document.createElement("div");
+			containerObj.append(li);
+			$(li).addClass("row");
+			textdiv = document.createElement("div");
+			$(li).append(textdiv);
+			$(textdiv).addClass("col-xs-12");
+			$(textdiv).html("None");
+		}
+		
+		function append_argument(arg, containerObj) {
+			li = document.createElement("div");
+			newParagraph = document.createElement("p");
+			newButton = document.createElement("button");
+			newSpan = document.createElement("span");
+			containerObj.append(li);
+			$(li).append(newParagraph);
+			$(li).append(newButton);
+			$(newButton).append(newSpan);
+
+			$(li).addClass("row");
+
+			$(newParagraph).addClass("col-xs-10");
+			$(newParagraph).append(htmlEncode(arg['description']));
+			$(newButton).addClass("btn btn-link btn-xs col-xs-1");
+			$(newButton).attr("argumentId", arg['id']);
+			$(newButton).click(function() {
+				closealert();
+				remove_argument(li, $(this).attr("argumentId"));
+			});
+			$(newSpan).addClass("glyphicon glyphicon-remove");
+		}
+		
+		function remove_argument(li, argument_id) {
+		  $.post("/dico/deleteargument/", { csrfmiddlewaretoken: storedcsrftoken, "argument_id" : argument_id }, function(json){
+		  	if (json['success']) {
+		  		$(li).remove();
+			}
+			else
+				bootstrap_alert.warning(json['error']);
+		    });
+		}
+		
+		function add_argument(isSupport, newArgumentText, textObj) {
+		  deferredObject = $.post("/dico/newargument/", { csrfmiddlewaretoken: storedcsrftoken, 
+		  												  "petition" : "{{petition.id}}", 
+		  												  "isSupport" : isSupport, 
+		  												  "newDescription": newArgumentText} 
+		  	)
+		  .done(function(json, textStatus, jqXHR)
+		  	{
+				if (json['success']) {
+					show_petition_arguments();
+					if (newIssueName == add_interest_text.value) {
+						$(textObj).val('');
+						$(textObj).focus();
+					}
+				}
+				else {
+					bootstrap_alert.warning(json['error']);
+				}
+			})
+		  .fail(function(jqXHR, textStatus, errorThrown) {
+			console.log( "error: " + textStatus + "; " + errorThrown + ";");
+			console.log( jqXHR.status + "; " + jqXHR.statusText);
+		  });
+		}
+
+		function enter_new_supporting_argument(e, inputObject){
+			var code = (e.keyCode ? e.keyCode : e.which);
+			if(code == 13 && new_supporting_argument_text.value.length > 0) { //Enter keycode
+			 add_argument(1, new_supporting_argument_text.value, new_supporting_argument_text);
+			}
+			e.stopPropagation();
+		}
+		
+		function enter_new_opposing_argument(e, inputObject){
+			var code = (e.keyCode ? e.keyCode : e.which);
+			if(code == 13 && new_opposing_argument_text.value.length > 0) { //Enter keycode
+			 add_argument(0, new_opposing_argument_text.value, new_opposing_argument_text);
+			}
+			e.stopPropagation();
+		}
+		
+		function cast_vote(vote) {
+			deferredObject = $.post("/dico/newpetitionvote/", { csrfmiddlewaretoken: storedcsrftoken, 
+														  "petition" : "{{petition.id}}",
+														  "vote" : vote} 
+				)
+				.done(function(json, textStatus, jqXHR)
+				{
+					if (json['success']) {
+						show_petition_votes(false);
+					}
+					else {
+						bootstrap_alert.warning(json['error']);
+					}
+				})
+				.fail(function(jqXHR, textStatus, errorThrown)
+				{
+					console.log( "error: " + textStatus + "; " + errorThrown + ";");
+					console.log( jqXHR.status + "; " + jqXHR.statusText);
+				});
+		}
+		
+		function cast_support_vote(e, inputObj) {
+			console.log(inputObj);
+			cast_vote(inputObj.value);
+			e.stopPropagation();
+		}
+		
+		function cast_oppose_vote(e, inputObj) {
+			console.log(inputObj);
+			cast_vote(inputObj.value);
+			e.stopPropagation();
+		}
+		
+		function vote_no_opinion() {
+			deferredObject = $.post("/dico/deletepetitionvote/", { csrfmiddlewaretoken: storedcsrftoken, 
+														  "petition" : "{{petition.id}}"} 
+				)
+				.done(function(json, textStatus, jqXHR)
+				{
+					if (json['success']) {
+						show_petition_votes(false);
+					}
+					else {
+						bootstrap_alert.warning(json['error']);
+					}
+				})
+				.fail(function(jqXHR, textStatus, errorThrown)
+				{
+					console.log( "error: " + textStatus + "; " + errorThrown + ";");
+					console.log( jqXHR.status + "; " + jqXHR.statusText);
+				});
+		}
+		
+		function show_petition_votes(init_user_vote) {
+			deferredObject = $.post("/dico/getpetitionvotes/", { csrfmiddlewaretoken: storedcsrftoken, 
+														  "petition" : "{{petition.id}}"} 
+				)
+				.done(function(json, textStatus, jqXHR)
+				{
+					if (json['success']) {
+						supportVotes = 0;
+						opposeVotes = 0;
+						for (i=0; i < json['votes'].length; ++i) {
+							vc = json['votes'][i];
+							if (vc.vote == 0)
+								opposeVotes = vc.count;
+							else if (vc.vote == 1)
+								supportVotes = vc.count;
+						}
+						$("#id_total_votes").html("Support: " +supportVotes + "; Oppose: " + opposeVotes);
+						if ('userVote' in json) {
+							if (init_user_vote) {
+								if (json['userVote'] == 1) {
+									$("#supportRadio").prop('checked', true);
+									$("#supportButton").button('toggle');
+								}
+								else if (json['userVote'] == 0) {
+									$('#opposeRadio').attr('checked', true);
+									$("#opposeButton").button('toggle');
+								}
+							}
+						}
+						else
+						{
+							if (init_user_vote) {
+								$('#noOpinionRadio').attr('checked', true);
+								$('#noOpinionButton').button('toggle');
+							}
+						}
+							
+					}
+					else {
+						bootstrap_alert.warning(json['error']);
+					}
+				})
+				.fail(function(jqXHR, textStatus, errorThrown)
+				{
+					console.log( "error: " + textStatus + "; " + errorThrown + ";");
+					console.log( jqXHR.status + "; " + jqXHR.statusText);
+				});
+		}
+		
+	</script>
+
+	<div id='container' class="container">
+		<nav class="navbar navbar-default" role="navigation">
+		  <div class="container-fluid">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header">
+			  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+			  </button>
+			  <a class="navbar-brand" href="/dico/">I Do Declare</a>
+			</div>
+
+			<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			  <ul class="nav navbar-nav navbar-right">
+			    <li>
+			    	<a href="/dico/">Home</a>
+			    </li>
+				<li>
+					{% if user.is_authenticated %}
+						<a href="/dico/signout/">Sign out</a>
+					{% else %}
+						<a href="/dico/signin/">Sign in</a>
+					{% endif %}
+				</li>
+				{% if user.is_authenticated %}
+				<li class="dropdown">
+				  <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
+				  <ul class="dropdown-menu" role="menu">
+					<li><a href="/dico/account/">Account Settings</a></li>
+					<li><a href="#">Change Password</a></li>
+					<li class="divider"></li>
+					<li><a href="/dico/editinterests/">Edit Interests</a></li>
+				  </ul>
+				</li>
+				{% endif %}
+			  </ul>
+			</div><!-- /.navbar-collapse -->
+		  </div><!-- /.container-fluid -->
+		</nav>
+
+	    <div id="myAlert"></div>
+		<div class="lightbackground row">
+			<div class="col-xs-12 col-sm-8">
+				<h3 id='id_petition_title' class="toplabel">An Action for Congress:</h3>
+				<p class="lead">{{petition.description}}</p>
+			</div>
+			<div class="col-xs-12 col-sm-4 container issue-column">
+				<div class="row">
+					<div class="col-xs-9">
+						<label for="id_petition_issues" class="toplabel">Related Issues</label>
+					</div>
+					<div class="col-xs-3">
+						<a href="/dico/{{petition.id}}/addpetitionissue/">
+							Add
+						</a>
+					</div>
+				</div>
+				<div id='id_petition_issues'> </div>
+			</div>
+		</div>
+		<div class="lightbackground row bottompadding">
+			<div class="col-xs-6 your-vote-column">
+				<label class="control-label">Your vote</label>
+				<div class="btn-group" data-toggle="buttons">
+					<label id="supportButton" class="btn btn-default">
+					  <input type="radio" name="voteOptions" id="supportRadio" value=1 />Support
+					</label>
+					<label id="opposeButton" class="btn btn-default">
+					  <input type="radio" name="voteOptions" id="opposeRadio" value=0 />Oppose
+					</label>			
+					<label id="noOpinionButton" class="btn btn-default active">
+					  <input type="radio" name="voteOptions" id="noOpinionRadio" value=-1 />No Opinion
+					</label>
+				</div>			
+			</div>
+			<div id="id_total_votes" class="col-xs-6 total-vote-column">
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12 col-sm-6">
+				<div class="panel argument-container">
+					<div class="panel-heading">
+						<h4 class="panel-title">Supporting Arguments</h4>
+					</div>
+					<div id='id_supporting_arguments' class="panel-body"> </div>
+					<div class="panel-footer">
+						<div for="new_issue_input_group" class="panel-title">A New Supporting Argument</div>
+						<div id="new_supporting_argument_group" class="input-group">
+						  <textarea id="new_supporting_argument_text" width="200" maxlength="254" class="form-control"
+								 onKeyPress="enter_new_supporting_argument(event, this)"></textarea>
+						  <div class="input-group-btn">
+							<button type="button" id="add_supporting_argument_button" class="btn btn-default" >
+								<span class="glyphicon glyphicon-plus"></span>
+							</button>
+						  </div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-xs-12 col-sm-6">
+				<div class="panel argument-container">
+					<div class="panel-heading">
+						<h4 class="panel-title">Opposing Arguments</h4>
+					</div>
+					<div id='id_opposing_arguments' class="panel-body"> </div>
+					<div class="panel-footer">
+						<div for="new_issue_input_group" class="panel-title">A New Opposing Argument</div>
+						<div id="new_opposing_argument_group" class="input-group">
+						  <textarea id="new_opposing_argument_text" width="200" maxlength="254" class="form-control"
+								 onKeyPress="enter_new_opposing_argument(event, this)"></textarea>
+						  <div class="input-group-btn">
+							<button type="button" id="add_opposing_argument_button" class="btn btn-default" >
+								<span class="glyphicon glyphicon-plus"></span>
+							</button>
+						  </div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+</div> <!-- container -->
+</body>

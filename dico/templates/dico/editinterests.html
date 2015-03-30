@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load staticfiles %}
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,7 +8,7 @@
     <title>I Do Declare</title>
 
     <!-- Bootstrap -->
-    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -28,7 +29,7 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
 
 	<!-- Scripts for this web page -->
 	<script type="text/JavaScript">
@@ -58,6 +59,19 @@
 		var storedcsrftoken = "{{ csrf_token }}";
 
 		$(document).ready (function(e) {
+			<!-- Block of code for an alert area at the top of the window -->
+			$(".close").click(function(){
+				$("#myAlert").alert();
+			});
+			
+			bootstrap_alert = function() {}
+			bootstrap_alert.warning = function(message) {
+            	$('#myAlert').html('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+        	}
+        	closealert = function() { 
+        		$('#myAlert').html('');
+        	}
+			
 			// Display the interests of the currently logged-in user.
 			show_my_interests();
 			check_new_interest();
@@ -83,7 +97,7 @@
 					}
 				}
 				else {
-					alert("Sorry, " + json['error']);
+					bootstrap_alert.warning("Sorry, " + json['error']);
 				}
 			})
 		  .fail(function(jqXHR, textStatus, errorThrown) {
@@ -115,7 +129,7 @@
 				show_my_interests();
 			}
 			else {
-				alert("Sorry, " + json['error']);
+				bootstrap_alert.warning("Sorry, " + json['error']);
 			}
 		  });
 		}
@@ -226,6 +240,8 @@
 			</div><!-- /.navbar-collapse -->
 		  </div><!-- /.container-fluid -->
 		</nav>
+
+	    <div id="myAlert" class="row"></div>
 
 		<div class="row">
 			<div class="col-xs-12 col-sm-5">

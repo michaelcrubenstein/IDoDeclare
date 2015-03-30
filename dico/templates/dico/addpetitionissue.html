@@ -5,13 +5,13 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>I Do Declare - {{ issue.name }}</title>
+    <title>I Do Declare</title>
 
-    <!-- Bootstrap core CSS -->
+    <!-- Bootstrap -->
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
-    <link href="{% static "dico/css/issuePetitions.css" %}" rel="stylesheet">
+    <link href="{% static "dico/css/petition.css" %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -50,14 +50,6 @@
 		    return String(str).replace(/ /g, '&nbsp;');
 		}
 		
-		function oneWordTitleCase(input) {
-			return i[0].toUpperCase() + i.substring(1);
-		}
-		
-		function validIssueName(input){
-			return input.split(" ").map(function(i){return oneWordTitleCase(i)}).join(" ");
-		}
-
 		// Display all of the interests in the system.
 		var storedcsrftoken = "{{ csrf_token }}";
 
@@ -74,78 +66,39 @@
         	closealert = function() { 
         		$('#myAlert').html('');
         	}
-			
-			// Display the interests of the currently logged-in user.
-			show_issue_petitions();
 		});
 
-		function show_issue_petitions() {
-		  $.post("/dico/getissuepetitions/", { csrfmiddlewaretoken: storedcsrftoken, "issue" : "{{issue.id}}" }, function(json){
-		  	if (json['success']) {
-				petitions = json['petitions'];
-			
-				$("#id_issue_petitions").empty();
-			
-				for (i = 0; i < petitions.length; ++i) {
-					petition = petitions[i];
-					li = document.createElement("div");
-					newParagraph = document.createElement("p");
-					$("#id_issue_petitions").append(li);
-					$(li).append(newParagraph);
-
-					$(li).addClass("row");
-
-					$(newParagraph).addClass("col-xs-10");
-					$(newParagraph).append(htmlEncode(petition['description']));
-					
-					<!-- Add a button to delete the petition -->
-					newButton = document.createElement("button");
-					newSpan = document.createElement("span");
-					$(li).append(newButton);
-					$(newButton).append(newSpan);
-					$(newButton).addClass("btn btn-link btn-xs col-xs-1");
-					$(newButton).attr("petitionId", petition['id']);
-					$(newButton).click(function() {
-						closealert();
-						remove_petition(li, $(this).attr("petitionId"));
-					});
-					$(newSpan).addClass("glyphicon glyphicon-remove");
-					
-					<!-- Add a button to show the petition -->
-					newButton = document.createElement("a");
-					newSpan = document.createElement("span");
-					$(li).append(newButton);
-					$(newButton).append(newSpan);
-					$(newButton).addClass("btn btn-link btn-xs col-xs-1");
-					$(newButton).attr("href", "/dico/" + petition['id'] + "/petition/");
-					$(newSpan).addClass("glyphicon glyphicon-chevron-right");
+		function add_petition_issue(issueID) {
+		  deferredObject = $.post("/dico/newpetitionissue/", { csrfmiddlewaretoken: storedcsrftoken, 
+		  		"issue": issueID,
+		  		"petition": {{petition.id}}
+		  		} 
+		  	)
+		  .done(function(json, textStatus, jqXHR)
+		  	{
+				if (json['success']) {
+					closealert();
+					window.location = "/dico/{{petition.id}}/petition/";
 				}
-			}
-			else
-				bootstrap_alert.warning(json['error']);
+				else {
+					bootstrap_alert.warning("Sorry, " + json['error']);
+				}
+			})
+		  .fail(function(jqXHR, textStatus, errorThrown) {
+			console.log( "error: " + textStatus + "; " + errorThrown + ";");
+			console.log( jqXHR.status + "; " + jqXHR.statusText);
 		  });
 		}
-		
-		function remove_petition(li, petition_id) {
-		  $.post("/dico/deletepetition/", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : petition_id }, function(json){
-		  	if (json['success']) {
-		  		$(li).remove();
+
+		function hasIssue(issues, oldName) {
+			var i;
+			for (i = 0; i < issues.length; ++i) {
+				if (issues[i]['name'] == oldName) {
+					return true;
+				}
 			}
-			else
-				bootstrap_alert.warning(json['error']);
-		    });
+			return false;
 		}
-		
-		function remove_petition(li, petition_id) {
-		  $.post("/dico/deletepetition/", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : petition_id }, function(json){
-		  	if (json['success']) {
-		  		$(li).remove();
-			}
-			else
-				bootstrap_alert.warning(json['error']);
-		    });
-		}
-		
 	</script>
 
 	<div id='container' class="container">
@@ -189,20 +142,46 @@
 		  </div><!-- /.container-fluid -->
 		</nav>
 
-	    <div id="myAlert"></div>
+	    <div id="myAlert" class="row"></div>
 
-		<div class="row">
-			<div class="col-xs-12">
-				<h3 id='id_issue_title' issueID='{{issue.id}}'>{{issue.name}}</h3>
-				<p>What actions should Congress take on this issue?</p>
-				<label for="id_issue_petitions" class="control-label">Actions</label>
-				<a class="btn btn-sm btn-link" 
-				    href="/dico/createpetition?issue={{issue.id}}&next=/dico/{{issue.id}}/issue/">Create an Action</a>
-				<div id='id_issue_petitions'>
+		<div class="lightbackground row">
+			<div class="col-xs-12 col-sm-8">
+				<h3 id='id_petition_title' class="toplabel">An Action for Congress:</h3>
+				<p class="lead">{{petition.description}}</p>
+			</div>
+			<div class="col-xs-12 col-sm-4 container issue-column">
+				<div class="row">
+					<div class="col-xs-9">
+						<label for="id_petition_issues" class="toplabel">Related Issues</label>
+						{% for issue in petition.issues.all %}
+						<div class="row" />
+							<div class="col-xs-12">{{ issue.name }}</div>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+				<div id='id_petition_issues'> </div>
+			</div>
+		</div>
+			
+			<div class="col-xs-12 col-sm-6">
+				<div class="row" />
+					<span for="issue_div" class="help-block col-xs-12">Click an issue to add it to this action.</span>
+				</div>
+				<div id="issue_div">
+					{% for issue in allIssues %}
+					<div class="row" />
+						<div class="col-xs-12">
+							<button class="btn btn-link btn-xs" onClick="add_petition_issue({{issue.id}})">
+								<span class="glyphicon glyphicon-chevron-left"> </span>
+								{{ issue.name }}
+							</button>
+						</div>
+					</div>
+					{% endfor %}
 				</div>
 
 			</div>
-			
 		</div>
 
 </div> <!-- container -->

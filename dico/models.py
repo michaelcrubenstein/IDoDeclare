@@ -35,9 +35,9 @@ class Issue(models.Model):
                       " AND   dico_issue.id = dico_constituentinterest.issue_id" + \
                       " AND   dico_constituentinterest.constituent_id = dico_constituent.user_id" + \
                       " GROUP BY state" + \
-                      " ORDER BY state";
-            c.execute(sql, [self.name]);
-            return c.fetchall();
+                      " ORDER BY state"
+            c.execute(sql, [self.name])
+            return c.fetchall()
             
     def get_active_issues(min_interest_count = 1):
         with connection.cursor() as c:
@@ -47,12 +47,12 @@ class Issue(models.Model):
                   "  WHERE dico_issue.id = dico_constituentinterest.issue_id" + \
                   "  GROUP BY name, dico_issue.id) p" + \
                   " WHERE interest_count >= %s" + \
-                  " ORDER BY name";
-            c.execute(sql, [min_interest_count]);
+                  " ORDER BY name"
+            c.execute(sql, [min_interest_count])
             active_issues = []
             for i in c.fetchall():
                 active_issues.append({'name': i[0], 'id': i[1]})
-            return active_issues;
+            return active_issues
     
 class ConstituentManager(models.Manager):
     def create_constituent(self, username, password, email, firstname, lastname, streetaddress, zipcode, district, state):
@@ -191,20 +191,33 @@ class Petition(models.Model):
     description = models.TextField()
     constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
     creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+    issues = models.ManyToManyField(Issue, through='PetitionIssue');
     
     objects = PetitionManager()
+    
+    def add_issue(self, issue, constituent):
+        pi = PetitionIssue(petition=self, issue=issue, constituent=constituent)
+        pi.save()
+
+    def get_votes(petition_id):
+        with connection.cursor() as c:
+            sql = "SELECT vote, COUNT(*) as vote_count" + \
+                  " FROM dico_petitionvote" + \
+                  " WHERE dico_petitionvote.petition_id = %s" + \
+                  " GROUP BY vote" + \
+                  " ORDER BY vote";
+            c.execute(sql, [petition_id]);
+            countList = []
+            for vc in c.fetchall():
+                countList.append({'vote': vc[0], 'count': vc[1]})
+            return countList
+    
     def __str__(self):
         return self.description
 
 class PetitionIssueManager(models.Manager):
-    def create_petition_issue(self, constituent, petition, issueName):
-        query_set = Issue.objects.filter(name=issueName)
-        if query_set.count() == 0:
-            raise ValueError('the issue "{}" is not recognized'.format(issueName))
-        else:
-            issue = query_set.get()
-        return self.create(petition=petition, issue=issue, constituent=constituent)
-    
+    pass
+        
 class PetitionIssue(models.Model):
     petition = models.ForeignKey(Petition, db_index=True, db_column='petition_id')
     issue = models.ForeignKey(Issue, db_index=True, db_column='issue_id')
@@ -212,6 +225,11 @@ class PetitionIssue(models.Model):
     
     objects = PetitionIssueManager()
 
+    def delete_petition_issue(petition_id, issue_id):
+        query_set = PetitionIssue.objects.filter(petition_id=petition_id). \
+            filter(issue_id=issue_id)
+        query_set.delete()
+            
     def __str__(self):
         return self.issue.name + ": " + self.petition.description
 

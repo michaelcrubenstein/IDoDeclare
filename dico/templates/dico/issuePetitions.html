@@ -75,6 +75,9 @@
         		$('#myAlert').html('');
         	}
 			
+			$("#id_accountSettingsLink").attr("href", "/dico/account/?back="+window.location.href);
+			$("#id_changePasswordLink").attr("href", "/dico/password/?back="+window.location.href);
+
 			// Display the interests of the currently logged-in user.
 			show_issue_petitions();
 		});
@@ -102,16 +105,18 @@
 					
 					<!-- Add a button to delete the petition -->
 					newButton = document.createElement("button");
-					newSpan = document.createElement("span");
-					$(li).append(newButton);
-					$(newButton).append(newSpan);
 					$(newButton).addClass("btn btn-link btn-xs col-xs-1");
-					$(newButton).attr("petitionId", petition['id']);
-					$(newButton).click(function() {
-						closealert();
-						remove_petition(li, $(this).attr("petitionId"));
-					});
-					$(newSpan).addClass("glyphicon glyphicon-remove");
+					$(li).append(newButton);
+					if (petition['isEditable']) {
+						newSpan = document.createElement("span");
+						$(newButton).append(newSpan);
+						$(newButton).attr("petitionId", petition['id']);
+						$(newButton).click(function() {
+							closealert();
+							remove_petition(li, $(this).attr("petitionId"));
+						});
+						$(newSpan).addClass("glyphicon glyphicon-remove");
+					}
 					
 					<!-- Add a button to show the petition -->
 					newButton = document.createElement("a");
@@ -119,7 +124,7 @@
 					$(li).append(newButton);
 					$(newButton).append(newSpan);
 					$(newButton).addClass("btn btn-link btn-xs col-xs-1");
-					$(newButton).attr("href", "/dico/" + petition['id'] + "/petition/?backIssue={{issue.id}}");
+					$(newButton).attr("href", "/dico/" + petition['id'] + "/petition/?backIssueID={{issue.id}}");
 					$(newSpan).addClass("glyphicon glyphicon-chevron-right");
 				}
 			}
@@ -164,8 +169,8 @@
 				<li class="dropdown">
 				  <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
 				  <ul class="dropdown-menu" role="menu">
-					<li><a href="/dico/account/">Account Settings</a></li>
-					<li><a href="#">Change Password</a></li>
+					<li><a id="id_accountSettingsLink">Account Settings</a></li>
+					<li><a id="id_changePasswordLink">Change Password</a></li>
 					<li class="divider"></li>
 					<li><a href="/dico/editinterests/">Edit Interests</a></li>
 					<li class="divider"></li>

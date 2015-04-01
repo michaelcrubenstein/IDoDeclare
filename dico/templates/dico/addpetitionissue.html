@@ -78,7 +78,7 @@
 		  	{
 				if (json['success']) {
 					closealert();
-					window.location = "/dico/{{petition.id}}/petition/";
+					window.location = "/dico/{{petition.id}}/petition/?backIssueID={{backIssueID}}";
 				}
 				else {
 					bootstrap_alert.warning("Sorry, " + json['error']);
@@ -105,40 +105,10 @@
 		<nav class="navbar navbar-default" role="navigation">
 		  <div class="container-fluid">
 			<!-- Brand and toggle get grouped for better mobile display -->
-			<div class="navbar-header">
-			  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-			  </button>
-			  <a class="navbar-brand" href="/dico/">I Do Declare</a>
+			<div class="nav navbar-nav navbar-header pull-left">
+			  <a class="navbar-text" href="/dico/{{petition.id}}/petition/?backIssueID={{backIssueID}}">
+			  	Cancel</a>
 			</div>
-
-			<!-- Collect the nav links, forms, and other content for toggling -->
-			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-			  <ul class="nav navbar-nav navbar-right">
-			    <li>
-			    	<a href="/dico/">Home</a>
-			    </li>
-				<li>
-					{% if user.is_authenticated %}
-						<a href="/dico/signout/">Sign out</a>
-					{% else %}
-						<a href="/dico/signin/">Sign in</a>
-					{% endif %}
-				</li>
-				{% if user.is_authenticated %}
-				<li class="dropdown">
-				  <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
-				  <ul class="dropdown-menu" role="menu">
-					<li><a href="/dico/account/">Account Settings</a></li>
-					<li><a href="#">Change Password</a></li>
-					<li class="divider"></li>
-					<li><a href="/dico/editinterests/">Edit Interests</a></li>
-				  </ul>
-				</li>
-				{% endif %}
-			  </ul>
-			</div><!-- /.navbar-collapse -->
 		  </div><!-- /.container-fluid -->
 		</nav>
 
@@ -155,7 +125,7 @@
 						<label for="id_petition_issues" class="toplabel">Related Issues</label>
 						{% for issue in petition.issues.all %}
 						<div class="row" />
-							<div class="col-xs-12">{{ issue.name }}</div>
+							<div class="col-xs-12"><span class="btn btn-xs">{{ issue.name }}</span></div>
 						</div>
 						{% endfor %}
 					</div>
@@ -164,6 +134,7 @@
 			</div>
 		</div>
 			
+		<div class="lightbackground row bottompadding">
 			<div class="col-xs-12 col-sm-6">
 				<div class="row" />
 					<span for="issue_div" class="help-block col-xs-12">Click an issue to add it to this action.</span>
@@ -180,9 +151,7 @@
 					</div>
 					{% endfor %}
 				</div>
-
 			</div>
 		</div>
-
-</div> <!-- container -->
+	</div>
 </body>

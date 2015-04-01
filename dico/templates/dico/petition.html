@@ -67,6 +67,9 @@
         		$('#myAlert').html('');
         	}
 			
+			$("#id_accountSettingsLink").attr("href", "/dico/account/?back="+window.location.href);
+			$("#id_changePasswordLink").attr("href", "/dico/password/?back="+window.location.href);
+
 			$("#add_supporting_argument_button").click(function() {
 				add_argument(1, new_supporting_argument_text.value, new_supporting_argument_text);
 			});
@@ -121,21 +124,27 @@
 
 					<!-- Add a button to delete the issue from the petition -->
 					newButton = document.createElement("button");
-					newSpan = document.createElement("span");
+					$(newButton).addClass("btn btn-link btn-xs col-xs-1 pull-right");
 					$(li).append(newButton);
-					$(newButton).append(newSpan);
-					$(newButton).addClass("btn btn-link btn-xs col-xs-1");
-					$(newButton).attr("issueID", issue['id']);
-					$(newButton).click(function() {
-						closealert();
-						remove_issue(li, $(this).attr("issueID"));
-					});
-					$(newSpan).addClass("glyphicon glyphicon-remove");
+					if (issue['isEditable']) {
+						newSpan = document.createElement("span");
+						$(newButton).append(newSpan);
+						$(newButton).attr("issueID", issue['id']);
+						$(newButton).click(function() {
+							closealert();
+							remove_issue($(this).parent(), $(this).attr("issueID"));
+						});
+						$(newSpan).addClass("glyphicon glyphicon-remove");
+					}
 				}
 			}
 			else
 				bootstrap_alert.warning(json['error']);
 		  });
+		}
+		
+		function add_issue() {
+			window.location = "/dico/{{petition.id}}/addpetitionissue/?backIssueID={{backIssueID}}";
 		}
 		
 		function remove_issue(li, issue_id) {
@@ -159,7 +168,7 @@
 					append_zero_arguments($("#id_supporting_arguments"));
 				} else {
 					for (i = 0; i < supportingArguments.length; ++i) {
-						append_argument(1, supportingArguments[i], $("#id_supporting_arguments"));
+						append_argument(supportingArguments[i], $("#id_supporting_arguments"));
 					}
 				}
 				$("#id_opposing_arguments").empty();
@@ -187,30 +196,34 @@
 		}
 		
 		function append_argument(arg, containerObj) {
-			li = document.createElement("div");
-			newParagraph = document.createElement("p");
-			newButton = document.createElement("button");
-			newSpan = document.createElement("span");
+			li = document.createElement("tr");
+			newParagraph = document.createElement("td");
 			containerObj.append(li);
 			$(li).append(newParagraph);
-			$(li).append(newButton);
-			$(newButton).append(newSpan);
 
-			$(li).addClass("row");
+			// $(li).addClass("row");
 
-			$(newParagraph).addClass("col-xs-10");
-			$(newParagraph).append(htmlEncode(arg['description']));
-			$(newButton).addClass("btn btn-link btn-xs col-xs-1");
-			$(newButton).attr("argumentId", arg['id']);
-			$(newButton).click(function() {
-				closealert();
-				remove_argument(li, $(this).attr("argumentId"));
-			});
-			$(newSpan).addClass("glyphicon glyphicon-remove");
+			// $(newParagraph).addClass("col-xs-10");
+			$(newParagraph).append(arg['description']);
+			newCell = document.createElement("td");
+			$(li).append(newCell);
+			if (arg['isEditable']) {
+				newButton = document.createElement("button");
+				newSpan = document.createElement("span");
+				$(newCell).append(newButton);
+				$(newButton).append(newSpan);
+				$(newButton).addClass("btn btn-link btn-xs col-xs-1");
+				$(newButton).attr("argumentId", arg['id']);
+				$(newButton).click(function() {
+					closealert();
+					remove_argument($(this).parent(), $(this).attr("argumentId"));
+				});
+				$(newSpan).addClass("glyphicon glyphicon-remove");
+			}
 		}
 		
 		function remove_argument(li, argument_id) {
-		  $.post("/dico/deleteargument/", { csrfmiddlewaretoken: storedcsrftoken, "argument_id" : argument_id }, function(json){
+		  $.post("/dico/deleteargument/", { csrfmiddlewaretoken: storedcsrftoken, "argument" : argument_id }, function(json){
 		  	if (json['success']) {
 		  		$(li).remove();
 			}
@@ -219,17 +232,17 @@
 		    });
 		}
 		
-		function add_argument(isSupport, newArgumentText, textObj) {
+		function add_argument(vote, newArgumentText, textObj) {
 		  deferredObject = $.post("/dico/newargument/", { csrfmiddlewaretoken: storedcsrftoken, 
 		  												  "petition" : "{{petition.id}}", 
-		  												  "isSupport" : isSupport, 
-		  												  "newDescription": newArgumentText} 
+		  												  "vote" : vote, 
+		  												  "description": newArgumentText} 
 		  	)
 		  .done(function(json, textStatus, jqXHR)
 		  	{
 				if (json['success']) {
 					show_petition_arguments();
-					if (newIssueName == add_interest_text.value) {
+					if (newArgumentText === textObj.value) {
 						$(textObj).val('');
 						$(textObj).focus();
 					}
@@ -329,7 +342,7 @@
 							else if (vc.vote == 1)
 								supportVotes = vc.count;
 						}
-						$("#id_total_votes").html("Support: " +supportVotes + "; Oppose: " + opposeVotes);
+						$("#id_total_votes").html("<span class='btn disabled'>" + supportVotes + " Support; " + opposeVotes + " Oppose</span>");
 						if ('userVote' in json) {
 							if (init_user_vote) {
 								if (json['userVote'] == 1) {
@@ -367,26 +380,12 @@
 	<div id='container' class="container">
 		<nav class="navbar navbar-default" role="navigation">
 		  <div class="container-fluid">
-			<!-- Brand and toggle get grouped for better mobile display -->
 			<div class="nav navbar-nav navbar-header pull-left">
 			  <a class="navbar-text" href="{{ backURL }}">
 			  	<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}</a>
 			</div>
 
 			<!-- Collect the nav links, forms, and other content for toggling -->
-		  <ul class="nav navbar-nav navbar-header pull-right">
-			{% if user.is_authenticated %}
-			<li class="dropdown">
-			  <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
-			  <ul class="dropdown-menu" role="menu">
-				<li><a href="/dico/account/">Account Settings</a></li>
-				<li><a href="#">Change Password</a></li>
-				<li class="divider"></li>
-				<li><a href="/dico/editinterests/">Edit Interests</a></li>
-			  </ul>
-			</li>
-			{% endif %}
-		  </ul>
 		  </div><!-- /.container-fluid -->
 		</nav>
 
@@ -396,22 +395,21 @@
 				<h3 id='id_petition_title' class="toplabel">An Action for Congress:</h3>
 				<p class="lead">{{petition.description}}</p>
 			</div>
-			<div class="col-xs-12 col-sm-4 container issue-column">
+			<div class="col-xs-12 col-sm-4 container-fluid issue-column">
 				<div class="row">
 					<div class="col-xs-9">
 						<label for="id_petition_issues" class="toplabel">Related Issues</label>
 					</div>
-					<div class="col-xs-3">
-						<a href="/dico/{{petition.id}}/addpetitionissue/">
+					<button class="btn btn-link btn-xs col-xs-2 pull-right"
+							onClick="add_issue()"}>
 							Add
-						</a>
-					</div>
+					</button>
 				</div>
 				<div id='id_petition_issues'> </div>
 			</div>
 		</div>
 		<div class="lightbackground row bottompadding">
-			<div class="col-xs-6 your-vote-column">
+			<div class="col-xs-12 col-sm-6 your-vote-column">
 				<label class="control-label">Your vote</label>
 				<div class="btn-group" data-toggle="buttons">
 					<label id="supportButton" class="btn btn-default">
@@ -425,7 +423,7 @@
 					</label>
 				</div>			
 			</div>
-			<div id="id_total_votes" class="col-xs-6 total-vote-column">
+			<div id="id_total_votes" class="col-xs-12 col-sm-6 total-vote-column">
 			</div>
 		</div>
 		<div class="row">
@@ -434,7 +432,10 @@
 					<div class="panel-heading">
 						<h4 class="panel-title">Supporting Arguments</h4>
 					</div>
-					<div id='id_supporting_arguments' class="panel-body"> </div>
+					<div class="panel-body">
+						<table id='id_supporting_arguments' class="table table-hover">
+						</table>
+					</div>
 					<div class="panel-footer">
 						<div for="new_issue_input_group" class="panel-title">A New Supporting Argument</div>
 						<div id="new_supporting_argument_group" class="input-group">
@@ -454,7 +455,10 @@
 					<div class="panel-heading">
 						<h4 class="panel-title">Opposing Arguments</h4>
 					</div>
-					<div id='id_opposing_arguments' class="panel-body"> </div>
+					<div class="panel-body">
+						<table id='id_opposing_arguments' class="table table-hover">
+						</table>
+					</div>
 					<div class="panel-footer">
 						<div for="new_issue_input_group" class="panel-title">A New Opposing Argument</div>
 						<div id="new_opposing_argument_group" class="input-group">

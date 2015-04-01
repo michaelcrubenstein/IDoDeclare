@@ -10,7 +10,7 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>I Do Declare</title>
+    <title>I Do Declare - Account Settings</title>
 
     <!-- Bootstrap core CSS -->
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
@@ -54,7 +54,7 @@
 					{
 						if (json['success']) {
 							closealert();
-							window.location = "/dico/"
+							window.location = "{{backURL}}"
 						}
 						else {
 							bootstrap_alert.warning(json['error']);
@@ -107,6 +107,7 @@
   </div>
 
 <form id="createconstituent-form">
+  <a id="cancel_button" class="btn btn-link btn-sm" href="{{backURL}}">Cancel</a>
   
   <div class="form-group">
     <label for="id_username"  class="control-label">Email Address</label> 

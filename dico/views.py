@@ -13,8 +13,9 @@ import traceback
 import urllib
 import json
 
+from custom_user.models import AuthUser
 from dico.models import Issue, Constituent, ConstituentInterest, \
-    Petition, PetitionIssue, PetitionVote, MC
+    Petition, PetitionManager, PetitionIssue, PetitionVote, Argument, ArgumentManager, MC
 from dico.titlecase import titlecase
 
 # Create your views here.
@@ -83,13 +84,28 @@ def account(request):
         return signin(request)
     
     template = loader.get_template('dico/account.html')
+    backURL = request.GET.get('back', "")
     constituent = Constituent.get_constituent(request.user)
     if constituent is None:
         return index(request)
         
     context = RequestContext(request, {
         'user': request.user,
-        'constituent': constituent
+        'constituent': constituent,
+        'backURL': backURL
+    })
+    return HttpResponse(template.render(context))
+
+def password(request):
+    if not request.user.is_authenticated:
+        return signin(request)
+    
+    template = loader.get_template('dico/password.html')
+    backURL = request.GET.get('back', "")
+        
+    context = RequestContext(request, {
+        'user': request.user,
+        'backURL': backURL
     })
     return HttpResponse(template.render(context))
 
@@ -130,6 +146,7 @@ def addpetitionissue(request, petition_id):
     template = loader.get_template('dico/addpetitionissue.html')
         
     petition = Petition.objects.filter(pk=petition_id).select_related().get()
+    backIssueID = int(request.GET.get(u'backIssueID', 0));
     
     petitionIssues = petition.issues.all();
     allIssues = []
@@ -141,6 +158,7 @@ def addpetitionissue(request, petition_id):
         'user': request.user,
         'petition': petition,
         'allIssues': allIssues,
+        'backIssueID': backIssueID,
     })
     return HttpResponse(template.render(context))
 
@@ -293,6 +311,43 @@ def updateConstituent(request):
     
     return JsonResponse(results)
 
+def updatePassword(request):
+    results = {'success':False, 'error': 'updatePassword failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("UpdatePassword only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+            
+        POST = request.POST;
+        oldPassword = POST.get('oldPassword', '')
+        newPassword = POST.get('newPassword', '')
+        
+        log = open('exception.log', 'a')
+        log.write("%s\n" % oldPassword)
+        log.write("%s\n" % newPassword)
+        log.flush()
+
+        testUser = authenticate(username=request.user.email, password=oldPassword)
+        if testUser is not None:
+            if testUser.is_active:
+                testUser.set_password(newPassword)
+                testUser.save(using=AuthUser.objects._db)
+            else:
+                return redirect('/dico/signin/?authentication_error=disabled_account')
+                # Return a 'disabled account' error message
+        else:
+            raise Exception('Invalid login')
+
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
 def newPetition(request):
     results = {'success':False, 'error': 'newPetition failed'}
     try:
@@ -436,10 +491,10 @@ def deletePetitionIssue(request):
     return JsonResponse(results)
 
 def getPetitionVotes(request):
-    results = {'success':False, 'error': 'newPetitionVote failed'}
+    results = {'success':False, 'error': 'getPetitionVotes failed'}
     try:
         if request.method != "POST":
-            raise Exception("newPetitionVote only responds to POST requests")
+            raise Exception("getPetitionVotes only responds to POST requests")
             
         # Get the petition info.
         petition_id = request.POST['petition']
@@ -550,6 +605,68 @@ def updatePetitionVote(request):
     
     return JsonResponse(results)
 
+def newArgument(request):
+    results = {'success':False, 'error': 'newArgument failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("newArgument only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            raise Exception('The current login is not a constituent');
+
+        # Get the petition info.
+        petition_id = request.POST['petition']
+        vote = request.POST['vote']
+        description = request.POST['description']
+        
+        # Do the model operation
+        argument = Argument.objects.create(petition_id=petition_id, \
+                                               constituent_id=constituent.user.id, \
+                                               vote=int(vote), \
+                                               description=description)
+        
+        # Return the results.
+        results = {'success':True, 'argument': {'description': argument.description, \
+                                                'creationTime': argument.creationTime}}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def deleteArgument(request):
+    results = {'success':False, 'error': 'deleteArgument failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("deleteArgument only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        argument_id = request.POST['argument']
+        
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            raise Exception('The current login is not a constituent');
+
+        # Do the model operation
+        Argument.objects.filter(pk=argument_id).delete()
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
 def issue(request, issue_id):
     template = loader.get_template('dico/issuePetitions.html')
     filter = Issue.objects.filter(id=issue_id)
@@ -559,10 +676,11 @@ def issue(request, issue_id):
     })
     return HttpResponse(template.render(context))
 
+# Displays a web page for a petition.
 def petition(request, petition_id):
     template = loader.get_template('dico/petition.html')
     
-    issueID = int(request.GET.get(u'backIssue', 0))
+    issueID = int(request.GET.get(u'backIssueID', 0))
     if (issueID != 0):
         issue = Issue.objects.filter(pk=issueID).get()
         backName = issue.name
@@ -577,6 +695,7 @@ def petition(request, petition_id):
         'petition': filter.get(),
         'backName' : backName,
         'backURL' : backURL,
+        'backIssueID' : issueID,
     })
     return HttpResponse(template.render(context))
 
@@ -688,10 +807,10 @@ def getIssuePetitions(request):
         issue_id = request.POST['issue']
 
         # Do the model operation
-        petitionIssues = PetitionIssue.objects.filter(issue_id=issue_id).select_related('petition')
-        petitions = []
-        for i in petitionIssues:
-            petitions.append({'id': i.petition.id, 'description': i.petition.description})
+        petitions = PetitionManager.get_petitions(issue_id);
+        for p in petitions:
+            p['isEditable'] = (int(p['constituent_id']) == request.user.id or \
+                               request.user.is_superuser)
         
         # Return the results.
         results = {'success':True, 'petitions' : petitions}
@@ -713,13 +832,13 @@ def getPetitionIssues(request):
         petition_id = request.POST['petition']
 
         # Do the model operation
-        petitionIssues = PetitionIssue.objects.filter(petition_id=petition_id).select_related('issue')
-        issues = []
+        petitionIssues = Petition.get_issues(petition_id);
         for i in petitionIssues:
-            issues.append({'id': i.issue.id, 'name': i.issue.name})
+        	i['isEditable'] = i['constituent_id'] == request.user.id or \
+                              request.user.is_superuser
         
         # Return the results.
-        results = {'success':True, 'issues' : issues}
+        results = {'success':True, 'issues' : petitionIssues}
     except Exception as e:
         log = open('exception.log', 'a')
         log.write("%s\n" % traceback.format_exc())
@@ -737,10 +856,17 @@ def getPetitionArguments(request):
         # Get the petition info.
         petition_id = request.POST['petition']
 
-        supportingArguments = [];
-        opposingArguments = [];
         # Do the model operation
-        # TODO: 
+        supportingArguments = ArgumentManager.get_arguments(petition_id, 1)
+        opposingArguments = ArgumentManager.get_arguments(petition_id, 0)
+        
+        for a in supportingArguments:
+            a['isEditable'] = (int(a['constituent_id']) == request.user.id or \
+                               request.user.is_superuser)
+        
+        for a in opposingArguments:
+            a['isEditable'] = (int(a['constituent_id']) == request.user.id or \
+                               request.user.is_superuser)
         
         # Return the results.
         results = {'success':True, 'supportingArguments' : supportingArguments, 'opposingArguments' : opposingArguments}

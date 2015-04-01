@@ -15,6 +15,8 @@ urlpatterns = patterns(
     url(r'^editinterests/', views.editinterests, name='editinterests'),
     # ex: /dico/account/
     url(r'^account/', views.account, name='account'),
+    # ex: /dico/password/
+    url(r'^password/', views.password, name='password'),
 	# ex: /dico/issue/5/
 	url(r'^(?P<issue_id>\d+)/issue/$', views.issue, name='issue'),
 	# ex: /dico/petition/5/
@@ -33,6 +35,8 @@ urlpatterns = patterns(
 	url(r'^newconstituent/', views.newConstituent, name='newConstituent'),
 	# ex: /dico/updateconstituent/
 	url(r'^updateconstituent/', views.updateConstituent, name='updateConstituent'),
+	# ex: /dico/updatepassword/
+	url(r'^updatepassword/', views.updatePassword, name='updatePassword'),
     # ex: /dico/getissuepetitions/
     url(r'^getissuepetitions/', views.getIssuePetitions, name='getissuepetitions'),
     # ex: /dico/newpetition/
@@ -57,6 +61,10 @@ urlpatterns = patterns(
     url(r'^deletepetitionvote/', views.deletePetitionVote, name='deletepetitionvote'),
     # ex: /dico/updatepetitionvote/
     url(r'^updatepetitionvote/', views.updatePetitionVote, name='updatepetitionvote'),
+    # ex: /dico/newargument/
+    url(r'^newargument/', views.newArgument, name='newArgument'),
+    # ex: /dico/deleteargument/
+    url(r'^deleteargument/', views.deleteArgument, name='deleteArgument'),
 	# ex: /dico/5/
 	url(r'^(?P<constituent_id>\d+)/$', views.dashboard, name='dashboard'),
 	# ex: /dico/5/addissue/

@@ -187,6 +187,19 @@ class PetitionManager(models.Manager):
         petition = self.create(constituent=constituent, description=description)
         return petition
     
+    def get_petitions(issue_id):
+        with connection.cursor() as c:
+            sql = "SELECT dico_petition.id, description, dico_petition.constituent_id, creation_time FROM " + \
+                  " dico_petition, dico_petitionissue" + \
+                  " WHERE dico_petitionissue.issue_id = %s" + \
+                  " AND dico_petition.id = dico_petitionissue.petition_id" + \
+                  " ORDER BY creation_time DESC"
+            c.execute(sql, [issue_id])
+            petitions = []
+            for i in c.fetchall():
+                petitions.append({'id': i[0], 'description': i[1], 'constituent_id': i[2], 'creation_time': i[3]})
+            return petitions
+
 class Petition(models.Model):
     description = models.TextField()
     constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
@@ -212,19 +225,29 @@ class Petition(models.Model):
                 countList.append({'vote': vc[0], 'count': vc[1]})
             return countList
     
+    # Gets an array of dictionaries that have the id, name and the constituent_id of
+    # the user who connected the issue to the specified petition.
+    def get_issues(petition_id):
+        with connection.cursor() as c:
+            sql = "SELECT dico_issue.id, dico_issue.name, dico_petitionissue.constituent_id" + \
+                  " FROM dico_issue, dico_petitionissue" + \
+                  " WHERE dico_petitionissue.petition_id = %s" + \
+                  " AND dico_issue.id = dico_petitionissue.issue_id" + \
+                  " ORDER BY dico_issue.name";
+            c.execute(sql, [petition_id]);
+            countList = []
+            for vc in c.fetchall():
+                countList.append({'id': vc[0], 'name': vc[1], 'constituent_id' : vc[2]})
+            return countList
+    
     def __str__(self):
         return self.description
 
-class PetitionIssueManager(models.Manager):
-    pass
-        
 class PetitionIssue(models.Model):
     petition = models.ForeignKey(Petition, db_index=True, db_column='petition_id')
     issue = models.ForeignKey(Issue, db_index=True, db_column='issue_id')
     constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
     
-    objects = PetitionIssueManager()
-
     def delete_petition_issue(petition_id, issue_id):
         query_set = PetitionIssue.objects.filter(petition_id=petition_id). \
             filter(issue_id=issue_id)
@@ -240,6 +263,32 @@ class PetitionVote(models.Model):
     
     def __str__(self):
         return self.user.email + "/" + self.petition.description + ": " + str(vote)
+
+class ArgumentManager(models.Manager):
+    def get_arguments(petition_id, vote):
+        with connection.cursor() as c:
+            sql = "SELECT id, description, constituent_id, creation_time FROM " + \
+                  " dico_argument" + \
+                  " WHERE petition_id = %s" + \
+                  " AND vote = %s" + \
+                  " ORDER BY creation_time DESC"
+            c.execute(sql, [petition_id, vote])
+            arguments = []
+            for i in c.fetchall():
+                arguments.append({'id': i[0], 'description': i[1], 'constituent_id': i[2], 'creation_time': i[3]})
+            return arguments
+    
+class Argument(models.Model):
+    petition = models.ForeignKey(Petition, db_index=True, db_column='petition_id')
+    constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
+    description = models.TextField()
+    vote = models.IntegerField(db_index=True)
+    creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+    
+    objects = ArgumentManager()
+    
+    def __str__(self):
+        return description
 
 class MC(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, primary_key=True, db_column='user_id');

@@ -1,5 +1,5 @@
-Validate data in Create Constituent Page before the Join button is enabled.
-Implement Remember Me checkbox on sign-in page.
+DONE - Validate data in Create Constituent Page before the Join button is enabled.
+DONE 2 - Implement Remember Me checkbox on sign-in page.
 DONE - Add a confirmation input for the password.
 
 DONE - Display bubbles by selected issue by state.
@@ -8,7 +8,7 @@ DONE - Separate panel for editing interests?
 DONE - Allow user to remove interest.
 DONE - Allow user to show interests by existing issues.
 
-Allow user to change password
+DONE - Allow user to change password
 Allow user to reset forgotten password
 DONE - Allow user to change name, address
 Add Catcha to creating a user
@@ -18,13 +18,13 @@ DONE - Allow user to see petitions associated with an issue
 DONE - Allow user to create a petition
 DONE - Allow user to delete a petition
 DONE - Allow user to modify the description of a petition
-Allow users to delete only petitions that they created
+DONE - Allow users to delete only petitions that they created
 
-Allow user to specify reason for petition
+Not needed - Allow user to specify reason for petition
 Allow user to specify intensity for petition
-Allow user to associate petition with an issue
-Allow user to support or oppose petition
-Allow user to specify reason for support or opposition
+DONE - Allow user to associate petition with an issue
+DONE - Allow user to support or oppose petition
+DONE - Allow user to specify reason for support or opposition
 
 Display intensity in a map as a set of concentric circles.
 Intensity levels - 
@@ -41,17 +41,28 @@ Intensities for a reason.
 Primary Consideration
 Secondary Consideration
 Irrelevant
+A Matter of Opinion
 Incorrect
 
 DONE - Beautiful layout for home page
 DONE - Beautiful layout for sign in page.
 DONE - Beautiful layout for user creation page
 DONE - Beautiful layout for change name, address page
-Beautiful layout for reset password page
+DONE - Beautiful layout for reset password page
 
 Test layout for mobile devices
 
 Click member of Congress goes to their web page
+Hitting the Return Key for an argument doesn't behave properly.
+Put the tabular data for the map in table format.
+DONE 2 - Fix navbar on Edit Interests page. Home on left 
+DONE 2 - Remove Link on navbar banner on home page.
+Add the number of new actions for each issue.
+Add "Vote" for each action where you haven't voted.
+DONE 2 - Confirm deletion of actions and arguments in the UI.
+Prevent deletion of the last issue related to a petition.
+Add a Cancel button to the Create an Action page.
+Have the Done button do nothing on the Create an Action page if the page is blank. 
 
 Allow sign-in as member of Congress
 Allow member of Congress to post an event

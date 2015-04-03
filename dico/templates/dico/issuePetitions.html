@@ -60,6 +60,7 @@
 
 		// Display all of the interests in the system.
 		var storedcsrftoken = "{{ csrf_token }}";
+		var elementToDelete = null;
 
 		$(document).ready (function(e) {
 			<!-- Block of code for an alert area at the top of the window -->
@@ -77,6 +78,10 @@
 			
 			$("#id_accountSettingsLink").attr("href", "/dico/account/?back="+window.location.href);
 			$("#id_changePasswordLink").attr("href", "/dico/password/?back="+window.location.href);
+			
+			$("#id_confirmDeleteButton").click(function() {
+				remove_petition(elementToDelete, $("#id_deleteDialog").attr("petitionId"));
+			});
 
 			// Display the interests of the currently logged-in user.
 			show_issue_petitions();
@@ -113,7 +118,9 @@
 						$(newButton).attr("petitionId", petition['id']);
 						$(newButton).click(function() {
 							closealert();
-							remove_petition(li, $(this).attr("petitionId"));
+							$("#id_deleteDialog").attr("petitionId", $(this).attr("petitionId"));
+							elementToDelete = $(this).parent();
+							$("#id_deleteDialog").modal('show');
 						});
 						$(newSpan).addClass("glyphicon glyphicon-remove");
 					}
@@ -133,20 +140,10 @@
 		  });
 		}
 		
-		function remove_petition(li, petition_id) {
+		function remove_petition(actionContainer, petition_id) {
 		  $.post("/dico/deletepetition/", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : petition_id }, function(json){
 		  	if (json['success']) {
-		  		$(li).remove();
-			}
-			else
-				bootstrap_alert.warning(json['error']);
-		    });
-		}
-		
-		function remove_petition(li, petition_id) {
-		  $.post("/dico/deletepetition/", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : petition_id }, function(json){
-		  	if (json['success']) {
-		  		$(li).remove();
+		  		actionContainer.remove();
 			}
 			else
 				bootstrap_alert.warning(json['error']);
@@ -209,4 +206,16 @@
 		</div>
 
 </div> <!-- container -->
+
+<!-- Modal HTML -->
+<div id="id_deleteDialog" class="modal fade">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button id="id_confirmDeleteButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Action</button>
+                <button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>

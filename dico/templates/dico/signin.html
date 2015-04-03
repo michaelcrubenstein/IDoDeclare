@@ -27,25 +27,85 @@
 
   <body>
 
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+    <script src="{% static "jquery-cookie/jquery.cookie.js" %}"></script>
+
+	<!-- Scripts for this web page -->
+	<script type="text/JavaScript">
+		var storedcsrftoken = "{{ csrf_token }}";
+
+		$(document).ready (function(e) {
+			<!-- Block of code for an alert area at the top of the window -->
+			$(".close").click(function(){
+				$("#myAlert").alert();
+			});
+			
+			bootstrap_alert = function() {}
+			bootstrap_alert.warning = function(message) {
+            	$('#myAlert').html('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+        	}
+        	closealert = function() { 
+        		$('#myAlert').html('');
+        	}
+			
+			$("#id_signinform").on('submit', function (e) {
+				closealert();
+				sign_in();
+				
+			   //stop form submission
+			   e.preventDefault();
+			});
+			
+			$("#id_username").val($.cookie("email"));
+			if ($("#id_username").val() !== "")
+			{
+				$("#id_rememberme").prop("checked", true);
+				$("#id_password").focus();
+			}
+			else
+				$("#id_username").focus();
+		});
+		
+		function sign_in() {
+		  $.post("/dico/submitsignin/", { csrfmiddlewaretoken: storedcsrftoken, 
+		  								  "username" : $("#id_username").val(),
+		  								  "password" : $("#id_password").val() }, 
+		  								function(json){
+		  	if (json['success']) {
+		  		if ($("#id_rememberme").prop("checked"))
+		  			$.cookie("email", $("#id_username").val(), { expires : 10 });
+		  		else
+		  			$.removeCookie("email");
+		  		window.location = "/dico/"
+		  	}
+		  	else
+				bootstrap_alert.warning(json['error']);
+		  });
+		}
+	</script>
+	
     <div class="container">
 
 {% if authentication_error %}
 authentication error : {{authentication_error}} <br>
 {% endif %}
 
-      <form class="form-signin" action="/dico/submitsignin/?next=/dico/" method="post">
+      <form id="id_signinform" class="form-signin">
         <h3 class="form-signin-heading">Sign in to I Do Declare</h3>
-        <input type='hidden' name='csrfmiddlewaretoken' value='{{ csrf_token }}' />
+	    <div id="myAlert"></div>
         <label for="id_username" class="sr-only">Email address</label>
         <input type="email" id="id_username" maxlength="254" name="username" class="form-control" placeholder="Email address" required autofocus>
         <label for="id_password" class="sr-only">Password</label>
         <input type="password" id="id_password" name="password" class="form-control" placeholder="Password" required>
         <div class="checkbox">
           <label>
-            <input type="checkbox" value="remember-me"> Remember me
+            <input id="id_rememberme" type="checkbox" value="remember-me"> Remember me
           </label>
         </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        <input id="id_signinbutton" class="btn btn-lg btn-primary btn-block" type="submit" value="Sign in"></input>
       </form>
 
 	  <div class="div-create-new-account">

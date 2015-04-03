@@ -50,19 +50,25 @@ def signin(request):
     return HttpResponse(template.render(context))
 
 def submitsignin(request):
-    username = request.POST['username']
-    password = request.POST['password']
-    user = authenticate(username=username, password=password)
-    if user is not None:
-        if user.is_active:
-            login(request, user)
-            return redirect('/dico/')
+    try:
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                results = {'success':True}
+            else:
+                raise Exception('This account is disabled.')
         else:
-            return redirect('/dico/signin/?authentication_error=disabled_account')
-            # Return a 'disabled account' error message
-    else:
-        return redirect('/dico/signin/?authentication_error=invalid_login')
-        # Return an 'invalid login' error message.
+            raise Exception('This login is invalid.');
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+            
+    return JsonResponse(results)
 
 def signout(request):
     logout(request)
@@ -323,21 +329,16 @@ def updatePassword(request):
         oldPassword = POST.get('oldPassword', '')
         newPassword = POST.get('newPassword', '')
         
-        log = open('exception.log', 'a')
-        log.write("%s\n" % oldPassword)
-        log.write("%s\n" % newPassword)
-        log.flush()
-
         testUser = authenticate(username=request.user.email, password=oldPassword)
         if testUser is not None:
             if testUser.is_active:
                 testUser.set_password(newPassword)
                 testUser.save(using=AuthUser.objects._db)
             else:
-                return redirect('/dico/signin/?authentication_error=disabled_account')
+                raise Exception('This account is disabled.');
                 # Return a 'disabled account' error message
         else:
-            raise Exception('Invalid login')
+            raise Exception('This login is invalid.')
 
         results = {'success':True}
     except Exception as e:
@@ -834,7 +835,7 @@ def getPetitionIssues(request):
         # Do the model operation
         petitionIssues = Petition.get_issues(petition_id);
         for i in petitionIssues:
-        	i['isEditable'] = i['constituent_id'] == request.user.id or \
+            i['isEditable'] = i['constituent_id'] == request.user.id or \
                               request.user.is_superuser
         
         # Return the results.

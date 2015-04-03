@@ -52,6 +52,7 @@
 		
 		// Display all of the interests in the system.
 		var storedcsrftoken = "{{ csrf_token }}";
+		var elementToDelete = null;
 
 		$(document).ready (function(e) {
 			<!-- Block of code for an alert area at the top of the window -->
@@ -78,6 +79,10 @@
 				add_argument(0, new_opposing_argument_text.value, new_opposing_argument_text);
 			});
 			
+			$("#id_confirmDeleteButton").click(function() {
+				remove_argument(elementToDelete, $("#id_deleteDialog").attr("argumentId"));
+			});
+
 			// Display the issues associated with the current petition.
 			show_petition_issues();
 
@@ -201,10 +206,8 @@
 			containerObj.append(li);
 			$(li).append(newParagraph);
 
-			// $(li).addClass("row");
-
-			// $(newParagraph).addClass("col-xs-10");
 			$(newParagraph).append(arg['description']);
+							
 			newCell = document.createElement("td");
 			$(li).append(newCell);
 			if (arg['isEditable']) {
@@ -212,11 +215,13 @@
 				newSpan = document.createElement("span");
 				$(newCell).append(newButton);
 				$(newButton).append(newSpan);
-				$(newButton).addClass("btn btn-link btn-xs col-xs-1");
+				$(newButton).addClass("btn btn-link btn-xs");
 				$(newButton).attr("argumentId", arg['id']);
 				$(newButton).click(function() {
 					closealert();
-					remove_argument($(this).parent(), $(this).attr("argumentId"));
+					$("#id_deleteDialog").attr("argumentId", $(this).attr("argumentId"));
+					elementToDelete = $(this).parent().parent();
+					$("#id_deleteDialog").modal('show');
 				});
 				$(newSpan).addClass("glyphicon glyphicon-remove");
 			}
@@ -226,6 +231,12 @@
 		  $.post("/dico/deleteargument/", { csrfmiddlewaretoken: storedcsrftoken, "argument" : argument_id }, function(json){
 		  	if (json['success']) {
 		  		$(li).remove();
+		  		if ($($("#id_supporting_arguments").children()[0]).children().length == 0)
+		  			append_zero_arguments($("#id_supporting_arguments"));
+
+		  		if ($($("#id_opposing_arguments").children()[0]).children().length == 0)
+		  			append_zero_arguments($("#id_opposing_arguments"));
+
 			}
 			else
 				bootstrap_alert.warning(json['error']);
@@ -342,7 +353,15 @@
 							else if (vc.vote == 1)
 								supportVotes = vc.count;
 						}
-						$("#id_total_votes").html("<span class='btn disabled'>" + supportVotes + " Support; " + opposeVotes + " Oppose</span>");
+						if (supportVotes == 1)
+							supportString = "1 person supports this";
+						else
+							supportString = "" + supportVotes + " people support this";
+						if (opposeVotes == 1)
+							opposeString = "1 person opposes this";
+						else
+							opposeString = "" + opposeVotes + " people oppose this";
+						$("#id_total_votes").html("<span class='btn disabled'><span class='glyphicon glyphicon-thumbs-up'></span> " + supportString + ";&nbsp;&nbsp;<span class='glyphicon glyphicon-thumbs-down'></span>&nbsp;" + opposeString + "</span>");
 						if ('userVote' in json) {
 							if (init_user_vote) {
 								if (json['userVote'] == 1) {
@@ -413,10 +432,12 @@
 				<label class="control-label">Your vote</label>
 				<div class="btn-group" data-toggle="buttons">
 					<label id="supportButton" class="btn btn-default">
-					  <input type="radio" name="voteOptions" id="supportRadio" value=1 />Support
+					  <input type="radio" name="voteOptions" id="supportRadio" value=1 />
+					  <span class="glyphicon glyphicon-thumbs-up"></span>&nbsp;Support
 					</label>
 					<label id="opposeButton" class="btn btn-default">
-					  <input type="radio" name="voteOptions" id="opposeRadio" value=0 />Oppose
+					  <input type="radio" name="voteOptions" id="opposeRadio" value=0 />
+					  <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;Oppose
 					</label>			
 					<label id="noOpinionButton" class="btn btn-default active">
 					  <input type="radio" name="voteOptions" id="noOpinionRadio" value=-1 />No Opinion
@@ -433,7 +454,9 @@
 						<h4 class="panel-title">Supporting Arguments</h4>
 					</div>
 					<div class="panel-body">
-						<table id='id_supporting_arguments' class="table table-hover">
+						<table class="table table-hover">
+							<tbody id='id_supporting_arguments'>
+							</tbody>
 						</table>
 					</div>
 					<div class="panel-footer">
@@ -456,7 +479,9 @@
 						<h4 class="panel-title">Opposing Arguments</h4>
 					</div>
 					<div class="panel-body">
-						<table id='id_opposing_arguments' class="table table-hover">
+						<table class="table table-hover">
+							<tbody id='id_opposing_arguments'>
+							</tbody>
 						</table>
 					</div>
 					<div class="panel-footer">
@@ -476,4 +501,16 @@
 		</div>
 
 </div> <!-- container -->
+
+<!-- Modal HTML -->
+<div id="id_deleteDialog" class="modal fade">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button id="id_confirmDeleteButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Argument</button>
+                <button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>

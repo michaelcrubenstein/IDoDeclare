@@ -41,6 +41,17 @@ body {
 
 .div-create-new-account {
   max-width: 330px;
-  padding: 15px;
+  padding-left: 15px;
+  padding-top: 5px;
+  padding-right: 15px;
+  padding-bottom: 0px;
+  margin: 0 auto;
+}
+.div-forgot-password {
+  max-width: 330px;
+  padding-left: 15px;
+  padding-top: 0px;
+  padding-right: 15px;
+  padding-bottom: 5px;
   margin: 0 auto;
 }

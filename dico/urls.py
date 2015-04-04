@@ -17,6 +17,14 @@ urlpatterns = patterns(
     url(r'^account/', views.account, name='account'),
     # ex: /dico/password/
     url(r'^password/', views.password, name='password'),
+    # ex: /dico/forgotpassword/
+    url(r'^forgotpassword/', views.forgotPassword, name='forgotpassword'),
+    # ex: /dico/resetpassword/
+    url(r'^resetpassword/', views.resetPassword, name='resetPassword'),
+    # ex: /dico/passwordreset/
+    url(r'^passwordreset/', views.passwordReset, name='passwordReset'),
+    # ex: /dico/passwordreset/
+    url(r'^setresetpassword/', views.setResetPassword, name='setResetPassword'),
 	# ex: /dico/issue/5/
 	url(r'^(?P<issue_id>\d+)/issue/$', views.issue, name='issue'),
 	# ex: /dico/petition/5/

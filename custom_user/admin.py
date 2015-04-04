@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, ReadOnlyPasswordHashField
-from custom_user.models import AuthUser
+from custom_user.models import AuthUser, PasswordReset
 from django import forms
 
 
@@ -83,3 +83,4 @@ class AuthUserAdmin(UserAdmin):
     filter_horizontal = ('groups', 'user_permissions',)
 
 admin.site.register(AuthUser, AuthUserAdmin)
+admin.site.register(PasswordReset)

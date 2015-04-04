@@ -1,7 +1,9 @@
 from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.utils import timezone
 
+import datetime
 
 class AuthUserManager(BaseUserManager):
     def create_user(self, username, email, password=None):
@@ -33,8 +35,8 @@ class AuthUserManager(BaseUserManager):
             newLastName = user.last_name
         
         if len(newPassword) > 0:
-        	user.set_password(newPassword)
-        	user.save()
+            user.set_password(newPassword)
+            user.save()
         self.all().filter(id=user.id).update(email=self.normalize_email(newEmail), first_name=newFirstName, last_name=newLastName);
 
 class AuthUser(AbstractBaseUser, PermissionsMixin):
@@ -69,3 +71,32 @@ class AuthUser(AbstractBaseUser, PermissionsMixin):
 
     def __unicode__(self):
         return self.email
+
+class PasswordReset(models.Model):
+    email = models.EmailField(verbose_name='email address', unique=True, max_length=255)
+    reset_key = models.CharField(max_length=50)
+    creation_time = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+
+    def updatePassword(self, email, password):
+        if self.email != email:
+            PasswordReset.objects.filter(reset_key=self.reset_key).delete()
+            raise Exception("This reset key is not valid.");
+            
+        if timezone.now() - datetime.timedelta(minutes=30) > self.creation_time:
+            PasswordReset.objects.filter(reset_key=self.reset_key).delete()
+            raise Exception("This reset key is expired.")
+            
+        if len(password) == 0:
+            raise ValueError("The password is zero-length.")
+            
+        user = AuthUser.objects.filter(username=email).get()
+        user.set_password(password)  
+        user.save()  
+        self.delete()
+
+    def __unicode__(self):
+        return self.email
+
+    def __str__(self):
+        return self.email
+

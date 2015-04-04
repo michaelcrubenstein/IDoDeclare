@@ -92,3 +92,13 @@ STATICFILES_DIRS = (
 
 # Sunlight API Key
 SUNLIGHT_API_KEY = 'f9defbcc52934ab38960bd1415ad3906'
+
+EMAIL_HOST = 'mail.idodeclare.org'
+
+EMAIL_PORT = 587
+
+EMAIL_HOST_USER = 'feedback@idodeclare.org'
+
+EMAIL_HOST_PASSWORD = '********'
+
+PASSWORD_RESET_URL = r'http://127.0.0.1:8000/dico/passwordreset/'

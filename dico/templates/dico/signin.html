@@ -79,7 +79,7 @@
 		  			$.cookie("email", $("#id_username").val(), { expires : 10 });
 		  		else
 		  			$.removeCookie("email");
-		  		window.location = "/dico/"
+		  		window.location = "{{backURL}}"
 		  	}
 		  	else
 				bootstrap_alert.warning(json['error']);
@@ -88,11 +88,6 @@
 	</script>
 	
     <div class="container">
-
-{% if authentication_error %}
-authentication error : {{authentication_error}} <br>
-{% endif %}
-
       <form id="id_signinform" class="form-signin">
         <h3 class="form-signin-heading">Sign in to I Do Declare</h3>
 	    <div id="myAlert"></div>
@@ -109,7 +104,10 @@ authentication error : {{authentication_error}} <br>
       </form>
 
 	  <div class="div-create-new-account">
-	  	Don't have an account? <a href="/dico/createConstituent">Create one now.</a>
+	  	Don't have an account? <a href="/dico/createConstituent/?back={{backURL}}">Create one now.</a>
+	  </div>
+	  <div class="div-forgot-password">
+		Forgot your password? <a href="/dico/forgotpassword/?back={{backURL}}">Reset it now.</a>
 	  </div>
 	  
     </div> <!-- /container -->

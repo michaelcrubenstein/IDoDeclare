@@ -8,12 +8,14 @@ from django.template import RequestContext, loader
 from django.views.decorators.csrf import requires_csrf_token
 from pygeocoder import Geocoder
 from sunlight import congress
+from dico.email import Emailer
 
 import traceback
 import urllib
 import json
+import uuid
 
-from custom_user.models import AuthUser
+from custom_user.models import AuthUser, PasswordReset
 from dico.models import Issue, Constituent, ConstituentInterest, \
     Petition, PetitionManager, PetitionIssue, PetitionVote, Argument, ArgumentManager, MC
 from dico.titlecase import titlecase
@@ -39,13 +41,9 @@ def index(request):
 @requires_csrf_token
 def signin(request):
     template = loader.get_template('dico/signin.html')
-    if 'authentication_error' in request.GET:
-        authenticationError = request.GET['authentication_error']
-    else:
-        authenticationError = None
         
     context = RequestContext(request, {
-        'authentication_error' : authenticationError,
+        'backURL' : "/dico/",
     })
     return HttpResponse(template.render(context))
 
@@ -115,6 +113,34 @@ def password(request):
     })
     return HttpResponse(template.render(context))
 
+# Displays a web page in which a user can specify an email address for 
+# resetting their password.
+def forgotPassword(request):
+    if not request.user.is_authenticated:
+        return signin(request)
+    
+    template = loader.get_template('dico/forgotpassword.html')
+    backURL = request.GET.get('back', "")
+        
+    context = RequestContext(request, {
+        'backURL': backURL
+    })
+    return HttpResponse(template.render(context))
+
+# Displays a web page in which a user can specify a new password based on a key.
+def passwordReset(request):
+    if not request.user.is_authenticated:
+        return signin(request)
+    
+    template = loader.get_template('dico/passwordreset.html')
+    resetKey = request.GET.get('key', "")
+        
+    context = RequestContext(request, {
+        'resetkey': resetKey
+    })
+    return HttpResponse(template.render(context))
+
+# Displays a web page in which a user can create a new petition for the specified issue.
 def createPetition(request):
     if not request.user.is_authenticated:
         return signin(request)
@@ -167,6 +193,82 @@ def addpetitionissue(request, petition_id):
         'backIssueID': backIssueID,
     })
     return HttpResponse(template.render(context))
+
+# Creates a record so that a user can reset their password via email.
+def resetPassword(request):
+    results = {'success':False, 'error': u'request format invalid'}
+    try:
+        if request.method != "POST":
+            raise Exception("newInterest only responds to POST requests")
+
+        POST = request.POST
+        email = request.POST['email']
+        
+        if AuthUser.objects.filter(username=email).count() == 0:
+            raise Exception("This email address is not recognized.");
+            
+        newKey = str(uuid.uuid4())
+        
+        query_set = PasswordReset.objects.filter(email=email)
+        if query_set.count() == 0:
+        	PasswordReset.objects.create(email=email, reset_key=newKey)
+        else:
+        	pr = query_set.get()
+        	pr.resetkey = newKey
+        	pr.save()
+        
+        Emailer.sendResetPasswordEmail(email, settings.PASSWORD_RESET_URL + "?key=" + newKey)
+        
+        # Set the new issue to titlecase and remove extraneous spaces.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+            
+    return JsonResponse(results)
+
+# Resets the password for the specified email address based on the key.
+def setResetPassword(request):
+    results = {'success':False, 'error': u'request format invalid'}
+    try:
+        if request.method != "POST":
+            raise Exception("newInterest only responds to POST requests")
+
+        POST = request.POST
+        resetKey = request.POST['resetkey']
+        email = request.POST['email']
+        password = request.POST['password']
+        
+        if AuthUser.objects.filter(username=email).count() == 0:
+            raise Exception("This email address is not recognized.");
+        
+        query_set = PasswordReset.objects.filter(reset_key=resetKey)
+        if query_set.count() == 0:  
+            raise Exception("This reset key is not recognized.");
+        
+        pr = query_set.get()
+        pr.updatePassword(email, password)
+        
+        user = authenticate(username=email, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                results = {'success':True}
+            else:
+                raise Exception('This account is disabled.')
+        else:
+            raise Exception('This login is invalid.');
+
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+            
+    return JsonResponse(results)
 
 def newInterest(request):
     results = {'success':False, 'error': u'request format invalid'}

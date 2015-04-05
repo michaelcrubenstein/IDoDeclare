@@ -88,8 +88,12 @@ class PasswordReset(models.Model):
             
         if len(password) == 0:
             raise ValueError("The password is zero-length.")
-            
-        user = AuthUser.objects.filter(username=email).get()
+        
+        query_set = AuthUser.objects.filter(email=email)
+        if query_set.count == 0:
+        	raise ValueError("This email address is no longer valid.");
+        	    
+        user = query_set.get()
         user.set_password(password)  
         user.save()  
         self.delete()

@@ -8,7 +8,7 @@ from django.template import RequestContext, loader
 from django.views.decorators.csrf import requires_csrf_token
 from pygeocoder import Geocoder
 from sunlight import congress
-from dico.email import Emailer
+from dico.emailer import Emailer
 
 import traceback
 import urllib
@@ -204,7 +204,7 @@ def resetPassword(request):
         POST = request.POST
         email = request.POST['email']
         
-        if AuthUser.objects.filter(username=email).count() == 0:
+        if AuthUser.objects.filter(email=email).count() == 0:
             raise Exception("This email address is not recognized.");
             
         newKey = str(uuid.uuid4())
@@ -214,7 +214,7 @@ def resetPassword(request):
         	PasswordReset.objects.create(email=email, reset_key=newKey)
         else:
         	pr = query_set.get()
-        	pr.resetkey = newKey
+        	pr.reset_key = newKey
         	pr.save()
         
         Emailer.sendResetPasswordEmail(email, settings.PASSWORD_RESET_URL + "?key=" + newKey)
@@ -241,7 +241,7 @@ def setResetPassword(request):
         email = request.POST['email']
         password = request.POST['password']
         
-        if AuthUser.objects.filter(username=email).count() == 0:
+        if AuthUser.objects.filter(email=email).count() == 0:
             raise Exception("This email address is not recognized.");
         
         query_set = PasswordReset.objects.filter(reset_key=resetKey)

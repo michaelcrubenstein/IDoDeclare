@@ -17,7 +17,8 @@ import uuid
 
 from custom_user.models import AuthUser, PasswordReset
 from dico.models import Issue, Constituent, ConstituentInterest, \
-    Petition, PetitionManager, PetitionIssue, PetitionVote, Argument, ArgumentManager, MC
+    Petition, PetitionManager, PetitionIssue, PetitionVote, \
+    Argument, ArgumentManager, ArgumentRating, MC
 from dico.titlecase import titlecase
 
 # Create your views here.
@@ -171,7 +172,7 @@ def hasIssue(issues, issue):
     return False
     
 # Displays a web page for adding an issue to a petition.
-def addpetitionissue(request, petition_id):
+def addPetitionIssue(request, petition_id):
     if not request.user.is_authenticated:
         return signin(request)
     
@@ -211,11 +212,11 @@ def resetPassword(request):
         
         query_set = PasswordReset.objects.filter(email=email)
         if query_set.count() == 0:
-        	PasswordReset.objects.create(email=email, reset_key=newKey)
+            PasswordReset.objects.create(email=email, reset_key=newKey)
         else:
-        	pr = query_set.get()
-        	pr.reset_key = newKey
-        	pr.save()
+            pr = query_set.get()
+            pr.reset_key = newKey
+            pr.save()
         
         Emailer.sendResetPasswordEmail(email, settings.PASSWORD_RESET_URL + "?key=" + newKey)
         
@@ -708,6 +709,44 @@ def updatePetitionVote(request):
     
     return JsonResponse(results)
 
+# Displays a web page for adding a supporting argument to a petition.
+def addSupportingArgument(request, petition_id):
+    if not request.user.is_authenticated:
+        return signin(request)
+    
+    template = loader.get_template('dico/addargument.html')
+        
+    petition = Petition.objects.filter(pk=petition_id).select_related().get()
+    backIssueID = int(request.GET.get(u'backIssueID', 0));
+    
+    context = RequestContext(request, {
+        'user': request.user,
+        'petition': petition,
+        'backIssueID': backIssueID,
+        'argumentVote': 1,
+        'voteLabel': "Supporting",
+    })
+    return HttpResponse(template.render(context))
+
+# Displays a web page for adding a supporting argument to a petition.
+def addOpposingArgument(request, petition_id):
+    if not request.user.is_authenticated:
+        return signin(request)
+    
+    template = loader.get_template('dico/addargument.html')
+        
+    petition = Petition.objects.filter(pk=petition_id).select_related().get()
+    backIssueID = int(request.GET.get(u'backIssueID', 0));
+    
+    context = RequestContext(request, {
+        'user': request.user,
+        'petition': petition,
+        'backIssueID': backIssueID,
+        'argumentVote': 0,
+        'voteLabel': "Opposing",
+    })
+    return HttpResponse(template.render(context))
+
 def newArgument(request):
     results = {'success':False, 'error': 'newArgument failed'}
     try:
@@ -759,6 +798,71 @@ def deleteArgument(request):
 
         # Do the model operation
         Argument.objects.filter(pk=argument_id).delete()
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def rateArgument(request):
+    results = {'success':False, 'error': 'rateArgument failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("rateArgument only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        argument_id = request.POST['argument']
+        vote = request.POST['rating']
+        
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            raise Exception('The current login is not a constituent');
+
+        # Do the model operation
+        query_set = ArgumentRating.objects.filter(argument_id=argument_id, constituent_id=constituent.user.id)
+        if query_set.count() == 0:
+            ar = ArgumentRating.objects.create(argument_id=argument_id, constituent_id=constituent.user.id, vote=int(vote))
+        else:
+            ar = query_set.get()
+            ar.vote = int(vote)
+            ar.save()
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def unrateArgument(request):
+    results = {'success':False, 'error': 'unrateArgument failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("unrateArgument only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        argument_id = request.POST['argument']
+        
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            raise Exception('The current login is not a constituent');
+
+        # Do the model operation
+        query_set = ArgumentRating.objects.filter(argument_id=argument_id, constituent_id=constituent.user.id)
+        if query_set.count() > 0:
+            query_set.delete()
         
         # Return the results.
         results = {'success':True}
@@ -950,25 +1054,31 @@ def getPetitionIssues(request):
     
     return JsonResponse(results)
 
+# Returns a json response containing the arguments associated with the specified petition. 
 def getPetitionArguments(request):
     results = {'success':False, 'error': 'getPetitionArguments failed'}
     try:
         if request.method != "POST":
             raise Exception("getPetitionArguments only responds to POST requests")
+            
+        if request.user.is_authenticated:
+            request_user_id = request.user.id
+        else:
+            request_user_id = None
 
         # Get the petition info.
         petition_id = request.POST['petition']
 
         # Do the model operation
-        supportingArguments = ArgumentManager.get_arguments(petition_id, 1)
-        opposingArguments = ArgumentManager.get_arguments(petition_id, 0)
+        supportingArguments = ArgumentManager.get_arguments(petition_id, request_user_id, 1)
+        opposingArguments = ArgumentManager.get_arguments(petition_id, request_user_id, 0)
         
         for a in supportingArguments:
-            a['isEditable'] = (int(a['constituent_id']) == request.user.id or \
+            a['isEditable'] = (int(a['constituent_id']) == request_user_id or \
                                request.user.is_superuser)
         
         for a in opposingArguments:
-            a['isEditable'] = (int(a['constituent_id']) == request.user.id or \
+            a['isEditable'] = (int(a['constituent_id']) == request_user_id or \
                                request.user.is_superuser)
         
         # Return the results.

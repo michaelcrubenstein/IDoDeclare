@@ -33,7 +33,38 @@ DONE 2 - Fix navbar on Edit Interests page. Home on left
 DONE 2 - Remove Link on navbar banner on home page.
 DONE 2 - Confirm deletion of actions and arguments in the UI.
 
-Allow user to reset forgotten password
+DONE 2 - Allow user to reset forgotten password
+
+DONE 2 - Ratings for an argument.
+			Central - Primary Consideration
+			Peripheral - Secondary Consideration
+			Irrelevant
+			Opinion
+			Misleading
+			False
+
+DONE 2 - Create new arguments on a separate web page.
+
+Click member of Congress goes to their web page
+Put the tabular data for the map in table format.
+Add the number of new actions for each issue.
+Add "Vote" for each action where you haven't voted.
+Prevent deletion of the last issue related to a petition.
+Add a Cancel button to the Create an Action page.
+Have the Done button do nothing on the Create an Action page if the page is blank. 
+Add tip information describing the ratings
+Add tip information for creating a new action.
+	- Spell items correctly.
+	- Don't use acronyms
+	- Common actions by Congress include:
+		Pass a law to...
+		Authorize the Executive Branch to...
+		Prohibit the Executive Branch from...
+		Appropriate funds to...
+Add tip information for creating a new argument.
+	- Spell items correctly.
+	- Don't use acronyms
+
 Add Catcha to creating a user
 Log out user after a period of inactivity.
 
@@ -50,22 +81,6 @@ Feels good - You feel good that people are involved in this issue
 Don't care - You don't care if or how this issue is addressed
 Not worth it - You think this issue is not worth addressing
 Misplaced priority - You think this issue should not be addressed
-
-Intensities for a reason.
-Primary Consideration
-Secondary Consideration
-Irrelevant
-A Matter of Opinion
-Incorrect
-
-Click member of Congress goes to their web page
-Hitting the Return Key for an argument doesn't behave properly.
-Put the tabular data for the map in table format.
-Add the number of new actions for each issue.
-Add "Vote" for each action where you haven't voted.
-Prevent deletion of the last issue related to a petition.
-Add a Cancel button to the Create an Action page.
-Have the Done button do nothing on the Create an Action page if the page is blank. 
 
 Allow sign-in as member of Congress
 Allow member of Congress to post an event

@@ -32,7 +32,7 @@ urlpatterns = patterns(
 	# ex: /dico/createPetition/
 	url(r'^createpetition/$', views.createPetition, name='createPetition'),
 	# ex: /dico/addpetitionissue/5/
-	url(r'^(?P<petition_id>\d+)/addpetitionissue/$', views.addpetitionissue, name='addpetitionissue'),
+	url(r'^(?P<petition_id>\d+)/addpetitionissue/$', views.addPetitionIssue, name='addPetitionIssue'),
     # ex: /dico/newinterest/
     url(r'^newinterest/', views.newInterest, name='newInterest'),
     # ex: /dico/submitdeleteinterest/
@@ -69,10 +69,18 @@ urlpatterns = patterns(
     url(r'^deletepetitionvote/', views.deletePetitionVote, name='deletepetitionvote'),
     # ex: /dico/updatepetitionvote/
     url(r'^updatepetitionvote/', views.updatePetitionVote, name='updatepetitionvote'),
+	# ex: /dico/addsupportingargument/5/
+	url(r'^(?P<petition_id>\d+)/addsupportingargument/$', views.addSupportingArgument, name='addSupportingArgument'),
+	# ex: /dico/addopposingargument/5/
+	url(r'^(?P<petition_id>\d+)/addopposingargument/$', views.addOpposingArgument, name='addOpposingArgument'),
     # ex: /dico/newargument/
     url(r'^newargument/', views.newArgument, name='newArgument'),
     # ex: /dico/deleteargument/
     url(r'^deleteargument/', views.deleteArgument, name='deleteArgument'),
+    # ex: /dico/rateargument/
+    url(r'^rateargument/', views.rateArgument, name='rateArgument'),
+    # ex: /dico/unrateargument/
+    url(r'^unrateargument/', views.unrateArgument, name='unrateArgument'),
 	# ex: /dico/5/
 	url(r'^(?P<constituent_id>\d+)/$', views.dashboard, name='dashboard'),
 	# ex: /dico/5/addissue/

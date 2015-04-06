@@ -71,6 +71,7 @@
 						}
 					})
 				  .fail(function(jqXHR, textStatus, errorThrown) {
+		    		bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
 					console.log( "error: " + textStatus + "; " + errorThrown + ";");
 					console.log( jqXHR.status + "; " + jqXHR.statusText);
 				  });

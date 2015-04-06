@@ -71,14 +71,6 @@
 			$("#id_accountSettingsLink").attr("href", "/dico/account/?back="+window.location.href);
 			$("#id_changePasswordLink").attr("href", "/dico/password/?back="+window.location.href);
 
-			$("#add_supporting_argument_button").click(function() {
-				add_argument(1, new_supporting_argument_text.value, new_supporting_argument_text);
-			});
-
-			$("#add_opposing_argument_button").click(function() {
-				add_argument(0, new_opposing_argument_text.value, new_opposing_argument_text);
-			});
-			
 			$("#id_confirmDeleteButton").click(function() {
 				remove_argument(elementToDelete, $("#id_deleteDialog").attr("argumentId"));
 			});
@@ -191,15 +183,23 @@
 		}
 		
 		function append_zero_arguments(containerObj) {
-			li = document.createElement("div");
+			li = document.createElement("tr");
 			containerObj.append(li);
-			$(li).addClass("row");
-			textdiv = document.createElement("div");
+			textdiv = document.createElement("td");
 			$(li).append(textdiv);
-			$(textdiv).addClass("col-xs-12");
 			$(textdiv).html("None");
+			$(li).append(document.createElement("td"));
+			$(li).append(document.createElement("td"));
 		}
 		
+		ratingData = [ {'text' : 'Central', 'value' : 5},
+					   {'text' : 'Peripheral', 'value' : 4},
+					   {'text' : 'Irrelevent', 'value' : 3},
+					   {'text' : 'Opinion', 'value' : 2},
+					   {'text' : 'Misleading', 'value' : 1},
+					   {'text' : 'False', 'value' : 0},
+					  ];
+					  
 		function append_argument(arg, containerObj) {
 			li = document.createElement("tr");
 			newParagraph = document.createElement("td");
@@ -207,6 +207,13 @@
 			$(li).append(newParagraph);
 
 			$(newParagraph).append(arg['description']);
+			
+			ratingCell = document.createElement("td");
+			$(li).append(ratingCell);
+			ratingGroupDiv = document.createElement("div");
+			$(ratingCell).append(ratingGroupDiv);
+			$(ratingGroupDiv).addClass("btn-group");
+			set_rating_button(ratingGroupDiv, arg['rating_vote'], arg['id']);
 							
 			newCell = document.createElement("td");
 			$(li).append(newCell);
@@ -227,6 +234,69 @@
 			}
 		}
 		
+		function set_rating_button(ratingGroupDiv, ratingVote, argumentID) {
+			$(ratingGroupDiv).empty();
+			var ratingButton = document.createElement("button");
+			ratingCaret = document.createElement("span");
+			ratingMenu = document.createElement("ul");
+			$(ratingGroupDiv).append(ratingButton)
+							 .append(ratingMenu);
+							 
+			if (ratingVote === null)
+				ratingText = '-';
+			else
+				ratingText = ratingData[ratingData.length - 1 - ratingVote].text;
+				
+			$(ratingButton).prop("type", "button")
+						   .addClass("btn btn-xs btn-link block-display dropdown-toggle")
+						   .attr("data-toggle", "dropdown")
+						   .html(ratingText + ' ')
+						   .append(ratingCaret);
+			$(ratingCaret).addClass("caret");
+			$(ratingMenu).addClass("dropdown-menu")
+						 .attr("role", "menu");
+			
+			for (var i = 0; i < ratingData.length; ++i) {
+				ratingItem = document.createElement("li");
+				ratingItemButton = document.createElement("button");
+				ratingItemSpan = document.createElement("span");
+				$(ratingMenu).append(ratingItem);
+				$(ratingItem).append(ratingItemButton);
+				$(ratingItemButton).append(ratingItemSpan)
+								   .append(ratingData[i].text);
+							 
+				$(ratingItemSpan).addClass("btn btn-xs btn-link glyphicon glyphicon-ok");
+				if (ratingVote != ratingData[i].value)
+					$(ratingItemSpan).addClass("invisible");
+					
+				$(ratingItemButton).val(ratingData[i].value)
+								   .addClass("btn btn-xs btn-link")
+								   .attr("argumentId", argumentID)
+								   .click(function() { 
+								     theDiv = $(this).parents(".btn-group")[0];
+								     rate_argument(theDiv, $(this).attr("argumentId"), $(this).val());
+								   	 });
+			}
+
+			if (ratingVote !== null) {
+				ratingItem = document.createElement("li");
+				$(ratingMenu).append(ratingItem);
+				$(ratingItem).addClass("divider");
+				ratingItem = document.createElement("li");
+				ratingItemButton = document.createElement("button");
+				$(ratingMenu).append(ratingItem);
+				$(ratingItem).append(ratingItemButton);
+				$(ratingItemButton).text("Remove this rating")
+								   .val(-1)
+								   .addClass("btn btn-xs btn-link")
+								   .attr("argumentId", argumentID)
+								   .click(function() { 
+								     theDiv = $(this).parents(".btn-group")[0];
+								     rate_argument(theDiv, $(this).attr("argumentId"), $(this).val());
+								   	 });
+			}
+		}
+		
 		function remove_argument(li, argument_id) {
 		  $.post("/dico/deleteargument/", { csrfmiddlewaretoken: storedcsrftoken, "argument" : argument_id }, function(json){
 		  	if (json['success']) {
@@ -243,45 +313,12 @@
 		    });
 		}
 		
-		function add_argument(vote, newArgumentText, textObj) {
-		  deferredObject = $.post("/dico/newargument/", { csrfmiddlewaretoken: storedcsrftoken, 
-		  												  "petition" : "{{petition.id}}", 
-		  												  "vote" : vote, 
-		  												  "description": newArgumentText} 
-		  	)
-		  .done(function(json, textStatus, jqXHR)
-		  	{
-				if (json['success']) {
-					show_petition_arguments();
-					if (newArgumentText === textObj.value) {
-						$(textObj).val('');
-						$(textObj).focus();
-					}
-				}
-				else {
-					bootstrap_alert.warning(json['error']);
-				}
-			})
-		  .fail(function(jqXHR, textStatus, errorThrown) {
-			console.log( "error: " + textStatus + "; " + errorThrown + ";");
-			console.log( jqXHR.status + "; " + jqXHR.statusText);
-		  });
-		}
-
-		function enter_new_supporting_argument(e, inputObject){
-			var code = (e.keyCode ? e.keyCode : e.which);
-			if(code == 13 && new_supporting_argument_text.value.length > 0) { //Enter keycode
-			 add_argument(1, new_supporting_argument_text.value, new_supporting_argument_text);
-			}
-			e.stopPropagation();
+		function add_supporting_argument() {
+			window.location = "/dico/{{petition.id}}/addsupportingargument/?backIssueID={{backIssueID}}";
 		}
 		
-		function enter_new_opposing_argument(e, inputObject){
-			var code = (e.keyCode ? e.keyCode : e.which);
-			if(code == 13 && new_opposing_argument_text.value.length > 0) { //Enter keycode
-			 add_argument(0, new_opposing_argument_text.value, new_opposing_argument_text);
-			}
-			e.stopPropagation();
+		function add_opposing_argument() {
+			window.location = "/dico/{{petition.id}}/addopposingargument/?backIssueID={{backIssueID}}";
 		}
 		
 		function cast_vote(vote) {
@@ -300,19 +337,18 @@
 				})
 				.fail(function(jqXHR, textStatus, errorThrown)
 				{
+		    		bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
 					console.log( "error: " + textStatus + "; " + errorThrown + ";");
 					console.log( jqXHR.status + "; " + jqXHR.statusText);
 				});
 		}
 		
 		function cast_support_vote(e, inputObj) {
-			console.log(inputObj);
 			cast_vote(inputObj.value);
 			e.stopPropagation();
 		}
 		
 		function cast_oppose_vote(e, inputObj) {
-			console.log(inputObj);
 			cast_vote(inputObj.value);
 			e.stopPropagation();
 		}
@@ -332,6 +368,7 @@
 				})
 				.fail(function(jqXHR, textStatus, errorThrown)
 				{
+		    		bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
 					console.log( "error: " + textStatus + "; " + errorThrown + ";");
 					console.log( jqXHR.status + "; " + jqXHR.statusText);
 				});
@@ -389,6 +426,34 @@
 				})
 				.fail(function(jqXHR, textStatus, errorThrown)
 				{
+		    		bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+					console.log( "error: " + textStatus + "; " + errorThrown + ";");
+					console.log( jqXHR.status + "; " + jqXHR.statusText);
+				});
+		}
+		
+		function rate_argument(li, argument_id, rating) {
+			var deferredObject;
+			if (rating == -1)
+				deferredObject = $.post("/dico/unrateargument/", { csrfmiddlewaretoken: storedcsrftoken, 
+														  "argument" : argument_id});
+			else
+				deferredObject = $.post("/dico/rateargument/", { csrfmiddlewaretoken: storedcsrftoken, 
+														  "argument" : argument_id,
+														  "rating" : rating});
+
+			deferredObject.done(function(json, textStatus, jqXHR)
+				{
+					if (json['success']) {
+						set_rating_button(li, rating, argument_id);
+					}
+					else {
+						bootstrap_alert.warning(json['error']);
+					}
+				})
+				.fail(function(jqXHR, textStatus, errorThrown)
+				{
+					bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
 					console.log( "error: " + textStatus + "; " + errorThrown + ";");
 					console.log( jqXHR.status + "; " + jqXHR.statusText);
 				});
@@ -447,70 +512,65 @@
 			<div id="id_total_votes" class="col-xs-12 col-sm-6 total-vote-column">
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-xs-12 col-sm-6">
-				<div class="panel argument-container">
-					<div class="panel-heading">
-						<h4 class="panel-title">Supporting Arguments</h4>
-					</div>
-					<div class="panel-body">
-						<table class="table table-hover">
-							<tbody id='id_supporting_arguments'>
-							</tbody>
-						</table>
-					</div>
-					<div class="panel-footer">
-						<div for="new_issue_input_group" class="panel-title">A New Supporting Argument</div>
-						<div id="new_supporting_argument_group" class="input-group">
-						  <textarea id="new_supporting_argument_text" width="200" maxlength="254" class="form-control"
-								 onKeyPress="enter_new_supporting_argument(event, this)"></textarea>
-						  <div class="input-group-btn">
-							<button type="button" id="add_supporting_argument_button" class="btn btn-default" >
-								<span class="glyphicon glyphicon-plus"></span>
+		<div class="lightbackground row">
+			<div class="col-xs-12 col-md-6">
+				<table class="table table-bordered argument-container">
+					<thead>
+						<th><h5 class="panel-title">Supporting Arguments</h5>
+						</th>
+						<th>Your Rating</th>
+						<th></th>
+					</thead>
+					<tbody id='id_supporting_arguments'>
+					</tbody>
+					<tbody>
+					<tr>
+						<td>
+							<button class="btn btn-link btn-xs" onClick="add_supporting_argument()"}>
+									Add Supporting Argument
 							</button>
-						  </div>
-						</div>
-					</div>
-				</div>
+						</td>
+						<td></td>
+						<td></td>
+					</tr>
+					</tbody>
+				</table>
 			</div>
-			<div class="col-xs-12 col-sm-6">
-				<div class="panel argument-container">
-					<div class="panel-heading">
-						<h4 class="panel-title">Opposing Arguments</h4>
-					</div>
-					<div class="panel-body">
-						<table class="table table-hover">
-							<tbody id='id_opposing_arguments'>
-							</tbody>
-						</table>
-					</div>
-					<div class="panel-footer">
-						<div for="new_issue_input_group" class="panel-title">A New Opposing Argument</div>
-						<div id="new_opposing_argument_group" class="input-group">
-						  <textarea id="new_opposing_argument_text" width="200" maxlength="254" class="form-control"
-								 onKeyPress="enter_new_opposing_argument(event, this)"></textarea>
-						  <div class="input-group-btn">
-							<button type="button" id="add_opposing_argument_button" class="btn btn-default" >
-								<span class="glyphicon glyphicon-plus"></span>
+			<div class="col-xs-12 col-md-6">
+				<table class="table table-bordered argument-container">
+					<thead>
+						<th><h5 class="panel-title">Opposing Arguments</h5>
+						</th>
+						<th>Your Rating</th>
+						<th></th>
+					</thead>
+					<tbody id='id_opposing_arguments'>
+					</tbody>
+					<tbody>
+					<tr>
+						<td>
+							<button class="btn btn-link btn-xs" onClick="add_opposing_argument()"}>
+									Add Opposing Argument
 							</button>
-						  </div>
-						</div>
-					</div>
+						</td>
+						<td></td>
+						<td></td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div> <!-- container -->
+
+<!-- Modal HTML -->
+	<div id="id_deleteDialog" class="modal fade">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-body">
+					<button id="id_confirmDeleteButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Argument</button>
+					<button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
 				</div>
 			</div>
 		</div>
-
-</div> <!-- container -->
-
-<!-- Modal HTML -->
-<div id="id_deleteDialog" class="modal fade">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button id="id_confirmDeleteButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Argument</button>
-                <button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
+	</div>
 </body>

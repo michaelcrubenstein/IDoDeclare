@@ -265,17 +265,20 @@ class PetitionVote(models.Model):
         return self.user.email + "/" + self.petition.description + ": " + str(vote)
 
 class ArgumentManager(models.Manager):
-    def get_arguments(petition_id, vote):
+    def get_arguments(petition_id, rating_constituent_id, vote):
         with connection.cursor() as c:
-            sql = "SELECT id, description, constituent_id, creation_time FROM " + \
-                  " dico_argument" + \
-                  " WHERE petition_id = %s" + \
-                  " AND vote = %s" + \
-                  " ORDER BY creation_time DESC"
-            c.execute(sql, [petition_id, vote])
+            sql = "SELECT a.id, a.description, a.constituent_id, a.creation_time, ar.vote " + \
+                  " FROM dico_argument a" + \
+                  " LEFT JOIN dico_argumentrating ar" + \
+                  " ON a.id = ar.argument_id AND ar.constituent_id = %s" + \
+                  " WHERE a.petition_id = %s" + \
+                  " AND a.vote = %s" + \
+                  " ORDER BY a.creation_time DESC"
+            c.execute(sql, [rating_constituent_id, petition_id, vote])
             arguments = []
             for i in c.fetchall():
-                arguments.append({'id': i[0], 'description': i[1], 'constituent_id': i[2], 'creation_time': i[3]})
+                arguments.append({'id': i[0], 'description': i[1], 'constituent_id': i[2], \
+                                  'creation_time': i[3], 'rating_vote': i[4]})
             return arguments
     
 class Argument(models.Model):
@@ -288,7 +291,17 @@ class Argument(models.Model):
     objects = ArgumentManager()
     
     def __str__(self):
-        return description
+        return self.description
+
+class ArgumentRating(models.Model):
+    argument = models.ForeignKey(Argument, db_index=True, db_column='argument_id')
+    constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
+    vote = models.IntegerField(db_index=True)
+    creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+    lastModifiedTime = models.DateTimeField(db_column='last_modified_time', db_index=True, auto_now=True)
+
+    def __str__(self):
+        return str(self.constituent) + ": " + str(self.vote)
 
 class MC(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, primary_key=True, db_column='user_id');

@@ -79,8 +79,19 @@
 			   //stop form submission
 			   e.preventDefault();
 			});
+			
+			$("#id_textarea").on("input keyup paste", checkenabled);
+			checkenabled();
 		});
 
+		function checkenabled() {
+			if ($("#id_textarea").val() === "")
+				$( "#id_submitbutton" ).prop( "disabled", true );
+			else
+			{
+				$( "#id_submitbutton" ).prop( "disabled", false );
+			}
+		};
 	</script>
 
     <div class="container">
@@ -88,9 +99,9 @@
       <form class="form-createpetition" id="id_form">
         <h3 class="form-createpetition-heading">Create Action</h3>
         <label for="id_textarea">What action should Congress take regarding {{issue.name}}?</label>
-        <textarea id="id_textarea" row=5 maxlength="254" name="description" class="form-control" 
+        <textarea id="id_textarea" rows=5 maxlength="254" name="description" class="form-control" 
         	placeholder="Pass a law to..." required autofocus></textarea>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Done</button>
+        <button id="id_submitbutton" class="btn btn-lg btn-primary btn-block" type="submit">Done</button>
       </form>
 
     </div> <!-- /container -->

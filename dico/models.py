@@ -218,7 +218,7 @@ class PetitionManager(models.Manager):
                     petitions.append({'id': i[0], 'description': i[1], 'constituent_id': i[2], 'creation_time': i[3]})
             else:
                 sql = "SELECT p.id, p.description, p.constituent_id, p.creation_time, pv.vote" + \
-                      " FROM dico_petition p, dico_petitionissue pi" + \
+                      " FROM dico_petitionissue pi, dico_petition p" + \
                       "      LEFT JOIN dico_petitionvote pv ON (pv.petition_id = p.id AND pv.constituent_id = %s)" + \
                       " WHERE pi.issue_id = %s" + \
                       " AND p.id = pi.petition_id" + \

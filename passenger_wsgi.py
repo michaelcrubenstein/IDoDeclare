@@ -1,5 +1,6 @@
 import sys, os
 import traceback
+import datetime
 
 cwd = os.getcwd()
 sys.path.insert(0,cwd+'/env/bin')
@@ -12,7 +13,7 @@ sys.path.append(cwd)
 
 try:
     log = open('/home/micrub9/idodeclare.org/passengerwsgi.log', 'a')
-    log.write("Running %s\n" % (sys.executable))
+    log.write("Running %s at %s\n" % [(sys.executable), datetime.datetime.now()])
     log.write("  Version %s\n" % (sys.version))
     log.write("  Path: %s\n" % (sys.path))
     log.flush()

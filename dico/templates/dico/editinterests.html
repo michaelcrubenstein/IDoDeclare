@@ -146,7 +146,7 @@
 		}
 
 		function show_my_interests() {
-		  $.post("/dico/getmyissues/", { csrfmiddlewaretoken: storedcsrftoken}, function(json){
+		  $.post("/dico/getmyinterests/", { csrfmiddlewaretoken: storedcsrftoken}, function(json){
 			myIssues = json['myIssues'];
 			
 			$("#my_interests").empty();

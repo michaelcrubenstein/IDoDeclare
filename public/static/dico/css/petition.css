@@ -1,11 +1,11 @@
 .petition-description {
-  max-width: 330px;
   padding: 15px;
   margin: 0 auto;
 }
 
 .issue-column {
 	background: #DDD;
+	margin-bottom: 20px;
 }
 
 .lightbackground {
@@ -16,6 +16,7 @@
 		padding-top: 3px;
 		vertical-align: text-top;
   		margin: 0 auto;
+  		padding-left: 5px;
 }
 
 .bottompadding {
@@ -26,7 +27,6 @@
 }
 
 .argument-container {
-    margin-top: 20px;
 	background: white;
 }
 th {white-space:nowrap}

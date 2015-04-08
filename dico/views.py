@@ -73,7 +73,7 @@ def signout(request):
     logout(request)
     return redirect('/dico/')
     
-def editinterests(request):
+def editInterests(request):
     if not request.user.is_authenticated:
         return signin(request)
     
@@ -920,8 +920,9 @@ def mcaddissue(request, mc_id):
     response = "You're adding an issue as mc %s."
     return HttpResponse(response % mc_id)
 
-def member(request, bioguide_id):
+def member(request):
     response = "You're looking at member %s."
+    bioguide_id = request.GET.get('bioguide_id')
     return HttpResponse(response % bioguide_id)
 
 # Handles a GET request to get the interests based on specific issue.
@@ -935,7 +936,7 @@ def member(request, bioguide_id):
 # for each scope that contains at least one interested constituent. Each dictionary 
 # contains a 'state', a 'district' and a 'constituent_count' for district scope; each
 # dictionary contains a 'state' and a 'constituent_count' for state scope.
-def getInterests(request):
+def getIssueInterests(request):
     results = {'success':False}
     if request.method == u'GET':
         GET = request.GET
@@ -965,6 +966,14 @@ def getInterests(request):
 
     return JsonResponse(results)
     
+# Handles a GET request to get all of the issues for which there is at least 
+# the specified minimum interest.
+# Request GET element minInterestCount: the minimum number of users interested in each issue. Default: 1
+# Returns: JsonResponse with results. 
+# Return element success: True if the operation is successful, False otherwise.
+# Return element error: Present if there was an error with a text description of the error.
+# Return element interests: Present if there was no error. Contains an array of dictionaries
+# where each dictionary describes an issue with the following fields: name, id. 
 def getActiveIssues(request):
     results = {'success':False}
     if request.method == u'GET':
@@ -980,16 +989,14 @@ def getActiveIssues(request):
     return JsonResponse(results)
     
 
-def getMyIssues(request):
+def getMyInterests(request):
     results = {'success':False}
     if request.method == u'POST':
         try:
             POST = request.POST
             myIssues = []
             if request.user.is_authenticated:
-                interests = Constituent.get_interests(request.user)
-                for i in interests:
-                    myIssues.append({'id': i.issue.id, 'name': i.issue.name})
+                myIssues = Constituent.get_interests(request.user)
 
             issue_list = Issue.objects.order_by('name')
             allIssues = []
@@ -1014,7 +1021,7 @@ def getIssuePetitions(request):
         issue_id = request.POST['issue']
 
         # Do the model operation
-        petitions = PetitionManager.get_petitions(issue_id);
+        petitions = PetitionManager.get_petitions(issue_id, user=request.user);
         for p in petitions:
             p['isEditable'] = (int(p['constituent_id']) == request.user.id or \
                                request.user.is_superuser)

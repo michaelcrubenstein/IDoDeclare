@@ -120,18 +120,20 @@
 				<h3 id='id_petition_title' class="toplabel">An Action for Congress:</h3>
 				<p class="lead">{{petition.description}}</p>
 			</div>
-			<div class="col-xs-12 col-sm-4 container issue-column">
-				<div class="row">
-					<div class="col-xs-9">
-						<label for="id_petition_issues" class="toplabel">Related Issues</label>
-						{% for issue in petition.issues.all %}
-						<div class="row" />
-							<div class="col-xs-12"><span class="btn btn-xs">{{ issue.name }}</span></div>
+			<div class="col-xs-12 col-sm-4 container">
+				<div class="issue-column">
+					<div class="row">
+						<div class="col-xs-9">
+							<label for="id_petition_issues" class="toplabel">Related Issues</label>
+							{% for issue in petition.issues.all %}
+							<div class="row" />
+								<div class="col-xs-12"><span class="btn btn-xs">{{ issue.name }}</span></div>
+							</div>
+							{% endfor %}
 						</div>
-						{% endfor %}
 					</div>
+					<div id='id_petition_issues'> </div>
 				</div>
-				<div id='id_petition_issues'> </div>
 			</div>
 		</div>
 			

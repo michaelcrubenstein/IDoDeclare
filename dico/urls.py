@@ -12,7 +12,7 @@ urlpatterns = patterns(
     # ex: /dico/signout/
     url(r'^signout/', views.signout, name='signout'),
     # ex: /dico/editinterests/
-    url(r'^editinterests/', views.editinterests, name='editinterests'),
+    url(r'^editinterests/', views.editInterests, name='editInterests'),
     # ex: /dico/account/
     url(r'^account/', views.account, name='account'),
     # ex: /dico/password/
@@ -93,8 +93,8 @@ urlpatterns = patterns(
 	url(r'^member/', views.member, name='member'),
 	# ex: /dico/getactiveissues -- Get all of the issues with a specified minimum level of interest.
 	url(r'^getactiveissues/', views.getActiveIssues, name='getActiveIssues'),
-	# 	# ex: /dico/getInterests -- Get the interest in a particular issue ID.
-	url(r'^getinterests/', views.getInterests, name='getInterests'),
+	# ex: /dico/getissueinterests -- Get the interest in a particular issue ID.
+	url(r'^getissueinterests/', views.getIssueInterests, name='getIssueInterests'),
 	# ex: /dico/getMyIssues -- Get all of the interests of the current logged-in user.
-	url(r'^getmyissues/', views.getMyIssues, name='getMyIssues'),
+	url(r'^getmyinterests/', views.getMyInterests, name='getMyInterests'),
 )

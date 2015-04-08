@@ -93,25 +93,21 @@
 				petitions = json['petitions'];
 			
 				$("#id_issue_petitions").empty();
-			
 				for (i = 0; i < petitions.length; ++i) {
 					petition = petitions[i];
-					li = document.createElement("div");
-					pDiv = document.createElement("div");
-					newParagraph = document.createElement("p");
+					li = document.createElement("tr");
 					$("#id_issue_petitions").append(li);
-					$(li).append(pDiv);
+					td = document.createElement("td");
+					$(li).append(td);
 
-					$(li).addClass("row");
-
-					$(pDiv).addClass("col-xs-10");
-					$(pDiv).append(newParagraph);
-					$(newParagraph).append(petition['description']);
+					$(td).append(petition['description']);
 					
 					<!-- Add a button to delete the petition -->
+					td = document.createElement("td");
+					$(li).append(td);
 					newButton = document.createElement("button");
-					$(newButton).addClass("btn btn-link btn-xs col-xs-1");
-					$(li).append(newButton);
+					$(newButton).addClass("btn btn-link btn-xs");
+					$(td).append(newButton);
 					if (petition['isEditable']) {
 						newSpan = document.createElement("span");
 						$(newButton).append(newSpan);
@@ -125,13 +121,43 @@
 						$(newSpan).addClass("glyphicon glyphicon-remove");
 					}
 					
-					<!-- Add a button to show the petition -->
+					td = document.createElement("td");
+					$(li).append(td);
 					newButton = document.createElement("a");
 					newSpan = document.createElement("span");
-					$(li).append(newButton);
-					$(newButton).append(newSpan);
-					$(newButton).addClass("btn btn-link btn-xs col-xs-1");
-					$(newButton).attr("href", "/dico/" + petition['id'] + "/petition/?backIssueID={{issue.id}}");
+					if (petition['vote'] === 0) {
+						$(td).append(newButton);
+						$(newButton).addClass("btn btn-link btn-xs")
+									.attr("href", "/dico/" + petition['id'] + "/petition/?backIssueID={{issue.id}}")
+									.append(newSpan);
+						$(newSpan).addClass("label label-info")
+								  .append("Oppose");
+						td = document.createElement("td");
+						$(li).append(td);
+						newButton = document.createElement("a");
+					} else if (petition['vote'] === 1) {
+						$(td).append(newButton);
+						$(newButton).addClass("btn btn-link btn-xs")
+									.attr("href", "/dico/" + petition['id'] + "/petition/?backIssueID={{issue.id}}")
+									.append(newSpan);
+						$(newSpan).addClass("label label-info")
+								  .append("Support");
+						td = document.createElement("td");
+						$(li).append(td);
+						newButton = document.createElement("a");
+					} else {
+						td = document.createElement("td");
+						$(li).append(td);
+						$(newButton).append("Vote Now");
+					}
+
+					<!-- Add a button to show the petition -->
+					newSpan = document.createElement("span");
+					$(td).addClass("align-right-column")
+						 .append(newButton);
+					$(newButton).addClass("btn btn-link btn-xs")
+					            .attr("href", "/dico/" + petition['id'] + "/petition/?backIssueID={{issue.id}}")
+					            .append(newSpan);
 					$(newSpan).addClass("glyphicon glyphicon-chevron-right");
 				}
 			}
@@ -171,11 +197,11 @@
 					<li class="divider"></li>
 					<li><a href="/dico/editinterests/">Edit Interests</a></li>
 					<li class="divider"></li>
-					<li><a href="/dico/signout/">Sign out</a></li>
+					<li><a href="{% url 'signout' %}">Sign out</a></li>
 				  </ul>
 				</li>
 				{% else %}
-					<a href="/dico/signin/">Sign in</a>
+					<a class="navbar-text" href="{% url 'signin' %}">Sign in</a>
 				{% endif %}
 			  </ul>
 		  </div><!-- /.container-fluid -->
@@ -193,29 +219,35 @@
 		</div>
 		<div class="row">
 			<div class="col-xs-12">
-				<label for="id_issue_petitions" class="control-label">Actions</label>
-				<a class="btn btn-sm btn-link" 
-				    href="/dico/createpetition?issue={{issue.id}}&next=/dico/{{issue.id}}/issue/">Create an Action</a>
+				<table class="table table-condensed table-striped">
+					<thead>
+						<tr>
+							<th>
+								<label for="id_issue_petitions" class="control-label">Actions</label>
+								<a class="btn btn-sm btn-link" 
+									href="/dico/createpetition?issue={{issue.id}}&next=/dico/{{issue.id}}/issue/">Create an Action</a>
+							</th>
+							<th></th>
+							<th>Your vote</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody id='id_issue_petitions'></tbody>
+				</table>
 			</div>
 		</div>
-				<div id='id_issue_petitions'>
+
+	</div> <!-- container -->
+
+	<!-- Modal HTML -->
+	<div id="id_deleteDialog" class="modal fade">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-body">
+					<button id="id_confirmDeleteButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Action</button>
+					<button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
 				</div>
-
 			</div>
-			
 		</div>
-
-</div> <!-- container -->
-
-<!-- Modal HTML -->
-<div id="id_deleteDialog" class="modal fade">
-    <div class="modal-dialog modal-sm">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button id="id_confirmDeleteButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Action</button>
-                <button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
+	</div>
 </body>

@@ -45,10 +45,20 @@ DONE 2 - Ratings for an argument.
 
 DONE 2 - Create new arguments on a separate web page.
 
+DONE 2 - On home page, put your interests in a striped, condensed table.
+DONE 2 - On home page, Add the number of new actions for each issue as a badge.
+DONE 2 - On home page, Give a message if the user hasn't signed in to encourage this action.
+DONE 2 - On home page, Add a separator between the map and the info above on the index page.
+DONE 2 - On issue page, put the actions in a striped, condensed table.
+DONE 2 - On issue page, Add "Support" or "Oppose" for each action where you have voted.
+DONE 2 - On issue page, Add "Vote Now" for each action where you haven't voted.
+
+On issue page, remove the Delete button for each action
+On action page, add a Delete button
+On edit interests page, put you interests in a striped, condensed table.
+
 Click member of Congress goes to their web page
 Put the tabular data for the map in table format.
-Add the number of new actions for each issue.
-Add "Vote" for each action where you haven't voted.
 Prevent deletion of the last issue related to a petition.
 Add a Cancel button to the Create an Action page.
 Have the Done button do nothing on the Create an Action page if the page is blank. 

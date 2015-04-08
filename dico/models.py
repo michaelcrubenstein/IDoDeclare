@@ -114,6 +114,23 @@ class Constituent(models.Model):
         if constituent is None:
             return []
             
+        with connection.cursor() as c:
+            sql = "SELECT i.id, i.name, " + \
+                  " (SELECT COUNT(*) FROM dico_petitionissue pi " + \
+                  "  WHERE pi.issue_id = i.id" + \
+                  "  AND NOT EXISTS(SELECT * FROM dico_petitionvote pv" + \
+                                  " WHERE pv.petition_id = pi.petition_id" + \
+                                  " AND pv.constituent_id = %s)) " + \
+                  " FROM dico_issue i, dico_constituentinterest ci" + \
+                  " WHERE ci.constituent_id = %s" + \
+                  " AND ci.issue_id = i.id" + \
+                  " ORDER BY i.name"
+            c.execute(sql, [user.id, user.id])
+            interests = []
+            for i in c.fetchall():
+                interests.append({'id': i[0], 'name': i[1], 'petition_count': i[2]})
+            return interests
+
         return ConstituentInterest.objects.filter(constituent=constituent).order_by('issue__name')
 
     def get_members(user):
@@ -187,17 +204,29 @@ class PetitionManager(models.Manager):
         petition = self.create(constituent=constituent, description=description)
         return petition
     
-    def get_petitions(issue_id):
+    def get_petitions(issue_id, user=None):
         with connection.cursor() as c:
-            sql = "SELECT dico_petition.id, description, dico_petition.constituent_id, creation_time FROM " + \
-                  " dico_petition, dico_petitionissue" + \
-                  " WHERE dico_petitionissue.issue_id = %s" + \
-                  " AND dico_petition.id = dico_petitionissue.petition_id" + \
-                  " ORDER BY creation_time DESC"
-            c.execute(sql, [issue_id])
             petitions = []
-            for i in c.fetchall():
-                petitions.append({'id': i[0], 'description': i[1], 'constituent_id': i[2], 'creation_time': i[3]})
+            if (user == None):
+                sql = "SELECT dico_petition.id, description, dico_petition.constituent_id, creation_time FROM " + \
+                      " dico_petition, dico_petitionissue" + \
+                      " WHERE dico_petitionissue.issue_id = %s" + \
+                      " AND dico_petition.id = dico_petitionissue.petition_id" + \
+                      " ORDER BY creation_time DESC"
+                c.execute(sql, [issue_id])
+                for i in c.fetchall():
+                    petitions.append({'id': i[0], 'description': i[1], 'constituent_id': i[2], 'creation_time': i[3]})
+            else:
+                sql = "SELECT p.id, p.description, p.constituent_id, p.creation_time, pv.vote" + \
+                      " FROM dico_petition p, dico_petitionissue pi" + \
+                      "      LEFT JOIN dico_petitionvote pv ON (pv.petition_id = p.id AND pv.constituent_id = %s)" + \
+                      " WHERE pi.issue_id = %s" + \
+                      " AND p.id = pi.petition_id" + \
+                      " ORDER BY p.creation_time DESC"
+                c.execute(sql, [user.id, issue_id])
+                for i in c.fetchall():
+                    petitions.append({'id': i[0], 'description': i[1], 'constituent_id': i[2], 'creation_time': i[3], 'vote': i[4]})
+
             return petitions
 
 class Petition(models.Model):

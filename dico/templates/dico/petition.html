@@ -113,15 +113,15 @@
 					newButton = document.createElement("a");
 					newDiv = document.createElement("div");
 					$(li).append(newDiv);
-					$(newDiv).append(newButton);
-					$(newDiv).addClass("col-xs-9");
+					$(newDiv).addClass("col-xs-9")
+							 .append(newButton);
 					$(newButton).append(htmlEncode(issue['name']));
-					$(newButton).addClass("btn btn-link btn-xs");
+					$(newButton).addClass("btn-xs text-muted");
 					$(newButton).attr("href", "/dico/" + issue['id'] + "/issue/");
 
 					<!-- Add a button to delete the issue from the petition -->
 					newButton = document.createElement("button");
-					$(newButton).addClass("btn btn-link btn-xs col-xs-1 pull-right");
+					$(newButton).addClass("btn btn-link btn-xs col-xs-3 pull-right");
 					$(li).append(newButton);
 					if (issue['isEditable']) {
 						newSpan = document.createElement("span");
@@ -398,7 +398,7 @@
 							opposeString = "1 person opposes this";
 						else
 							opposeString = "" + opposeVotes + " people oppose this";
-						$("#id_total_votes").html("<span class='btn disabled'><span class='glyphicon glyphicon-thumbs-up'></span> " + supportString + ";&nbsp;&nbsp;<span class='glyphicon glyphicon-thumbs-down'></span>&nbsp;" + opposeString + "</span>");
+						$("#id_total_votes").html("<span class='text-muted'><span class='glyphicon glyphicon-thumbs-up'></span> " + supportString + "<br><span class='glyphicon glyphicon-thumbs-down'></span>&nbsp;" + opposeString + "</span>");
 						if ('userVote' in json) {
 							if (init_user_vote) {
 								if (json['userVote'] == 1) {
@@ -479,21 +479,23 @@
 				<h3 id='id_petition_title' class="toplabel">An Action for Congress:</h3>
 				<p class="lead">{{petition.description}}</p>
 			</div>
-			<div class="col-xs-12 col-sm-4 container-fluid issue-column">
-				<div class="row">
-					<div class="col-xs-9">
-						<label for="id_petition_issues" class="toplabel">Related Issues</label>
+			<div class="col-xs-12 col-sm-4">
+				<div class="issue-column">
+					<div class="row">
+						<div class="col-xs-9">
+							<label for="id_petition_issues" class="toplabel">Related Issues</label>
+						</div>
+						<button class="btn btn-link btn-xs col-xs-3 pull-right"
+								onClick="add_issue()"}>
+								Add
+						</button>
 					</div>
-					<button class="btn btn-link btn-xs col-xs-2 pull-right"
-							onClick="add_issue()"}>
-							Add
-					</button>
+					<div id='id_petition_issues'> </div>
 				</div>
-				<div id='id_petition_issues'> </div>
 			</div>
 		</div>
-		<div class="lightbackground row bottompadding">
-			<div class="col-xs-12 col-sm-6 your-vote-column">
+		<div class="lightbackground row">
+			<div class="col-xs-12 col-sm-8 your-vote-column">
 				<label class="control-label">Your vote</label>
 				<div class="btn-group" data-toggle="buttons">
 					<label id="supportButton" class="btn btn-default">
@@ -509,7 +511,12 @@
 					</label>
 				</div>			
 			</div>
-			<div id="id_total_votes" class="col-xs-12 col-sm-6 total-vote-column">
+			<div id="id_total_votes" class="col-xs-12 col-sm-4 total-vote-column">
+			</div>
+		</div>
+		<div class="lightbackground row">
+			<div class="col-xs-12">
+				<hr style="background:#AAA; border:0; height:2px" />
 			</div>
 		</div>
 		<div class="lightbackground row">

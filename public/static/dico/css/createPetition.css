@@ -30,3 +30,9 @@ body {
 .form-createpetition .form-control:focus {
   z-index: 2;
 }
+.ok-button {
+  margin-top: 20px;
+}
+.cancel-button {
+  margin-top: 10px;
+}

@@ -29,6 +29,7 @@ class PetitionIssueInline(admin.StackedInline):
 
 class IssueAdmin(admin.ModelAdmin):
     inlines = [PetitionIssueInline]
+    ordering = ('name',)
 
 class ConstituentInterestInline(admin.StackedInline):
     model = ConstituentInterest

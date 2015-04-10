@@ -10,7 +10,7 @@ from sunlight import congress
 _max_name_length = 50
 
 class Issue(models.Model):
-    name = models.CharField(max_length=30, unique=True, db_index=True)
+    name = models.CharField(max_length=50, unique=True, db_index=True)
 
     def __str__(self):
         return self.name
@@ -39,16 +39,12 @@ class Issue(models.Model):
             c.execute(sql, [self.name])
             return c.fetchall()
             
-    def get_active_issues(min_interest_count = 1):
+    def get_issues():
         with connection.cursor() as c:
             sql = "SELECT name, id FROM " + \
-                  " (SELECT name, dico_issue.id as id, COUNT(*) as interest_count" + \
-                  "  FROM dico_issue, dico_constituentinterest" + \
-                  "  WHERE dico_issue.id = dico_constituentinterest.issue_id" + \
-                  "  GROUP BY name, dico_issue.id) p" + \
-                  " WHERE interest_count >= %s" + \
+                  " dico_issue" + \
                   " ORDER BY name"
-            c.execute(sql, [min_interest_count])
+            c.execute(sql)
             active_issues = []
             for i in c.fetchall():
                 active_issues.append({'name': i[0], 'id': i[1]})

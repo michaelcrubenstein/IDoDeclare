@@ -64,7 +64,7 @@
 					{
 						if (json['success']) {
 							closealert();
-							window.location = "{{ next }}"
+							window.location = "/dico/" + json['petition'] + "/petition/?backIssueID="+"{{ issue.id }}"
 						}
 						else {
 							bootstrap_alert.warning(json['error']);
@@ -78,6 +78,11 @@
 
 			   //stop form submission
 			   e.preventDefault();
+			});
+			
+			$("#cancel_button").click(function(e) {
+				window.location = "{{ backURL }}";
+				e.preventDefault();
 			});
 			
 			$("#id_textarea").on("input keyup paste", checkenabled);
@@ -101,7 +106,12 @@
         <label for="id_textarea">What action should Congress take regarding {{issue.name}}?</label>
         <textarea id="id_textarea" rows=5 maxlength="254" name="description" class="form-control" 
         	placeholder="Pass a law to..." required autofocus></textarea>
-        <button id="id_submitbutton" class="btn btn-lg btn-primary btn-block" type="submit">Done</button>
+		  <div class="row">
+			  <input id="id_submitbutton" class="btn btn-primary btn-block ok-button" type="submit" value="Create Action"></input>
+		  </div>
+		  <div class="row">
+			  <input id="cancel_button" class="btn btn-default btn-block cancel-button" type="button" value="Cancel"></input>
+		  </div>
       </form>
 
     </div> <!-- /container -->

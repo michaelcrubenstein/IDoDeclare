@@ -174,7 +174,7 @@
 			// Remove any lingering contents from the mapFrame.
 			$("#issue_div").empty();
 	
-		  	$.getJSON("/dico/getactiveissues/", { 'minInterestCount': 1}, function(json){
+		  	$.getJSON("{% url 'getIssues' %}", {}, function(json){
 				var allIssues = json['issues'];
 
 				for (i = 0; i < allIssues.length; ++i) {

@@ -148,10 +148,10 @@ def createPetition(request):
     
     template = loader.get_template('dico/createPetition.html')
         
-    if 'next' in request.GET:
-        next = request.GET['next']
+    if 'backURL' in request.GET:
+        backURL = request.GET['backURL']
     else:
-        next = request.META.HTTP_REFERER
+        backURL = ""
         
     if 'issue' in request.GET:
         issueID = request.GET['issue']
@@ -159,7 +159,7 @@ def createPetition(request):
 
     context = RequestContext(request, {
         'user': request.user,
-        'next': next,
+        'backURL': backURL,
         'issue': issue,
     })
     return HttpResponse(template.render(context))
@@ -968,19 +968,17 @@ def getIssueInterests(request):
     
 # Handles a GET request to get all of the issues for which there is at least 
 # the specified minimum interest.
-# Request GET element minInterestCount: the minimum number of users interested in each issue. Default: 1
 # Returns: JsonResponse with results. 
 # Return element success: True if the operation is successful, False otherwise.
 # Return element error: Present if there was an error with a text description of the error.
 # Return element interests: Present if there was no error. Contains an array of dictionaries
 # where each dictionary describes an issue with the following fields: name, id. 
-def getActiveIssues(request):
+def getIssues(request):
     results = {'success':False}
     if request.method == u'GET':
         GET = request.GET
         try:
-            minInterestCount = int(GET.get(u'minInterestCount', 1))
-            issueList = Issue.get_active_issues(minInterestCount)
+            issueList = Issue.get_issues()
             results = {'success':True}
             results['issues'] = issueList
         except Exception as e:

@@ -352,7 +352,7 @@
 				}
 			{% endif %}
 
-		  	$.getJSON("{% url 'getActiveIssues' %}", { 'minInterestCount': 1}, function(json){
+		  	$.getJSON("{% url 'getIssues' %}", { 'minInterestCount': 1}, function(json){
 				var allIssues = json['issues'];
 
 				selectElement = document.getElementById("issue_select")

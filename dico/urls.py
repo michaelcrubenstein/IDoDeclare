@@ -91,8 +91,8 @@ urlpatterns = patterns(
 	url(r'^(?P<mc_id>\d+)/mcaddissue/$', views.mcaddissue, name='mcaddissue'),
 	# ex: /dico/member/?bioguide_id=.../
 	url(r'^member/', views.member, name='member'),
-	# ex: /dico/getactiveissues -- Get all of the issues with a specified minimum level of interest.
-	url(r'^getactiveissues/', views.getActiveIssues, name='getActiveIssues'),
+	# ex: /dico/getissues -- Get all of the issues with a specified minimum level of interest.
+	url(r'^getissues/', views.getIssues, name='getIssues'),
 	# ex: /dico/getissueinterests -- Get the interest in a particular issue ID.
 	url(r'^getissueinterests/', views.getIssueInterests, name='getIssueInterests'),
 	# ex: /dico/getMyIssues -- Get all of the interests of the current logged-in user.

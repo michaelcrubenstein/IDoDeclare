@@ -76,12 +76,6 @@
 			show_my_interests();
 			check_new_interest();
 			
-			$("#add_interest_text").bind("keyup input paste", function() {
-				check_new_interest();
-			});
-			$("#add_interest_button").click(function() {
-				add_interest(add_interest_text.value);
-			});
 		});
 
 		function add_interest(newIssueName) {
@@ -107,23 +101,6 @@
 		  });
 		}
 
-		function enter_interest(e, inputObject){
-			var code = (e.keyCode ? e.keyCode : e.which);
-			if(code == 13 && add_interest_text.value.length > 0) { //Enter keycode
-			 add_interest(add_interest_text.value);
-			}
-			e.stopPropagation();
-		}
-		
-		function check_new_interest(){
-			if (add_interest_text.value.length > 0) {
-				$('#add_interest_button').prop('disabled', false);
-			}
-			else {
-				$('#add_interest_button').prop('disabled', true);
-			}
-		}
-		
 		function remove_interest(issueName) {
 		  $.post("/dico/submitdeleteinterest/", { csrfmiddlewaretoken: storedcsrftoken, 'oldinterest': issueName}, function(json){
 			if (json['success']) {
@@ -222,19 +199,8 @@
 			</div>
 			
 			<div class="col-xs-12 col-sm-6">
-				<label for="issue_div" class="control-label">Issues Other People Care About</label>
+				<label for="issue_div" class="control-label">Other Issues</label>
 				<div id="issue_div" class="row">
-				</div>
-
-				<label for="new_issue_input_group" class="control-label">A New Issue You Care About</label>
-				<div id="new_issue_input_group" class="input-group">
-				  <input type="text" id="add_interest_text" width="200" maxlength="254" name="newissue" class="form-control"
-				  		 onKeyPress="enter_interest(event, this)" />
-				  <div class="input-group-btn">
-				  	<button type="button" id="add_interest_button" class="btn btn-default" >
-				  		<span class="glyphicon glyphicon-chevron-left"></span>
-				  	</button>
-				  </div>
 				</div>
 			</div>
 		</div>

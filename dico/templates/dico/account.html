@@ -16,6 +16,7 @@
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/formsimple.css" %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -70,6 +71,11 @@
 			   e.preventDefault();
 			});
 
+			$("#cancel_button").click(function(e) {
+				window.location = "{{ backURL }}";
+				e.preventDefault();
+			});
+		
 			$("#id_username").bind("keyup input paste", checkenabled);
 			$("#id_firstname").bind("keyup input paste", checkenabled);
 			$("#id_lastname").bind("keyup input paste", checkenabled);
@@ -101,56 +107,57 @@
 
 <body max-width="100%">
     <div class="container">
-    
-    <h3>Account Settings</h3>
+		<form id="createconstituent-form" class="form-simple">  
+    		<h3>Account Settings</h3>
+			<div id="myAlert"></div>
+			<div class="form-group row">
+				<label for="id_username"  class="control-label">Email Address</label> 
+				<input id="id_username" class="form-control" maxlength="254" name="username" 
+					   type="email" value="{{user.email}}" placeholder="{{user.email}}"/>
+			</div>
+			<div class="form-group row">
+			<!-- maxLength of firstname is the same as in the custom_user.AuthUser.firstName field --!>
+				<label for="id_firstname"  class="control-label">First Name</label> 
+				<input id="id_firstname" class="form-control" maxlength="30" name="firstName" type="text" 
+						value="{{user.first_name}}" placeholder="{{user.first_name}}" required/>
+			</div>
+			<div class="form-group row">
 
-  <div id="myAlert">
-  </div>
+				<!-- maxLength of firstname is the same as in the custom_user.AuthUser.lastName field --!>
+				<label for="id_lastname"  class="control-label">Last Name</label> 
+				<input id="id_lastname" class="form-control" maxlength="50" name="lastName" type="text" 
+						value="{{user.last_name}}" placeholder="{{user.last_name}}" required />
+			</div>
+			<div class="form-group row">
+				<span class="help-block">Your street address and zip code are used to identify your elected legislators.</span>
+			</div>
+			<div class="row">
+				<div class="form-group col-xs-offset-1">
+					<label for="id_streetaddress"  class="control-label">Street Address</label> 
+					<input id="id_streetaddress" class="form-control" maxlength="254" name="streetAddress" type="text" 
+							value="{{constituent.streetAddress}}" placeholder="{{constituent.streetAddress}}" required/>
+				</div>
+			</div>
+			<div class="row">
+				<div class="form-group col-xs-offset-1">
+					<label for="id_zipcode"  class="control-label">Zip Code</label> 
+					<input id="id_zipcode" class="form-control" maxlength="5" name="zipcode" type="text" 
+							value="{{constituent.zipCode}}" placeholder="{{constituent.zipCode}}" required/>
+				</div>
+			</div>
+			<div class="row">
+				<input id="submit_button" class="btn btn-primary btn-block ok-button col-xs-12" type="submit" value="Update Account"></input>
+			</div>
+		    <div class="row">
+				<input id="cancel_button" class="btn btn-default btn-block cancel-button col-xs-12" type="button" value="Cancel"></input>
+		    </div>
+		</form>
 
-<form id="createconstituent-form">
-  <a id="cancel_button" class="btn btn-link btn-sm" href="{{backURL}}">Cancel</a>
-  
-  <div class="form-group">
-    <label for="id_username"  class="control-label">Email Address</label> 
-    <input id="id_username" class="form-control" maxlength="254" name="username" 
-    	   type="email" value="{{user.email}}" placeholder="{{user.email}}"/>
-  </div>
-  <div class="form-group">
-    
-    <!-- maxLength of firstname is the same as in the custom_user.AuthUser.firstName field --!>
-    <label for="id_firstname"  class="control-label">First Name</label> 
-    <input id="id_firstname" class="form-control" maxlength="30" name="firstName" type="text" 
-    		value="{{user.first_name}}" placeholder="{{user.first_name}}" required/>
-  </div>
-  <div class="form-group">
-    
-    <!-- maxLength of firstname is the same as in the custom_user.AuthUser.lastName field --!>
-    <label for="id_lastname"  class="control-label">Last Name</label> 
-    <input id="id_lastname" class="form-control" maxlength="50" name="lastName" type="text" 
-    		value="{{user.last_name}}" placeholder="{{user.last_name}}" required />
-  </div>
-  <div class="form-group">
-  	<span class="help-block">Your street address and zip code are used to identify your elected legislators.</span>
-  </div>
-  
-  <div class="form-group col-xs-offset-1">
-    <label for="id_streetaddress"  class="control-label">Street Address</label> 
-    <input id="id_streetaddress" class="form-control" maxlength="254" name="streetAddress" type="text" 
-    		value="{{constituent.streetAddress}}" placeholder="{{constituent.streetAddress}}" required/>
-  </div>
-  <div class="form-group col-xs-offset-1">
-    <label for="id_zipcode"  class="control-label">Zip Code</label> 
-    <input id="id_zipcode" class="form-control" maxlength="5" name="zipcode" type="text" 
-    		value="{{constituent.zipCode}}" placeholder="{{constituent.zipCode}}" required/>
-  </div>
-    <input id="submit_button" class="btn btn-lg btn-primary btn-block" type="submit" value="Update Account"></input>
-</form>
+		<script type="text/javascript">
+		document.getElementById('id_username').focus()
+		</script>
 
-<script type="text/javascript">
-document.getElementById('id_username').focus()
-</script>
-
-</div>
+	</div>
 
 <!--     IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="{% static "bootstrap/assets/js/ie10-viewport-bug-workaround.js" %}"></script>

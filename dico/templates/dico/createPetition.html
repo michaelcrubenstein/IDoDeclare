@@ -100,15 +100,17 @@
 	</script>
 
     <div class="container">
-	  <div id="myAlert" class="errorAlert"></div>
-      <form class="form-createpetition" id="id_form">
-        <h3 class="form-createpetition-heading">Create Action</h3>
-        <label for="id_textarea">What action should Congress take regarding {{issue.name}}?</label>
-        <textarea id="id_textarea" rows=5 maxlength="254" name="description" class="form-control" 
-        	placeholder="Pass a law to..." required autofocus></textarea>
-		  <div class="row">
-			  <input id="id_submitbutton" class="btn btn-primary btn-block ok-button" type="submit" value="Create Action"></input>
-		  </div>
+		<form class="form-createpetition" id="id_form">
+			<div class="row">
+				<h3 class="form-createpetition-heading">Create Action</h3>
+				<label for="id_textarea">What action should Congress take regarding {{issue.name}}?</label>
+				<div id="myAlert" class="errorAlert"></div>
+				<textarea id="id_textarea" rows=5 maxlength="254" name="description" class="form-control" 
+					placeholder="Pass a law to..." required autofocus></textarea>
+    		</div>
+			<div class="row">
+				<input id="id_submitbutton" class="btn btn-primary btn-block ok-button" type="submit" value="Create Action"></input>
+			</div>
 		  <div class="row">
 			  <input id="cancel_button" class="btn btn-default btn-block cancel-button" type="button" value="Cancel"></input>
 		  </div>

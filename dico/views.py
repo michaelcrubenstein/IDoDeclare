@@ -314,13 +314,10 @@ def submitdeleteinterest(request):
 def createConstituent(request):
     template = loader.get_template('dico/createConstituent.html')
 
-    if 'error_message' in request.GET:
-        errorMessage = request.GET['error_message']
-    else:
-        errorMessage = None
+    backURL = request.GET.get('back', "")
 
     context = RequestContext(request, {
-        'error_message' : errorMessage
+        'backURL' : backURL
     })
     return HttpResponse(template.render(context))
     

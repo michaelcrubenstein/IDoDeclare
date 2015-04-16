@@ -76,22 +76,37 @@ class PasswordReset(models.Model):
     email = models.EmailField(verbose_name='email address', unique=True, max_length=255)
     reset_key = models.CharField(max_length=50)
     creation_time = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+    
+    class ResetKeyValidError(ValueError):
+    	def __str__(self):
+    	    return "This reset key is not valid."
+
+    class ResetKeyExpiredError(ValueError):
+    	def __str__(self):
+    	    return "This reset key is expired."
+
+    class NullPasswordError(ValueError):
+    	def __str__(self):
+    	    return "The password is zero-length."
+    class EmailValidError(ValueError):
+    	def __str__(self):
+    	    return "This email address is no longer valid."
 
     def updatePassword(self, email, password):
         if self.email != email:
             PasswordReset.objects.filter(reset_key=self.reset_key).delete()
-            raise Exception("This reset key is not valid.");
+            raise ResetKeyValidError();
             
         if timezone.now() - datetime.timedelta(minutes=30) > self.creation_time:
             PasswordReset.objects.filter(reset_key=self.reset_key).delete()
-            raise Exception("This reset key is expired.")
+            raise ResetKeyExpiredError()
             
         if len(password) == 0:
-            raise ValueError("The password is zero-length.")
+            raise NullPasswordError()
         
         query_set = AuthUser.objects.filter(email=email)
         if query_set.count == 0:
-        	raise ValueError("This email address is no longer valid.");
+        	raise EmailValidError();
         	    
         user = query_set.get()
         user.set_password(password)  

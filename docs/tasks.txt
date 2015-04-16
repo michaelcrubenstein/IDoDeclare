@@ -53,6 +53,14 @@ DONE 2 - On issue page, put the actions in a striped, condensed table.
 DONE 2 - On issue page, Add "Support" or "Oppose" for each action where you have voted.
 DONE 2 - On issue page, Add "Vote Now" for each action where you haven't voted.
 
+DONE 2 - Display a set of news items on the home page, consisting of petitions on which you can vote.
+
+Have a set of links associated with an action.
+Have a set of news items associated with an action.
+Have a set of representative comments associated with an action. (with ratings like arguments)
+Add a deadline time for actions
+Collect age and gender by user
+
 On issue page, remove the Delete button for each action
 On action page, add a Delete button
 On edit interests page, put you interests in a striped, condensed table.

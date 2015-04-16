@@ -1,0 +1,25 @@
+.table-label {
+  margin-top: 5px;
+  margin-bottom: 6px;
+}
+.full-width-table {
+  word-wrap: break-word;
+}
+.issue-col {
+  display: inline-block;
+  width: 100%;
+}
+.issue-container {
+  display: table-cell;
+  vertical-align: middle;
+  width: 100%;
+}
+.issue-name {
+  white-space: normal;
+  word-wrap: break-word;
+  text-align: left;
+  width: 80%;
+}
+.issue-chevron {
+  width: 10%;
+}

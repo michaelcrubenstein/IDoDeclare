@@ -127,7 +127,27 @@ class Constituent(models.Model):
                 interests.append({'id': i[0], 'name': i[1], 'petition_count': i[2]})
             return interests
 
-        return ConstituentInterest.objects.filter(constituent=constituent).order_by('issue__name')
+    # First, get a list of all of the petitions that the current user hasn't voted on,
+    # Ordered in descending order by creation date.
+    def get_news(user):
+        constituent = Constituent.get_constituent(user)
+        if constituent is None:
+            return []
+            
+        with connection.cursor() as c:
+            sql = "SELECT p.id, p.description, p.creation_time" + \
+                  " FROM dico_petition p" + \
+                  " WHERE EXISTS(SELECT * FROM dico_constituentinterest ci, dico_petitionissue pi" + \
+                                  " WHERE ci.issue_id = pi.issue_id" + \
+                                  " AND pi.petition_id = p.id" + \
+                                  " AND ci.constituent_id = %s)" + \
+                  " AND NOT EXISTS(SELECT * FROM dico_petitionvote pv WHERE pv.petition_id = p.id AND pv.constituent_id = %s)" + \
+                  " ORDER BY p.creation_time DESC"
+            c.execute(sql, [user.id, user.id])
+            petitions = []
+            for i in c.fetchall():
+                petitions.append({'id': i[0], 'description': i[1], 'creation_time': i[2]})
+            return petitions
 
     def get_members(user):
         constituent = Constituent.get_constituent(user)

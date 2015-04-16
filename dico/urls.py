@@ -95,6 +95,8 @@ urlpatterns = patterns(
 	url(r'^getissues/', views.getIssues, name='getIssues'),
 	# ex: /dico/getissueinterests -- Get the interest in a particular issue ID.
 	url(r'^getissueinterests/', views.getIssueInterests, name='getIssueInterests'),
-	# ex: /dico/getMyIssues -- Get all of the interests of the current logged-in user.
+	# ex: /dico/getmyinterests -- Get all of the interests of the current logged-in user.
 	url(r'^getmyinterests/', views.getMyInterests, name='getMyInterests'),
+	# ex: /dico/getmynews -- Get all of the news items of the current logged-in user.
+	url(r'^getmynews/', views.getMyNews, name='getMyNews'),
 )

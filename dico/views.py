@@ -30,12 +30,12 @@ def index(request):
     for i in issue_list:
         il = il + [{'name': i.name, 'id': i.id}]
         
-    member_list = Constituent.get_members(request.user)
-            
     context = RequestContext(request, {
         'user': request.user,
         'issue_list': json.dumps(il),
-        'member_list': member_list,
+        'my_issue_list' : Constituent.get_interests(request.user),
+        'member_list': Constituent.get_members(request.user),
+        'news_list': Constituent.get_news(request.user)
     })
     return HttpResponse(template.render(context))
 
@@ -183,7 +183,7 @@ def addPetitionIssue(request, petition_id):
     
     petitionIssues = petition.issues.all();
     allIssues = []
-    for i in Issue.get_active_issues(1):
+    for i in Issue.get_issues():
         if (not hasIssue(petitionIssues, i)):
             allIssues += [i]
 
@@ -890,8 +890,8 @@ def petition(request, petition_id):
         backName = issue.name
         backURL = "/dico/" + str(issueID) + "/issue/"
     else:
-        backName = ""
-        backURL = ""
+        backName = "Home"
+        backURL = "/dico/"
         
     filter = Petition.objects.filter(id=petition_id)
     context = RequestContext(request, {
@@ -983,28 +983,46 @@ def getIssues(request):
 
     return JsonResponse(results)
     
-
+# Responds to a Json request to get the issues of the currently logged-in user.
+# Returns: JsonResponse with results. 
+# Return element success: True if the operation is successful, False otherwise.
+# Return element myIssues: Present if there was no error. Contains an array of dictionaries
+# where each dictionary describes an issue with the following fields: name, id, petition_count. 
+# The petition_count is the number of petitions associated with that issue for which the
+# currently logged-in user has not voted.
 def getMyInterests(request):
     results = {'success':False}
-    if request.method == u'POST':
-        try:
-            POST = request.POST
-            myIssues = []
-            if request.user.is_authenticated:
-                myIssues = Constituent.get_interests(request.user)
+    try:
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+        
+        myIssues = Constituent.get_interests(request.user)
 
-            issue_list = Issue.objects.order_by('name')
-            allIssues = []
-            for i in issue_list:
-                allIssues.append({'id': i.id, 'name': i.name})
-                
-            results = {'success':True}
-            results['myIssues'] = myIssues
-            results['allIssues'] = allIssues
-        except Exception as e:
-            results = {'success':False, 'error': str(e)}
+        results = {'success':True}
+        results['myIssues'] = myIssues
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
             
     return JsonResponse(results)
+    
+def getMyNews(request):
+    results = {'success':False}
+    try:
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+        
+        results = {'myNews' : Constituent.get_news(request.user), 'success':True}
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+            
+    return JsonResponse(results)
+
     
 def getIssuePetitions(request):
     results = {'success':False, 'error': 'getIssuePetitions failed'}
@@ -1024,9 +1042,9 @@ def getIssuePetitions(request):
         # Return the results.
         results = {'success':True, 'petitions' : petitions}
     except Exception as e:
-        log = open('exception.log', 'a')
-        log.write("%s\n" % traceback.format_exc())
-        log.flush()
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
         results = {'success':False, 'error': str(e)}
     
     return JsonResponse(results)

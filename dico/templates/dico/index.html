@@ -10,6 +10,9 @@
     <!-- Bootstrap -->
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
+    <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/index.css" %}" rel="stylesheet">
+
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -184,9 +187,8 @@
 			$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+window.location.href);
 
 			initmap();
-
-			// Display the interests of the currently logged-in user.
-			show_my_interests();
+			
+			show_issue_map();
 
 			addHandlers();
 		});
@@ -352,6 +354,12 @@
 				}
 			{% endif %}
 
+			show_issue_map();
+			
+		  });
+		}
+		
+		function show_issue_map() {
 		  	$.getJSON("{% url 'getIssues' %}", { 'minInterestCount': 1}, function(json){
 				var allIssues = json['issues'];
 
@@ -366,8 +374,6 @@
 				}
 				reset_map();
 			});
-
-		  });
 		}
 		
 		function resize_map() {
@@ -579,12 +585,53 @@
 		<div class="row">
 			{% if user.is_authenticated %}
 			<div class="col-xs-10 col-sm-4 col-md-3">
-				<label class="control-label">Your Interests</label><a class="btn btn-sm btn-link" href="{% url 'editInterests' %}">Edit</a>
-				<table id='my_interests' class="table table-striped table-condensed">
-				</table>
+				<label class="control-label table-label">Your Interests</label><a class="btn btn-sm btn-link" href="{% url 'editInterests' %}">Edit</a>
+					{% if my_issue_list %}
+							{% for issue in my_issue_list %}
+								<div class="row">
+										<div class="col-xs-12 issue-container">
+											<a class="btn btn-link btn-xs issue-name"
+												href="/dico/{{issue.id}}/issue/">{{ issue.name }}
+												{% if issue.petition_count > 0 %}
+												 <span class="badge">{{issue.petition_count}}</span>
+												{% endif %}
+											</a>
+											<a href="/dico/{{issue.id}}/issue/" class="btn btn-link btn-xs issue-chevron">
+												<span class="glyphicon glyphicon-chevron-right"></span>
+											</a>
+										</div>
+								</div>
+							{% endfor %}
+						</tbody>
+					{% else %}
+						<tr><td>Click <a class="btn btn-sm btn-link" href="{% url 'editInterests' %}">here</a> to add some interests.</td></tr>
+					{% endif %}
+					</table>
 			</div>
 			
-			<div class="col-xs-12 col-sm-4 col-sm-offset-4 col-md-3 col-md-offset-6 text-right container-fluid member-column">
+			<div class="col-xs-10 col-sm-4 col-md-6">
+				<label class="control-label table-label">News</label>
+				<table id='my_news' class="table table-striped table-condensed full-width-table" max-width="100%">
+				{% if news_list %}
+					<tbody>
+						{% for news_item in news_list %}
+						<tr>
+							<td width="auto">{{ news_item.description }} </td>
+							<td width="100px">
+								<a class="btn btn-link btn-xs" href="/dico/{{ news_item.id }}/petition/">Vote Now
+									<span class="glyphicon glyphicon-chevron-right"></span>
+								</a>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				{% else %}
+					<tr><td>No news at the moment.</td></tr>
+				{% endif %}
+				</table>
+			</div>
+
+			<div class="col-xs-12 col-sm-4 col-md-3 text-right container-fluid member-column">
 				<div class="col-md-12 text-right"><h4>Your Members</h4></div>
 				<div>
 				{% if member_list %}

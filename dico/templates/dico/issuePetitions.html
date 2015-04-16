@@ -79,10 +79,6 @@
 			$("#id_accountSettingsLink").attr("href", "/dico/account/?back="+window.location.href);
 			$("#id_changePasswordLink").attr("href", "/dico/password/?back="+window.location.href);
 			
-			$("#id_confirmDeleteButton").click(function() {
-				remove_petition(elementToDelete, $("#id_deleteDialog").attr("petitionId"));
-			});
-
 			// Display the interests of the currently logged-in user.
 			show_issue_petitions();
 		});
@@ -101,26 +97,7 @@
 					$(li).append(td);
 
 					$(td).append(petition['description']);
-					
-					<!-- Add a button to delete the petition -->
-					td = document.createElement("td");
-					$(li).append(td);
-					newButton = document.createElement("button");
-					$(newButton).addClass("btn btn-link btn-xs");
-					$(td).append(newButton);
-					if (petition['isEditable']) {
-						newSpan = document.createElement("span");
-						$(newButton).append(newSpan);
-						$(newButton).attr("petitionId", petition['id']);
-						$(newButton).click(function() {
-							closealert();
-							$("#id_deleteDialog").attr("petitionId", $(this).attr("petitionId"));
-							elementToDelete = $(this).parent();
-							$("#id_deleteDialog").modal('show');
-						});
-						$(newSpan).addClass("glyphicon glyphicon-remove");
-					}
-					
+										
 					td = document.createElement("td");
 					$(li).append(td);
 					newButton = document.createElement("a");
@@ -165,17 +142,6 @@
 				bootstrap_alert.warning(json['error']);
 		  });
 		}
-		
-		function remove_petition(actionContainer, petition_id) {
-		  $.post("/dico/deletepetition/", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : petition_id }, function(json){
-		  	if (json['success']) {
-		  		actionContainer.remove();
-			}
-			else
-				bootstrap_alert.warning(json['error']);
-		    });
-		}
-		
 	</script>
 
 	<div id='container' class="container">
@@ -227,7 +193,6 @@
 								<a class="btn btn-sm btn-link" 
 									href="/dico/createpetition?issue={{issue.id}}&backURL=/dico/{{issue.id}}/issue/">Create an Action</a>
 							</th>
-							<th></th>
 							<th>Your vote</th>
 							<th></th>
 						</tr>
@@ -238,16 +203,4 @@
 		</div>
 
 	</div> <!-- container -->
-
-	<!-- Modal HTML -->
-	<div id="id_deleteDialog" class="modal fade">
-		<div class="modal-dialog modal-sm">
-			<div class="modal-content">
-				<div class="modal-body">
-					<button id="id_confirmDeleteButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Action</button>
-					<button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
-				</div>
-			</div>
-		</div>
-	</div>
 </body>

@@ -72,6 +72,14 @@
 				remove_argument(elementToDelete, $("#id_deleteDialog").attr("argumentId"));
 			});
 
+			$("#id_confirmDeleteActionButton").click(function() {
+				remove_petition();
+			});
+			
+			$("#id_deleteActionButton").click(function() {
+				$("#id_deleteActionDialog").modal('show');
+			});
+
 			// Display the issues associated with the current petition.
 			show_petition_issues();
 
@@ -456,6 +464,16 @@
 				});
 		}
 		
+		function remove_petition() {
+		  $.post("/dico/deletepetition/", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : {{ petition.id }} }, function(json){
+		  	if (json['success']) {
+		  		window.location.href = "{{ backURL }}";
+			}
+			else
+				bootstrap_alert.warning(json['error']);
+		    });
+		}
+		
 	</script>
 
 	<div id='container' class="container">
@@ -564,6 +582,20 @@
 				</table>
 			</div>
 		</div>
+		{% if user.id == petition.constituent.user.id or user.is_superuser %}
+		<div class="lightbackground row">
+			<div class="col-xs-12">
+				<hr class="simple-separator no-top-padding" />
+			</div>
+		</div>
+		<div class="lightbackground row bottom-padding">
+			<div class="col-xs-12 col-md-6 col-md-offset-6">
+				<button id="id_deleteActionButton" class="btn btn-default btn-block">
+					<span class="text-danger">Delete Action</span>
+				</button>
+			</div>
+		</div>
+		{% endif %}
 	</div> <!-- container -->
 
 <!-- Modal HTML -->
@@ -572,6 +604,18 @@
 			<div class="modal-content">
 				<div class="modal-body">
 					<button id="id_confirmDeleteButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Argument</button>
+					<button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Modal HTML -->
+	<div id="id_deleteActionDialog" class="modal fade">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-body">
+					<button id="id_confirmDeleteActionButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Action</button>
 					<button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
 				</div>
 			</div>

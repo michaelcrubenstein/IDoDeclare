@@ -61,6 +61,7 @@ DONE 2 - On issue page, remove the Delete button for each action
 DONE 2 - On action page, add a Delete button
 
 DONE 2 - Click member of Congress goes to their web page
+DONE 2 - Prevent deletion of the last issue related to a petition.
 
 Have a set of links associated with an action.
 Have a set of news items associated with an action.
@@ -71,7 +72,6 @@ Collect age and gender by user
 On edit interests page, put you interests in a striped, condensed table.
 
 Put the tabular data for the map in table format.
-Prevent deletion of the last issue related to a petition.
 Add tip information describing the ratings
 Add tip information for creating a new action.
 	- Spell items correctly.

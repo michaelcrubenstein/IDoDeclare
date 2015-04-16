@@ -128,7 +128,7 @@
 					newButton = document.createElement("button");
 					$(newButton).addClass("btn btn-link btn-xs col-xs-3 pull-right");
 					$(li).append(newButton);
-					if (issue['isEditable']) {
+					if (issue['isEditable'] && issues.length > 1) {
 						newSpan = document.createElement("span");
 						$(newButton).append(newSpan);
 						$(newButton).attr("issueID", issue['id']);

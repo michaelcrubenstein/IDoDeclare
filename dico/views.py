@@ -1023,7 +1023,21 @@ def getMyNews(request):
             
     return JsonResponse(results)
 
-    
+def getMyMembers(request):    
+    results = {'success':False}
+    try:
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+        
+        results = {'myMembers' : Constituent.get_members(request.user), 'success':True}
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+            
+    return JsonResponse(results)
+
 def getIssuePetitions(request):
     results = {'success':False, 'error': 'getIssuePetitions failed'}
     try:

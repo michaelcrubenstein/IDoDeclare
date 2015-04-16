@@ -637,7 +637,7 @@
 				{% if member_list %}
 					{% for member in member_list %}
 					<div class="member-row text-right">
-						<a href="{% url 'member' %}?bioguide_id={{ member.bioguide_id }}">
+						<a href="{{ member.website }}" target="_blank"">
 							<div class="col-xs-9 col-md-9 col-lg-9 member-title">
 								<strong>{{ member.title }} {{ member.first_name }} {{ member.last_name }} {{ member.suffix }}
 								</strong>

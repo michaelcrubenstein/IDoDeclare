@@ -68,9 +68,6 @@
         		$('#myAlert').html('');
         	}
 			
-			$("#id_accountSettingsLink").attr("href", "/dico/account/?back="+window.location.href);
-			$("#id_changePasswordLink").attr("href", "/dico/password/?back="+window.location.href);
-
 			$("#id_confirmDeleteButton").click(function() {
 				remove_argument(elementToDelete, $("#id_deleteDialog").attr("argumentId"));
 			});

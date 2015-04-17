@@ -108,12 +108,6 @@
 	  stroke-width: 0.5px;
 	}
 	
-	.member-column {
-		background: #DDD;
-		padding-left: 0px;
-		padding-right: 0px;
-	}
-	
 	.map-select-column {
 		display: inline-block;
     	vertical-align: bottom;
@@ -126,30 +120,6 @@
     	float: none;
 	}
 	
-	.member-row {
-		padding-left: 0px;
-		padding-right: 0px;
-	}
-	
-	.member-title {
-		display: inline-block;
-    	vertical-align: middle;
-    	float: none;
-    	padding-left: 0px;
-    	padding-right: 0px;
-	}
-	
-	.member-picture {
-		display: inline-block;
-    	vertical-align: middle;
-    	float: none;
-		width: 52px;
-		padding-top: 2px;
-		padding-bottom: 2px;
-    	padding-left: 0px;
-    	padding-right: 0px;
-	}
-
 	</style>
 
 
@@ -584,32 +554,7 @@
 
 		<div class="row">
 			{% if user.is_authenticated %}
-			<div class="col-xs-10 col-sm-4 col-md-3">
-				<label class="control-label table-label">Your Interests</label><a class="btn btn-sm btn-link" href="{% url 'editInterests' %}">Edit</a>
-					{% if my_issue_list %}
-							{% for issue in my_issue_list %}
-								<div class="row">
-										<div class="col-xs-12 issue-container">
-											<a class="btn btn-link btn-xs issue-name"
-												href="/dico/{{issue.id}}/issue/">{{ issue.name }}
-												{% if issue.petition_count > 0 %}
-												 <span class="badge">{{issue.petition_count}}</span>
-												{% endif %}
-											</a>
-											<a href="/dico/{{issue.id}}/issue/" class="btn btn-link btn-xs issue-chevron">
-												<span class="glyphicon glyphicon-chevron-right"></span>
-											</a>
-										</div>
-								</div>
-							{% endfor %}
-						</tbody>
-					{% else %}
-						<tr><td>Click <a class="btn btn-sm btn-link" href="{% url 'editInterests' %}">here</a> to add some interests.</td></tr>
-					{% endif %}
-					</table>
-			</div>
-			
-			<div class="col-xs-10 col-sm-4 col-md-6">
+			<div class="col-xs-12 col-md-6 col-md-push-3">
 				<label class="control-label table-label">News</label>
 				<table id='my_news' class="table table-striped table-condensed full-width-table" max-width="100%">
 				{% if news_list %}
@@ -631,27 +576,66 @@
 				</table>
 			</div>
 
-			<div class="col-xs-12 col-sm-4 col-md-3 text-right container-fluid member-column">
-				<div class="col-md-12 text-right"><h4>Your Members</h4></div>
-				<div>
-				{% if member_list %}
-					{% for member in member_list %}
-					<div class="member-row text-right">
-						<a href="{{ member.website }}" target="_blank"">
-							<div class="col-xs-9 col-md-9 col-lg-9 member-title">
-								<strong>{{ member.title }} {{ member.first_name }} {{ member.last_name }} {{ member.suffix }}
-								</strong>
-							</div>
-							<div class="col-xs-2 col-md-2 col-lg-2 member-picture">
-								<img width="50" src="http://theunitedstates.io/images/congress/original/{{ member.bioguide_id }}.jpg" />
-							</div>
-							<br>
-						</a>
+			<div class="col-xs-12 col-sm-6 col-md-3 col-md-pull-6">
+				<div class="dark-column">
+					<div class="row">
+						<div class="col-xs-12">
+						<label class="control-label table-label">Your Interests</label>
+						<a class="btn btn-sm btn-link" href="{% url 'editInterests' %}">Edit</a>
+						</div>
 					</div>
-					{% endfor %}
-				{% else %}
-					<p>No members are available.</p>
-				{% endif %}
+					{% if my_issue_list %}
+						{% for issue in my_issue_list %}
+							<div class="row">
+								<div class="col-xs-12 issue-container">
+									<a class="btn btn-link btn-xs issue-name"
+										href="/dico/{{issue.id}}/issue/">{{ issue.name }}
+										{% if issue.petition_count > 0 %}
+										 <span class="badge">{{issue.petition_count}}</span>
+										{% endif %}
+									</a>
+								</div>
+							</div>
+						{% endfor %}
+					{% else %}
+						<div class="row dark-column">
+							<div class="col-xs-12 issue-container">
+								<a class="btn btn-sm btn-link" href="{% url 'editInterests' %}">Express Interests</a>
+							</div>
+						</div>
+					{% endif %}
+				</div>
+			</div>
+			
+			<div class="col-xs-12 visible-xs-inline" style="border:0; height:7px">
+			</div>
+
+			<div class="col-xs-12 col-sm-5 col-sm-offset-1 col-md-3 col-md-offset-0 text-right">
+				<div class="dark-column">
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="text-right table-label"><h4>Your Members</h4></div>
+						</div>
+					</div>
+					<div>
+						{% if member_list %}
+							{% for member in member_list %}
+								<div class="member-row text-right">
+									<a href="{{ member.website }}" target="_blank"">
+										<div class="member-title">
+											<strong>{{ member.title }} {{ member.first_name }} {{ member.last_name }} {{ member.suffix }}
+											</strong>
+										</div>
+										<div class="member-picture">
+											<img width="50" src="http://theunitedstates.io/images/congress/original/{{ member.bioguide_id }}.jpg" />
+										</div>
+									</a>
+								</div>
+							{% endfor %}
+						{% else %}
+							<p>No members are available.</p>
+						{% endif %}
+					</div>
 				</div>
 			</div>
 			{% else %}

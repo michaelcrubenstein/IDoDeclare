@@ -63,13 +63,13 @@ DONE 2 - On action page, add a Delete button
 DONE 2 - Click member of Congress goes to their web page
 DONE 2 - Prevent deletion of the last issue related to a petition.
 
+DONE 2 - On edit interests page, make the format of existing interests the same as on the home page.
+
 Have a set of links associated with an action.
 Have a set of news items associated with an action.
 Have a set of representative comments associated with an action. (with ratings like arguments)
 Add a deadline time for actions
 Collect age and gender by user
-
-On edit interests page, put you interests in a striped, condensed table.
 
 Put the tabular data for the map in table format.
 Add tip information describing the ratings

@@ -10,6 +10,9 @@
     <!-- Bootstrap -->
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
+    <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/index.css" %}" rel="stylesheet">
+
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -74,8 +77,6 @@
 			
 			// Display the interests of the currently logged-in user.
 			show_my_interests();
-			check_new_interest();
-			
 		});
 
 		function add_interest(newIssueName) {
@@ -127,25 +128,33 @@
 			myIssues = json['myIssues'];
 			
 			$("#my_interests").empty();
-			ul = document.createElement( "ul" );
-			$(ul).addClass("list-unstyled");
-			$("#my_interests").append(ul);
 			
 			for (i = 0; i < myIssues.length; ++i) {
 				issue = myIssues[i];
-				li = document.createElement("li");
-				newButton = document.createElement("button");
+				li = document.createElement("div");
+				col = document.createElement("div");
+				nameButton = document.createElement("button");
+				iconButton = document.createElement("button");
 				newSpan = document.createElement("span");
+				$("#my_interests").append(li);
+				$(li).addClass("row")
+					 .append(col);
+				$(col).addClass("col-xs-12 issue-container")
+					  .append(nameButton)
+					  .append(iconButton);
+				$(nameButton).addClass("btn btn-link btn-xs issue-name issue-name-thin")
+							 .append(issue['name'])
+							 .attr("issueName", issue['name'])
+							 .click(function() {
+							 	remove_interest($(this).attr("issueName"));
+							 });
+				$(iconButton).addClass("btn btn-link btn-xs issue-chevron")
+							 .append(newSpan)
+							 .attr("issueName", issue['name'])
+							 .click(function() {
+							 	remove_interest($(this).attr("issueName"));
+							 });
 				$(newSpan).addClass("glyphicon glyphicon-remove");
-				$(ul).append(li);
-				$(li).append(newButton);
-				$(newButton).append(htmlEncode(issue['name']));
-				$(newButton).addClass("btn btn-link btn-xs");
-				$(newButton).append(newSpan);
-				$(newButton).attr("issueName", issue['name']);
-				$(newButton).click(function() {
-					remove_interest($(this).attr("issueName"));
-				});
 			}
 			
 			// Remove any lingering contents from the mapFrame.
@@ -160,7 +169,8 @@
 					{
 						newButton = document.createElement('button');
 						newSpan = document.createElement('span');
-						$("#issue_div").append(newButton);
+						$("#issue_div").append(newButton)
+									   .append(" <br> ");
 						$(newSpan).addClass("glyphicon glyphicon-chevron-left");
 						$(newButton).addClass("btn btn-link btn-xs")
 							.append(newSpan)
@@ -191,15 +201,15 @@
 	    <div id="myAlert" class="row"></div>
 
 		<div class="row">
-			<div class="col-xs-12 col-sm-5">
-				<label for="my_interests" class="control-label">Your Interests</label>
+			<div class="col-xs-12 col-sm-5 col-md-4">
+				<label for="my_interests" class="control-label table-label">Your Interests</label>
 				<div id='my_interests'>
 				</div>
 
 			</div>
 			
-			<div class="col-xs-12 col-sm-6">
-				<label for="issue_div" class="control-label">Other Issues</label>
+			<div class="col-xs-12 col-sm-7 col-md-8">
+				<label for="issue_div" class="control-label table-label">Other Issues</label>
 				<div id="issue_div" class="row">
 				</div>
 			</div>

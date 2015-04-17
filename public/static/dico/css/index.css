@@ -1,6 +1,8 @@
 .table-label {
   margin-top: 5px;
   margin-bottom: 6px;
+  margin-left: 3px;
+  margin-right: 3px;
 }
 .full-width-table {
   word-wrap: break-word;
@@ -18,8 +20,47 @@
   white-space: normal;
   word-wrap: break-word;
   text-align: left;
-  width: 80%;
+}
+.issue-name-thin {
+  width: 88%;
 }
 .issue-chevron {
   width: 10%;
 }
+.interest-column {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+.member-column {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+.dark-column {
+	background: #DDD;
+}
+
+.member-row {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+.member-title {
+	display: inline-block;
+	vertical-align: middle;
+	float: none;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+.member-picture {
+	display: inline-block;
+	vertical-align: middle;
+	float: none;
+	width: 52px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-left: 0px;
+	padding-right: 5px;
+}
+

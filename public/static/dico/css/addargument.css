@@ -9,11 +9,12 @@
 }
 .argument_textarea
 {
-  margin-bottom: 10px;
+  margin-bottom: 0px;
   max-width: 100%;
 }
 .argument_addbutton
 {
+  margin-top: 10px;
   margin-bottom: 10px;
   max-width: 100%;
 }

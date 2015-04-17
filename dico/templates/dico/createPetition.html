@@ -102,7 +102,18 @@
 		};
 		
 		function showTips() {
-			alert("");
+			bootstrap_alert.show($('#tipsAlert'), 
+				"<small>Start your action with a verb, such as the following:" +
+				"<ul>" +
+				"<li>Pass a law to...</li>" +
+				"<li>Authorize the Executive Branch to...</li>" +
+				"<li>Prohibit the Executive Branch from...</li>" +
+				"<li>Appropriate funds to...</li>" +
+				"</ul>" +
+				" Double check your spelling and grammer. Don't use all capital letters and" + 
+				" avoid acronyms whenever possible." +
+				"<br><br>You won't be able to edit the action once it has been created.</small>",
+				"alert-info");
 		};
 	</script>
 
@@ -114,7 +125,7 @@
 				<div id="myAlert" class="errorAlert"></div>
 				<textarea id="id_textarea" rows=5 maxlength="254" name="description" class="form-control" 
 					placeholder="Pass a law to..." required autofocus></textarea>
-				<a href="##" onClick="showTips()">Tips for writing actions</a>
+				<a href="##" onClick="showTips()"><small>Tips for writing actions</small></a>
 				<div id="tipsAlert" class="errorAlert"></div>
     		</div>
 			<div class="row">

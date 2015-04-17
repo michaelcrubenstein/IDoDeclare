@@ -64,6 +64,10 @@ DONE 2 - Click member of Congress goes to their web page
 DONE 2 - Prevent deletion of the last issue related to a petition.
 
 DONE 2 - On edit interests page, make the format of existing interests the same as on the home page.
+DONE 2 - Add tip information describing the ratings
+
+DONE 2 - Add tip information for creating a new action.
+DONE 2 - Add tip information for creating a new argument.
 
 Have a set of links associated with an action.
 Have a set of news items associated with an action.
@@ -72,18 +76,6 @@ Add a deadline time for actions
 Collect age and gender by user
 
 Put the tabular data for the map in table format.
-Add tip information describing the ratings
-Add tip information for creating a new action.
-	- Spell items correctly.
-	- Don't use acronyms
-	- Common actions by Congress include:
-		Pass a law to...
-		Authorize the Executive Branch to...
-		Prohibit the Executive Branch from...
-		Appropriate funds to...
-Add tip information for creating a new argument.
-	- Spell items correctly.
-	- Don't use acronyms
 
 Add Catcha to creating a user
 Log out user after a period of inactivity.

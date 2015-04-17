@@ -106,6 +106,13 @@
 			$("#id_add_argument_button").prop("disabled", $("#id_new_argument_text").val().length == 0);
 		}
 				
+		function showTips() {
+			bootstrap_alert.show($('#tipsAlert'), 
+				"<small>Double check your spelling and grammer. Don't use all capital letters and" + 
+				" avoid acronyms whenever possible." +
+				"<br><br>You won't be able to edit the argument once it has been created.</small>",
+				"alert-info");
+		};
 	</script>
 
 	<div id='container' class="container">
@@ -149,6 +156,8 @@
 				<label for="new_issue_input_group"">New {{ voteLabel }} Argument</label>
 				<textarea id="id_new_argument_text" rows="4" maxlength="254" class="form-control argument_textarea"
 					 onKeyPress="enter_new_argument(event, this)"></textarea>
+				<a class="btn btn-link btn-xs" href="##" onClick="showTips()">Tips for writing arguments</a>
+				<div id="tipsAlert"></div>
 				<button type="button" id="id_add_argument_button" class="btn btn-primary btn-block argument_addbutton" >
 					Add Argument
 				</button>

@@ -14,9 +14,7 @@ body {
   margin: 0 auto;
 }
 .form-createpetition .form-createpetition-heading,
-.form-createpetition .checkbox,
-.form-createpetition .textarea
- {
+{
   margin-bottom: 10px;
 }
 .form-createpetition .form-control {
@@ -25,7 +23,10 @@ body {
      -moz-box-sizing: border-box;
           box-sizing: border-box;
   padding: 10px;
-  margin-bottom: 10px;
+}
+.form-createpetition .textarea
+ {
+  margin-bottom: 0px;
 }
 .form-createpetition .form-control:focus {
   z-index: 2;

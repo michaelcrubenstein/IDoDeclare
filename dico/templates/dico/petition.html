@@ -326,6 +326,10 @@
 			window.location = "/dico/{{petition.id}}/addopposingargument/?backIssueID={{backIssueID}}";
 		}
 		
+		function doc_ratings() {
+			window.location = "/dico/{{petition.id}}/docratings/?backIssueID={{backIssueID}}";
+		}
+		
 		function cast_vote(vote) {
 			deferredObject = $.post("/dico/newpetitionvote/", { csrfmiddlewaretoken: storedcsrftoken, 
 														  "petition" : "{{petition.id}}",
@@ -540,7 +544,11 @@
 					<thead>
 						<th><h5 class="panel-title">Supporting Arguments</h5>
 						</th>
-						<th>Your Rating</th>
+						<th>Your Rating 
+							<button class="btn btn-link btn-xs" onClick="doc_ratings()"}>
+								<span class="glyphicon glyphicon-question-sign"></span>
+							</button>
+						</th>
 						<th></th>
 					</thead>
 					<tbody id='id_supporting_arguments'>
@@ -563,7 +571,11 @@
 					<thead>
 						<th><h5 class="panel-title">Opposing Arguments</h5>
 						</th>
-						<th>Your Rating</th>
+						<th>Your Rating 
+							<button class="btn btn-link btn-xs" onClick="doc_ratings()"}>
+								<span class="glyphicon glyphicon-question-sign"></span>
+							</button>
+						</th>
 						<th></th>
 					</thead>
 					<tbody id='id_opposing_arguments'>

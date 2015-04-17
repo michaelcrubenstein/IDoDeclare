@@ -101,4 +101,11 @@ urlpatterns = patterns(
 	url(r'^getmynews/', views.getMyNews, name='getMyNews'),
 	# ex: /dico/getmymembers -- Get information about all of the members for the current logged-in user.
 	url(r'^getmymembers/', views.getMyMembers, name='getMyMembers'),
+	#
+	# documentation urls.
+	# ex: /dico/docratings
+	url(r'^(?P<petition_id>\d+)/docratings/$', views.docRatings, name='docRatings'),
+	# ex: /dico/docyourinterests
+	url(r'^docyourinterests/', views.docYourInterests, name='docYourInterests'),
+	
 )

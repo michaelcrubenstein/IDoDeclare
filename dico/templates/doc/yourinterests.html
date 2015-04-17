@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>I Do Declare</title>
+
+    <!-- Bootstrap -->
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+	<!-- Styles for this web page -->
+	<style>
+
+	</style>
+
+
+  </head>
+  <body>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+
+	<!-- Scripts for this web page -->
+	<script type="text/JavaScript">
+	</script>
+
+	<div id='container' class="container">
+		<nav class="navbar navbar-default" role="navigation">
+		  <div class="container-fluid">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="nav navbar-nav navbar-header pull-left">
+			  <a class="navbar-text" href="{% url 'index' %}">
+			  	Done</a>
+			</div>
+		  </div><!-- /.container-fluid -->
+		</nav>
+
+	    <div id="myAlert" class="row"></div>
+
+		<div class="lightbackground row">
+			<div class="col-xs-12">
+				<h4>Your Interests</h4>
+				<p>Expressing interest in an issue connects you to a community of citizens who
+				share your interest.</p>
+				<p>Once you express interest in an issue,
+				you can create actions associated with that issue and vote on any action
+				associated with your interest. You can add or remove an issue from your list of interested 
+				issues at any time.</p>
+				<p>If you have a suggestion for an issue that is not available, send us your suggestion to
+				<a href="mailto:feedback@idodeclare.org">feedback@idodeclare.org</a> and we will take a look.</p>
+			</div>
+		</div>
+	</div>
+</body>

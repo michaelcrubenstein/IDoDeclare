@@ -744,6 +744,31 @@ def addOpposingArgument(request, petition_id):
     })
     return HttpResponse(template.render(context))
 
+# Displays a web page for adding a supporting argument to a petition.
+def docRatings(request, petition_id):
+    if not request.user.is_authenticated:
+        return signin(request)
+    
+    template = loader.get_template('doc/ratings.html')
+        
+    petition = Petition.objects.filter(pk=petition_id).select_related().get()
+    backIssueID = int(request.GET.get(u'backIssueID', 0));
+    
+    context = RequestContext(request, {
+        'user': request.user,
+        'petition': petition,
+        'backIssueID': backIssueID,
+    })
+    return HttpResponse(template.render(context))
+
+# Displays a web page for adding a supporting argument to a petition.
+def docYourInterests(request):
+    template = loader.get_template('doc/yourInterests.html')
+        
+    context = RequestContext(request, {
+    })
+    return HttpResponse(template.render(context))
+
 def newArgument(request):
     results = {'success':False, 'error': 'newArgument failed'}
     try:

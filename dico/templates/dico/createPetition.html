@@ -41,15 +41,18 @@
 		$(document).ready (function(e) {
 			<!-- Block of code for an alert area at the top of the window -->
 			$(".close").click(function(){
-				$("#myAlert").alert();
+				$(this).parent().alert();
 			});
 		
 			bootstrap_alert = function() {}
+			bootstrap_alert.show = function(parentDiv, message, alertClass) {
+				parentDiv.html('<div class="alert ' + alertClass + ' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+			}
 			bootstrap_alert.warning = function(message) {
-				$('#myAlert').html('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+				bootstrap_alert.show($('#myAlert'), message, "alert-danger");
 			}
 			closealert = function() { 
-				$('#myAlert').html('');
+				$('.alert').parent().html('');
 			}
 			
 			$("#id_form").on('submit', function (e) {
@@ -97,6 +100,10 @@
 				$( "#id_submitbutton" ).prop( "disabled", false );
 			}
 		};
+		
+		function showTips() {
+			alert("");
+		};
 	</script>
 
     <div class="container">
@@ -107,6 +114,8 @@
 				<div id="myAlert" class="errorAlert"></div>
 				<textarea id="id_textarea" rows=5 maxlength="254" name="description" class="form-control" 
 					placeholder="Pass a law to..." required autofocus></textarea>
+				<a href="##" onClick="showTips()">Tips for writing actions</a>
+				<div id="tipsAlert" class="errorAlert"></div>
     		</div>
 			<div class="row">
 				<input id="id_submitbutton" class="btn btn-primary btn-block ok-button" type="submit" value="Create Action"></input>

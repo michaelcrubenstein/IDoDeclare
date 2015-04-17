@@ -307,7 +307,7 @@ class PetitionVote(models.Model):
     vote = models.IntegerField(db_index=True)
     
     def __str__(self):
-        return self.user.email + "/" + self.petition.description + ": " + str(vote)
+        return self.constituent.user.email + "/" + self.petition.description + ": " + str(vote)
 
 class ArgumentManager(models.Manager):
     def get_arguments(petition_id, rating_constituent_id, vote):

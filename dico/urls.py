@@ -103,6 +103,8 @@ urlpatterns = patterns(
 	url(r'^getmymembers/', views.getMyMembers, name='getMyMembers'),
 	#
 	# documentation urls.
+	# ex: /dico/doctermsofuse
+	url(r'^doctermsofuse/', views.docTermsOfUse, name='docTermsOfUse'),
 	# ex: /dico/docratings
 	url(r'^(?P<petition_id>\d+)/docratings/$', views.docRatings, name='docRatings'),
 	# ex: /dico/docyourinterests

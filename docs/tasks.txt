@@ -69,6 +69,23 @@ DONE 2 - Add tip information describing the ratings
 DONE 2 - Add tip information for creating a new action.
 DONE 2 - Add tip information for creating a new argument.
 
+DONE 2 - Add a terms of use page to the account creation and account settings page.
+	Public Forum
+	Phone numbers and addresses are private
+	Passwords are not stored
+	
+DONE 2 - Fix bug so that password checkmarks appear outside of text boxes.
+
+Add Give Congress a Dose of Democracy data to the account creation and account settings page
+	daily, weekly, not at all
+	via email, via text message, via smart-phone app
+	
+Record times of votes
+Record creation times of arguments
+Record times of argument ratings
+
+Implement https
+
 Have a set of links associated with an action.
 Have a set of news items associated with an action.
 Have a set of representative comments associated with an action. (with ratings like arguments)

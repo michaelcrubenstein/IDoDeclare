@@ -151,11 +151,11 @@
 				</div>
 				<div class="form-group">
 					<label for="id_password"  class="control-label sr-only">Password</label> 
-					<input id="id_password" class="form-control" name="password" type="password" placeholder="Password" />
+					<input id="id_password" class="form-control password-control" name="password" type="password" placeholder="Password" />
 				</div>
 				<div id="id_confirm_form_group" class="form-group has-feedback">
 					<label for="id_confirmpassword"  class="control-label sr-only">Confirm Password</label> 
-					<input id="id_confirmpassword" class="form-control" name="confirmpassword" type="password" placeholder="Confirm password" />
+					<input id="id_confirmpassword" class="form-control password-control" name="confirmpassword" type="password" placeholder="Confirm password" />
 					<span id="id_passwordOK" class="glyphicon form-control-feedback"></span>
 				</div>
 				<div class="form-group">
@@ -183,6 +183,9 @@
 					<label for="id_zipcode"  class="control-label sr-only">Zip Code</label> 
 					<input id="id_zipcode" class="form-control" maxlength="5" name="zipcode" type="text" placeholder="Zip code" required/>
 				</div>
+			</div>
+			<div class="row">
+				<a class="btn btn-link btn-xs" href="{% url 'docTermsOfUse' %}">Terms of Use</a>
 			</div>
 			<div class="row">
 				<input id="submit_button" class="btn btn-primary btn-block ok-button col-xs-12" type="submit" value="Sign Up"></input>

@@ -29,6 +29,9 @@ body {
 .form-simple .div-success {
   margin-top: 10px;
 }
+.password-control {
+	width: 87%;	/* To account for confirmation check mark */
+}
 .ok-button {
   margin-top: 20px;
 }

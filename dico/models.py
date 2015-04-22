@@ -70,6 +70,7 @@ class ConstituentManager(models.Manager):
         try:
             constituent = self.create(user=user, streetAddress=streetaddress, zipCode=zipcode,
                                       district=district, state=state)
+            
             return constituent
         except Exception as e:
             try:
@@ -77,7 +78,39 @@ class ConstituentManager(models.Manager):
             except Exception:
                 pass
             raise e
+            
+class ContactMethod(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, primary_key=True);
+    frequency = models.PositiveSmallIntegerField(db_index=True, default=0) # 0 - never, 1 - daily, 2 - weekly
+    via = models.PositiveSmallIntegerField(db_index=True, null=True) # 1 - email, 2 - sms, 3 - app
+    phonenumber = models.CharField(max_length=25, null=True)
     
+    def get_contact_method(user):
+        if user is None or not user.is_active:
+            return None
+            
+        query_set = ContactMethod.objects.filter(user_id=user.id)
+        if query_set.count() == 0:
+            return ContactMethod.objects.create(user=user, frequency=1, via=2)
+        else:
+            return query_set.get()
+    
+    # Update the properties of this constituent.    
+    def update_fields(self, newFrequency, newVia, newPhoneNumber):
+        
+        if newFrequency is None:
+            newFrequency = self.frequency
+        if newVia is None:
+            newVia = self.via
+        if newPhoneNumber is None or len(newPhoneNumber) == 0:
+            newPhoneNumber = self.phonenumber
+        
+        ContactMethod.objects.filter(user_id=self.user.id) \
+            .update(frequency=newFrequency, via=newVia, phonenumber=newPhoneNumber)
+
+    def __str__(self):
+        return str(self.user)
+
 class Constituent(models.Model):
     fiveCharacterValidator = RegexValidator(r'^.....$', message='Zip codes are five digits only.')
     zipcodeValidator = RegexValidator(r'^[0-9][0-9][0-9][0-9][0-9]$', message='Zip codes are five digits only.')
@@ -89,7 +122,7 @@ class Constituent(models.Model):
     zipCode = models.CharField(max_length=5, db_column='zip_code', validators=[fiveCharacterValidator, zipcodeValidator])
     district = models.IntegerField(db_index=True)
     state = models.CharField(max_length=2, db_index=True)
-
+    
     objects = ConstituentManager()
     def __str__(self):
         return str(self.user)
@@ -101,9 +134,8 @@ class Constituent(models.Model):
         query_set = Constituent.objects.filter(user_id=user.id)
         if query_set.count() == 0:
             return None
-            
-        constituent = query_set.get()
-        return constituent
+        else:    
+            return query_set.get()
         
     def get_interests(user):
         constituent = Constituent.get_constituent(user)
@@ -146,7 +178,7 @@ class Constituent(models.Model):
             c.execute(sql, [user.id, user.id])
             petitions = []
             for i in c.fetchall():
-                petitions.append({'id': i[0], 'description': i[1], 'creation_time': i[2]})
+                petitions.append({'section': 'petition', 'id': i[0], 'description': i[1], 'creation_time': i[2]})
             return petitions
 
     def get_members(user):
@@ -170,7 +202,7 @@ class Constituent(models.Model):
             reps = [];
             
         return senators + reps
-    
+        
     # Update the properties of this constituent.    
     def update_fields(self, newUsername, newPassword, newFirstName, newLastName, newStreetAddress, newZipCode, newState, newDistrict):
          
@@ -179,13 +211,13 @@ class Constituent(models.Model):
             manager.update_user(self.user, newUsername, newPassword, newFirstName, newLastName)
             
             if len(newStreetAddress) == 0:
-                newStreetAddress = constituent.streetAddress
+                newStreetAddress = self.streetAddress
             if len(newZipCode) == 0:
-                newZipCode = constituent.zipCode
+                newZipCode = self.zipCode
             if len(newState) == 0:
-                newState = constituent.state
+                newState = self.state
             if newDistrict < 0:
-                newDistrict = constituent.district
+                newDistrict = self.district
             
             Constituent.objects.filter(user_id=self.user.id) \
                 .update(streetAddress=newStreetAddress, zipCode=newZipCode, state=newState, district=newDistrict)
@@ -305,6 +337,8 @@ class PetitionVote(models.Model):
     petition = models.ForeignKey(Petition, db_index=True, db_column='petition_id')
     constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
     vote = models.IntegerField(db_index=True)
+    creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+    lastModifiedTime = models.DateTimeField(db_column='last_modified_time', db_index=True, auto_now=True)
     
     def __str__(self):
         return self.constituent.user.email + "/" + self.petition.description + ": " + str(self.vote)

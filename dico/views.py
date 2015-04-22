@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.db import transaction
 from django.db.utils import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
@@ -16,7 +17,7 @@ import json
 import uuid
 
 from custom_user.models import AuthUser, PasswordReset
-from dico.models import Issue, Constituent, ConstituentInterest, \
+from dico.models import Issue, Constituent, ConstituentInterest, ContactMethod, \
     Petition, PetitionManager, PetitionIssue, PetitionVote, \
     Argument, ArgumentManager, ArgumentRating, MC
 from dico.titlecase import titlecase
@@ -93,11 +94,13 @@ def account(request):
     constituent = Constituent.get_constituent(request.user)
     if constituent is None:
         return index(request)
+    contactMethod = ContactMethod.get_contact_method(request.user)
         
     context = RequestContext(request, {
         'user': request.user,
         'constituent': constituent,
-        'backURL': backURL
+        'backURL': backURL,
+        'contactMethod': contactMethod
     })
     return HttpResponse(template.render(context))
 
@@ -346,24 +349,33 @@ def newConstituent(request):
         
         districtInfo = getDistrict(streetAddress + " " + zipCode)
 
-        constituent = Constituent.objects.create_constituent(username='Default user', password=password, email=username,
-                                                             firstname = firstName, lastname = lastName,
-                                                             streetaddress=streetAddress, zipcode=zipCode,
-                                                             district=districtInfo[0]["district"], state = districtInfo[0]["state"]
-                                                             ) 
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                if request.user is None:
-                    results = {'success':False, 'error': 'user login failed.'}
+        contactFrequency = request.POST['contactFrequency']
+        contactVia = request.POST['contactVia']
+        contactPhoneNumber = request.POST['contactPhone']
+        
+        with transaction.atomic():
+            constituent = Constituent.objects.create_constituent(username='Default user', password=password, email=username,
+                                                                 firstname = firstName, lastname = lastName,
+                                                                 streetaddress=streetAddress, zipcode=zipCode,
+                                                                 district=districtInfo[0]["district"], state = districtInfo[0]["state"]
+                                                                 )
+                                                             
+            contactMethod = ContactMethod.objects.create(user=constituent.user, frequency=contactFrequency,
+                                                         via=contactVia, phonenumber = contactPhoneNumber)
+                                                     
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    if request.user is None:
+                        results = {'success':False, 'error': 'user login failed.'}
+                    else:
+                        results = {'success':True}
                 else:
-                    results = {'success':True}
+                    results = {'success':False, 'error': 'this user is disabled.'}
+                    # Return a 'disabled account' error message
             else:
-                results = {'success':False, 'error': 'this user is disabled.'}
-                # Return a 'disabled account' error message
-        else:
-            results = {'success':False, 'error': 'This login is invalid.'}
+                results = {'success':False, 'error': 'This login is invalid.'}
     except IntegrityError as e:
         results = {'success':False, 'error': 'That email address has already been used to sign up.'}
     except Exception as e:
@@ -390,6 +402,9 @@ def updateConstituent(request):
         newLastName = POST.get('newLastName', '')
         newStreetAddress = POST.get('newStreetAddress', '')
         newZipCode = POST.get('newZipcode', '')
+        newFrequency = int(POST.get('newContactFrequency', 0))
+        newVia = int(POST.get('newContactVia', 0))
+        newPhoneNumber = POST.get('newContactPhone', '')
         
         constituent = Constituent.get_constituent(request.user)
         if constituent is None:
@@ -402,9 +417,17 @@ def updateConstituent(request):
             
         districtInfo = getDistrict(newStreetAddress + " " + newZipCode)
         
-        constituent.update_fields(newUsername, newPassword, 
-                                  newFirstName, newLastName, newStreetAddress, newZipCode, 
-                                  districtInfo[0]["state"], districtInfo[0]["district"])
+        contactMethod = ContactMethod.get_contact_method(request.user)
+
+        with transaction.atomic():
+            constituent.update_fields(newUsername, newPassword, 
+                                      newFirstName, newLastName, newStreetAddress, newZipCode, 
+                                      districtInfo[0]["state"], districtInfo[0]["district"])
+                                  
+            if contactMethod is None:
+                ContactMethod.objects.create(frequency=newFrequency, via=newVia, phonenumber=newPhoneNumber)
+            else:
+                contactMethod.update_fields(newFrequency, newVia, newPhoneNumber)
 
         results = {'success':True}
     except IntegrityError as e:

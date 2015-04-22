@@ -558,6 +558,9 @@
 				<a href="{% url 'signin' %}">Sign in</a> to identify the issues you care about and vote on actions
 				Congress can take!
 			</div>
+			<div class="col-xs-12 help block">
+	  			Don't have an account? <a href="{% url 'createConstituent' %}?back={% url 'index' %}">Create one now.</a>
+			</div>
 			{% endif %}
 		</div>
 

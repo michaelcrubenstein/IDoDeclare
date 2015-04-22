@@ -11,6 +11,7 @@
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -37,15 +38,15 @@
 	<script type="text/JavaScript">
 	</script>
 
-	<div id='container' class="container">
-		<nav class="navbar navbar-default" role="navigation">
-		  <div class="container-fluid">
-			<!-- Brand and toggle get grouped for better mobile display -->
-			<div class="nav navbar-nav navbar-header pull-left">
-			  <a class="navbar-text" href="{% url 'index' %}">
-			  	Done</a>
+	<div id='container' class="container-fluid">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="nav navbar-nav navbar-header pull-left">
+				  <a class="navbar-text navbar-link dico-nav-edge-link" href="{% url 'index' %}">
+					Done</a>
+				</div>
 			</div>
-		  </div><!-- /.container-fluid -->
 		</nav>
 
 	    <div id="myAlert" class="row"></div>

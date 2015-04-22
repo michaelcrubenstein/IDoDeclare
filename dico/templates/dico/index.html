@@ -11,6 +11,7 @@
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
     <link href="{% static "dico/css/index.css" %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -28,98 +29,6 @@
 	<!-- Styles for this web page -->
 	<style>
 
-	.header {
-		background-color:green;
-		color:white;
-		padding:5px;
-	}
-
-	path {
-	  stroke-linejoin: round;
-	  stroke-linecap: round;
-	}
-
-	.land {
-	  fill: #bbb;
-	}
-
-	.land :hover {
-	  fill: purple;
-	}
-
-	/* 
-	.land .neighbor {
-	  fill: orange;
-	}
-	 */
-
-	.border {
-	  pointer-events: none;
-	  fill: none;
-	  stroke: #fff;
-	}
-
-	.border--district {
-	  stroke-width: .5px;
-	}
-
-	.border--state {
-	  stroke-width: 1.5px;
-	}
-
-	// Styles for tool tips.
-	.d3-tip {
-	  line-height: 1;
-	  font-weight: bold;
-	  padding: 12px;
-	  background: rgba(0, 0, 0, 0.8);
-	  color: #fff;
-	  border-radius: 2px;
-	}
-
-	/* Creates a small triangle extender for the tooltip */
-	.d3-tip:after {
-	  box-sizing: border-box;
-	  display: inline;
-	  font-size: 10px;
-	  width: 100%;
-	  line-height: 1;
-	  color: rgba(0, 0, 0, 0.8);
-	  content: "\25BC";
-	  position: absolute;
-	  text-align: center;
-	}
-
-	/* Style northward tooltips differently */
-	.d3-tip.n:after {
-	  margin: -1px 0 0 0;
-	  top: 100%;
-	  left: 0;
-	}
-
-	circle {
-	  fill: #888;
-	}
-
-	.bubble {
-	  fill: #FCC;
-	  fill-opacity: 0.5;
-	  stroke: white;
-	  stroke-width: 0.5px;
-	}
-	
-	.map-select-column {
-		display: inline-block;
-    	vertical-align: bottom;
-    	float: none;
-	}
-	
-	.map-options-column {
-		display: inline-block;
-    	vertical-align: bottom;
-    	float: none;
-	}
-	
 	</style>
 
 
@@ -306,7 +215,7 @@
 					$(td1).append(newButton);
 					$(newButton).addClass("btn btn-link btn-xs")
 								.attr("href", "/dico/" + issue['id'] + "/issue/")
-								.append(issue['name']);
+								.append(htmlEncode(issue['name']));
 					petitionCount = parseInt(issue['petition_count']);
 					if (petitionCount > 0) {
 						newBadge = document.createElement("span");
@@ -523,35 +432,35 @@
 		d3.select(self.frameElement).style("height", ($("#mapFrame").width() / 8 * 5) + "px");
 	</script>
 
-	<div id='container' class="container">
-		<nav class="navbar navbar-default" role="navigation">
-		  <div class="container-fluid">
-			<!-- Brand and toggle get grouped for better mobile display -->
-			<div class="nav navbar-nav navbar-header pull-left">
-			  <div class="navbar-brand">I Do Declare</div>
+	<div id='container' class="container-fluid">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="nav navbar-nav navbar-header pull-left">
+				  <div class="navbar-brand">I Do Declare</div>
+				</div>
+
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav navbar-nav navbar-header pull-right">
+					{% if user.is_authenticated %}
+						<li class="dropdown">
+						  <a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
+						  <ul class="dropdown-menu dropdown-menu-right" role="menu">
+							<li><a id="id_accountSettingsLink">Account Settings</a></li>
+							<li><a id="id_changePasswordLink">Change Password</a></li>
+							<li class="divider"></li>
+							<li><a href="{% url 'editInterests' %}">Edit Interests</a></li>
+							<li class="divider"></li>
+							<li><a href="{% url 'signout' %}">Sign out</a></li>
+						  </ul>
+						</li>
+					{% else %}
+						<a class="navbar-text navbar-link dico-nav-edge-link" href="{% url 'signin' %}">Sign in</a>
+					{% endif %}
+				</div>
 			</div>
-
-			<!-- Collect the nav links, forms, and other content for toggling -->
-		  <ul class="nav navbar-nav navbar-header pull-right">
-			{% if user.is_authenticated %}
-			<li class="dropdown">
-			  <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
-			  <ul class="dropdown-menu" role="menu">
-				<li><a id="id_accountSettingsLink">Account Settings</a></li>
-				<li><a id="id_changePasswordLink">Change Password</a></li>
-				<li class="divider"></li>
-				<li><a href="{% url 'editInterests' %}">Edit Interests</a></li>
-				<li class="divider"></li>
-				<li><a href="{% url 'signout' %}">Sign out</a></li>
-			  </ul>
-			</li>
-			{% else %}
-				<a class="navbar-text" href="{% url 'signin' %}">Sign in</a>
-			{% endif %}
-		  </ul>
-		  </div><!-- /.container-fluid -->
 		</nav>
-
+		
 		<div class="row">
 			{% if user.is_authenticated %}
 			<div class="col-xs-12 col-md-6 col-md-push-3">
@@ -561,7 +470,11 @@
 					<tbody>
 						{% for news_item in news_list %}
 						<tr>
-							<td width="auto">{{ news_item.description }} </td>
+							<td width="auto">
+								{% if news_item.section == "petition" %}
+									<span class="text-muted">This action needs your vote:<br> </span>
+								{% endif %}
+								{{ news_item.description }} </td>
 							<td width="100px">
 								<a class="btn btn-link btn-xs" href="/dico/{{ news_item.id }}/petition/">Vote Now
 									<span class="glyphicon glyphicon-chevron-right"></span>
@@ -577,7 +490,7 @@
 			</div>
 
 			<div class="col-xs-12 col-sm-6 col-md-3 col-md-pull-6">
-				<div class="dark-column">
+				<div>
 					<div class="row">
 						<div class="col-xs-12">
 						<label class="control-label table-label">Your Interests</label>
@@ -598,7 +511,7 @@
 							</div>
 						{% endfor %}
 					{% else %}
-						<div class="row dark-column">
+						<div class="row">
 							<div class="col-xs-12 issue-container">
 								<a class="btn btn-sm btn-link" href="{% url 'editInterests' %}">Express Interests</a>
 							</div>
@@ -610,24 +523,26 @@
 			<div class="col-xs-12 visible-xs-inline" style="border:0; height:7px">
 			</div>
 
-			<div class="col-xs-12 col-sm-5 col-sm-offset-1 col-md-3 col-md-offset-0 text-right">
-				<div class="dark-column">
+			<div class="col-xs-12 col-sm-5 col-sm-offset-1 col-md-3 col-md-offset-0">
+				<div class="dark-column member-column">
 					<div class="row">
 						<div class="col-xs-12">
-							<div class="text-right table-label"><h4>Your Members</h4></div>
+							<label class="control-label table-label">Your Members</label>
 						</div>
 					</div>
 					<div>
 						{% if member_list %}
 							{% for member in member_list %}
-								<div class="member-row text-right">
+								<div class="member-row">
 									<a href="{{ member.website }}" target="_blank"">
-										<div class="member-title">
-											<strong>{{ member.title }} {{ member.first_name }} {{ member.last_name }} {{ member.suffix }}
-											</strong>
+										<div class="hidden-xs member-title">
+											{{ member.title }} {{ member.first_name }} {{ member.last_name }} {{ member.suffix }}
 										</div>
 										<div class="member-picture">
 											<img width="50" src="http://theunitedstates.io/images/congress/original/{{ member.bioguide_id }}.jpg" />
+										</div>
+										<div class="visible-xs-inline-block member-title">
+											{{ member.title }} {{ member.first_name }} {{ member.last_name }} {{ member.suffix }}
 										</div>
 									</a>
 								</div>
@@ -647,16 +562,16 @@
 		</div>
 
 		<div class="row">
-			<div class="col-xs-12">
-				<hr style="background:#F87431; border:0; height:7px" />
-			</div>
+				<hr class="separator-bold" />
 		</div>
 		<div class="row">
 			{% if issue_list %}
-			<div class="col-xs-7 col-sm-7 map-select-column">
-				<label for="issue_select" class="control-label">Where People Care About</label>
-				<select id="issue_select" class="form-control">
-				</select>
+			<div class="col-xs-7 col-sm-7">
+				<div class="map-select-column">
+					<label for="issue_select" class="control-label">Where People Care About</label>
+					<select id="issue_select" class="form-control">
+					</select>
+				</div>
 			</div>
 
 			{% endif %}

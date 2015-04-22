@@ -1,0 +1,20 @@
+body {
+  padding-top: 55px;
+}
+.dico-navbar {
+	background: #D1E1FF;
+	border-radius:0px;
+	margin-bottom: 0px;
+	min-height: 40px;
+}
+@media (max-width: 767px) {
+	.navbar-brand {
+		display: none;
+	}
+	.dico-nav-edge-link {
+		padding-left: 15px;
+		padding-right: 15px;
+		padding-top: 15px;
+		padding-bottom: 15px;
+	}
+}

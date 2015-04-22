@@ -47,30 +47,75 @@
 			$("#createconstituent-form").on('submit', function (e) {
 				closealert();
 				
-				deferredObject = $.post("/dico/newconstituent/", 
-					{ csrfmiddlewaretoken: '{{ csrf_token }}', 
-						"username": $("#id_username").val(),
-						"password": $("#id_password").val(),
-						"firstName": $("#id_firstname").val(),
-						"lastName": $("#id_lastname").val(),
-						"streetAddress": $("#id_streetaddress").val(),
-						"zipcode": $("#id_zipcode").val(),
-					})
-				  .done(function(json, textStatus, jqXHR)
-					{
-						if (json['success']) {
-							closealert();
-							window.location = "{% url 'editInterests' %}"
-						}
-						else {
-							bootstrap_alert.warning(json['error']);
-						}
-					})
-				  .fail(function(jqXHR, textStatus, errorThrown) {
-		    		bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
-					console.log( "error: " + textStatus + "; " + errorThrown + ";");
-					console.log( jqXHR.status + "; " + jqXHR.statusText);
-				  });
+				if ($("#id_username").val() === "") {
+					bootstrap_alert.warning("An email address is required.");
+					$("#id_username").focus();
+				}
+				else if ($("#id_password").val() === "") {
+					bootstrap_alert.warning("A password is required.");
+					$("#id_password").focus();
+				}
+				else if ($("#id_confirmpassword").val() != $("#id_password").val()) {
+					bootstrap_alert.warning("Your password is not confirmed.");
+					$("#id_confirmpassword").focus();
+				}
+				else if ($("#id_firstname").val() === "") {
+					bootstrap_alert.warning("A first name is required.");
+					$("#id_firstname").focus();
+				}
+				else if ($("#id_lastname").val() === "") {
+					bootstrap_alert.warning("A last name is required.");
+					$("#id_lastname").focus();
+				}
+				else if ($("#id_streetaddress").val() === "") {
+					bootstrap_alert.warning("A street address is required.");
+					$("#id_streetaddress").focus();
+				}
+				else if ($("#id_zipcode").val() === "") {
+					bootstrap_alert.warning("A ZIP code is required.");
+					$("#id_zipcode").focus();
+				}
+				else if ($("#id_zipcode").val().length != 5) {
+					bootstrap_alert.warning("The ZIP code must be 5 digits");
+					$("#id_zipcode").focus();
+				}
+				else if ($("#id_phonenumber").val() === "" &&
+						 $('#id_viasms').is(':checked')) {
+					bootstrap_alert.warning("You must specify a phone number to receive help with a text message.");
+					$("#id_phonenumber").focus();
+				}
+				else
+				{
+					bootstrap_alert.show($('#myAlert'), "Signing up...", "alert-info");
+				
+					deferredObject = $.post("/dico/newconstituent/", 
+						{ csrfmiddlewaretoken: '{{ csrf_token }}', 
+							"username": $("#id_username").val(),
+							"password": $("#id_password").val(),
+							"firstName": $("#id_firstname").val(),
+							"lastName": $("#id_lastname").val(),
+							"streetAddress": $("#id_streetaddress").val(),
+							"zipcode": $("#id_zipcode").val(),
+							"contactFrequency": $('input[name=frequencyOptions]:checked', '#createconstituent-form').val(),
+							"contactVia": $('input[name=viaOptions]:checked', '#createconstituent-form').val(),
+							"contactPhone": $("#id_phonenumber").val()
+						})
+					  .done(function(json, textStatus, jqXHR)
+						{
+							if (json['success']) {
+								closealert();
+								window.location = "{% url 'editInterests' %}"
+							}
+							else {
+								bootstrap_alert.warning(json['error']);
+							}
+						})
+					  .fail(function(jqXHR, textStatus, errorThrown) {
+						bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+						console.log( "error: " + textStatus + "; " + errorThrown + ";");
+						console.log( jqXHR.status + "; " + jqXHR.statusText);
+					  });
+				}
 
 			   //stop form submission
 			   e.preventDefault();
@@ -81,45 +126,47 @@
 				e.preventDefault();
 			});
 		
-			$("#id_username").bind("keyup input paste", checkenabled);
-			$("#id_password").bind("keyup input paste", checkenabled);
-			$("#id_confirmpassword").bind("keyup input paste", checkenabled);
-			$("#id_firstname").bind("keyup input paste", checkenabled);
-			$("#id_lastname").bind("keyup input paste", checkenabled);
-			$("#id_streetaddress").bind("keyup input paste", checkenabled);
-			$("#id_zipcode").bind("keyup input paste", checkenabled);
+			$("input[type='text']").bind("keyup input paste", checkenabled);
+			$("input[type='password']").bind("keyup input paste", checkenabled);
 			checkenabled();
+			
+			$("#id_viasms").change(function(e) {
+				$( "#id_phonenumber" ).prop( "disabled", !($('#id_viasms').is(':checked')) );
+			});
+			
+			$("#id_dailyradio").prop("checked", true);
+			$("#id_viasms").prop("checked", true);
 		});
 		
 		function checkenabled() {
-			if ($("#id_username").val() === "" ||
-				$("#id_password").val() === "" ||
-				$("#id_firstname").val() === "" ||
-				$("#id_lastname").val() === "" ||
-				$("#id_streetaddress").val() === "" ||
-				$("#id_zipcode").val() === "")
-				$( "#submit_button" ).prop( "disabled", true );
-			else if ($("#id_confirmpassword").val() != $("#id_password").val()) {
-				$( "#submit_button" ).prop( "disabled", true );
-			}
-			else
-			{
-				// Make sure the email address has an "@" sign followed by a "."
-				testusername = $("#id_username").val();
-				if (testusername.indexOf("@") == -1 ||
-					testusername.indexOf(".") == -1 ||
-					testusername.indexOf("@") > testusername.lastIndexOf("."))
-					$( "#submit_button" ).prop( "disabled", true );
-				else
-				{
-					// Make sure the zipcode is 5 characters.
-					testzipcode = $("#id_zipcode").val();
-					if (testzipcode.length != 5)
-						$( "#submit_button" ).prop( "disabled", true );
-					else	
-						$( "#submit_button" ).prop( "disabled", false );
-				}
-			}
+// 			if ($("#id_username").val() === "" ||
+// 				$("#id_password").val() === "" ||
+// 				$("#id_firstname").val() === "" ||
+// 				$("#id_lastname").val() === "" ||
+// 				$("#id_streetaddress").val() === "" ||
+// 				$("#id_zipcode").val() === "")
+// 				$( "#submit_button" ).prop( "disabled", true );
+// 			else if ($("#id_confirmpassword").val() != $("#id_password").val()) {
+// 				$( "#submit_button" ).prop( "disabled", true );
+// 			}
+// 			else
+// 			{
+// 				// Make sure the email address has an "@" sign followed by a "."
+// 				testusername = $("#id_username").val();
+// 				if (testusername.indexOf("@") == -1 ||
+// 					testusername.indexOf(".") == -1 ||
+// 					testusername.indexOf("@") > testusername.lastIndexOf("."))
+// 					$( "#submit_button" ).prop( "disabled", true );
+// 				else
+// 				{
+// 					// Make sure the zipcode is 5 characters.
+// 					testzipcode = $("#id_zipcode").val();
+// 					if (testzipcode.length != 5)
+// 						$( "#submit_button" ).prop( "disabled", true );
+// 					else	
+// 						$( "#submit_button" ).prop( "disabled", false );
+// 				}
+// 			}
 			
 			if ($("#id_password").val() === "" ||
 			    $("#id_confirmpassword").val() !== $("#id_password").val())
@@ -142,7 +189,6 @@
 		<form id="createconstituent-form" class="form-simple">
 			<div class="row">
 				<h3>Join I Do Declare today.</h3>
-				<div id="myAlert"></div>
 
 				<div class="form-group">
 					<label for="id_username"  class="control-label sr-only">Email Address</label> 
@@ -170,6 +216,7 @@
 					<label for="id_lastname"  class="control-label sr-only">Last Name</label> 
 					<input id="id_lastname" class="form-control" maxlength="50" name="lastName" type="text" placeholder="Last name" required />
 				</div>
+				
 				<div class="form-group">
 					<span class="help-block">Your street address and zip code are used to identify your elected legislators.</span>
 				</div>
@@ -181,18 +228,83 @@
 							</div>
 				<div class="form-group col-xs-offset-1">
 					<label for="id_zipcode"  class="control-label sr-only">Zip Code</label> 
-					<input id="id_zipcode" class="form-control" maxlength="5" name="zipcode" type="text" placeholder="Zip code" required/>
+					<input id="id_zipcode" class="form-control" maxlength="5" name="zipcode" type="text" placeholder="ZIP code" required/>
 				</div>
 			</div>
-			<div class="row">
-				<a class="btn btn-link btn-xs" href="{% url 'docTermsOfUse' %}">Terms of Use</a>
+				
+			<div class="form-group">
+				<div class="row">
+					<span class="text-muted">Would you like help to easily share your voice periodically? Sign up to 
+						get messages so you can directly speak up on the issues you care about.</span>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label id="dailyButton" class="radio-inline">
+						  <input type="radio" name="frequencyOptions" id="id_dailyradio" value=1 />
+						  <span class="text-muted">Help Me Daily</span>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label id="weeklyButton" class="radio-inline">
+						  <input type="radio" name="frequencyOptions" id="weeklyRadio" value=2 />
+						  <span class="text-muted">Help Me Weekly</span>
+						</label>			
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2">
+						<label id="noneButton" class="radio-inline">
+						  <input type="radio" name="frequencyOptions" id="noneRadio" value=0 />
+						  <span class="text-muted">No Thanks</span>
+						</label>
+					</div>			
+				</div>
 			</div>
-			<div class="row">
-				<input id="submit_button" class="btn btn-primary btn-block ok-button col-xs-12" type="submit" value="Sign Up"></input>
+			<div class="form-group">
+				<div class="row">
+					<span class="text-muted">How would you like to be helped?</span>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label class="radio-inline">
+						<input type="radio" name="viaOptions" id="id_viasms" value=1></input>
+						<span class="text-muted">With a Text Message</span>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-3 group-row-item">
+						<label for="id_phonenumber" class="control-label sr-only">Phone Number</label> 
+						<input id="id_phonenumber" class="form-control" maxlength="25" name="phonenumber" type="text" placeholder="Phone Number" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label class="radio-inline">
+						<input type="radio" name="viaOptions" id="id_viaemail" value=2></input>
+						<span class="text-muted">With an E-Mail</span>
+						</label>
+					</div>
+				</div>
+			</div>		
+			<div class="form-group">
+				<div class="row">
+					<a class="btn btn-link btn-xs" href="{% url 'docTermsOfUse' %}">Terms of Use</a>
+				</div>
 			</div>
-		    <div class="row">
-				<input id="cancel_button" class="btn btn-default btn-block cancel-button col-xs-12" type="button" value="Cancel"></input>
-		    </div>
+			<div class="form-group">
+				<div class="row">
+					<div id="myAlert"></div>
+				</div>
+				<div class="row">
+					<input id="submit_button" class="btn btn-primary btn-block col-xs-12" type="submit" value="Sign Up"></input>
+				</div>
+				<div class="row">
+					<input id="cancel_button" class="btn btn-default btn-block cancel-button col-xs-12" type="button" value="Cancel"></input>
+				</div>
+			</div>
 		</form>
 
 <script type="text/javascript">

@@ -38,3 +38,6 @@ body {
 .cancel-button {
   margin-top: 10px;
 }
+.group-row-item {
+  margin-bottom: 0px;
+}

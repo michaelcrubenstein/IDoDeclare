@@ -42,9 +42,13 @@
         	closealert = function() { 
         		$('.alert').parent().html('');
         	}
+        	
+        	 $("input[name=frequencyOptions][value={{contactMethod.frequency}}]").attr("checked", true);
+        	 $("input[name=viaOptions][value={{contactMethod.via}}]").attr("checked", true);
 			
 			$("#createconstituent-form").on('submit', function (e) {
 				closealert();
+				bootstrap_alert.show($('#myAlert'), "Updating Account...", "alert-info");
 				
 				deferredObject = $.post("/dico/updateconstituent/", 
 					{ csrfmiddlewaretoken: '{{ csrf_token }}', 
@@ -53,6 +57,9 @@
 						"newLastName": $("#id_lastname").val(),
 						"newStreetAddress": $("#id_streetaddress").val(),
 						"newZipcode": $("#id_zipcode").val(),
+						"newContactFrequency": $('input[name=frequencyOptions]:checked', '#createconstituent-form').val(),
+						"newContactVia": $('input[name=viaOptions]:checked', '#createconstituent-form').val(),
+						"newContactPhone": $("#id_phonenumber").val()
 					})
 				  .done(function(json, textStatus, jqXHR)
 					{
@@ -112,7 +119,6 @@
     <div class="container">
 		<form id="createconstituent-form" class="form-simple">  
     		<h3>Account Settings</h3>
-			<div id="myAlert"></div>
 			<div class="form-group row">
 				<label for="id_username"  class="control-label">Email Address</label> 
 				<input id="id_username" class="form-control" maxlength="254" name="username" 
@@ -148,15 +154,80 @@
 							value="{{constituent.zipCode}}" placeholder="{{constituent.zipCode}}" required/>
 				</div>
 			</div>
-			<div class="row">
-				<a class="btn btn-link btn-xs" href="{% url 'docTermsOfUse' %}">Terms of Use</a>
+			<div class="form-group">
+				<div class="row">
+					<span class="text-muted">Would you like help to easily share your voice periodically? Sign up to 
+						get messages so you can directly speak up on the issues you care about.</span>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label id="dailyButton" class="radio-inline">
+						  <input type="radio" name="frequencyOptions" id="id_dailyradio" value=1 />
+						  <span class="text-muted">Help Me Daily</span>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label id="weeklyButton" class="radio-inline">
+						  <input type="radio" name="frequencyOptions" id="weeklyRadio" value=2 />
+						  <span class="text-muted">Help Me Weekly</span>
+						</label>			
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2">
+						<label id="noneButton" class="radio-inline">
+						  <input type="radio" name="frequencyOptions" id="noneRadio" value=0 />
+						  <span class="text-muted">No Thanks</span>
+						</label>
+					</div>			
+				</div>
 			</div>
-			<div class="row">
-				<input id="submit_button" class="btn btn-primary btn-block ok-button col-xs-12" type="submit" value="Update Account"></input>
+			<div class="form-group">
+				<div class="row">
+					<span class="text-muted">How would you like to be helped?</span>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label class="radio-inline">
+						<input type="radio" name="viaOptions" id="id_viasms" value=1></input>
+						<span class="text-muted">With a Text Message</span>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-3 group-row-item">
+						<label for="id_phonenumber" class="control-label sr-only">Phone Number</label> 
+						<input id="id_phonenumber" class="form-control" maxlength="25" name="phonenumber" type="text" 
+								value="{{contactMethod.phonenumber}}" placeholder="{{contactMethod.phonenumber}}" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label class="radio-inline">
+						<input type="radio" name="viaOptions" id="id_viaemail" value=2></input>
+						<span class="text-muted">With an E-Mail</span>
+						</label>
+					</div>
+				</div>
+			</div>		
+			<div class="form-group">
+				<div class="row">
+					<a class="btn btn-link btn-xs" href="{% url 'docTermsOfUse' %}">Terms of Use</a>
+				</div>
 			</div>
-		    <div class="row">
-				<input id="cancel_button" class="btn btn-default btn-block cancel-button col-xs-12" type="button" value="Cancel"></input>
-		    </div>
+			<div class="form-group">
+				<div class="row">
+					<div id="myAlert"></div>
+				</div>
+				<div class="row">
+					<input id="submit_button" class="btn btn-primary btn-block col-xs-12" type="submit" value="Update Account"></input>
+				</div>
+				<div class="row">
+					<button id="cancel_button" class="btn btn-default btn-block cancel-button col-xs-12">Cancel</button>
+				</div>
+			</div>
 		</form>
 
 		<script type="text/javascript">

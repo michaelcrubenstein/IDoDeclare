@@ -1,11 +1,6 @@
-.petition-description {
-  padding: 15px;
-  margin: 0 auto;
-}
-
 .issue-column {
-	background: #DDD;
-	margin-bottom: 20px;
+	margin-bottom: 10px;
+	background-color: #EEE;
 }
 
 .lightbackground {
@@ -16,12 +11,12 @@
 		padding-top: 3px;
 		vertical-align: text-top;
   		margin: 0 auto;
-  		padding-left: 5px;
 }
 
 .simple-separator {
 	background:#AAA; border:0; height:2px;
 	margin-top: 0px;
+	margin-bottom: 0px;
 }
 
 .no-top-padding {
@@ -29,7 +24,7 @@
 }
 
 .bottom-padding {
-		padding-bottom: 3px;
+	padding-bottom: 3px;
 }
 
 .argument-table {
@@ -42,6 +37,10 @@
 
 .argument-container {
 	background: white;
+}
+.delete-row-padding {
+	padding-top: 10px;
+	padding-bottom: 3px;
 }
 th {white-space:nowrap}
 	

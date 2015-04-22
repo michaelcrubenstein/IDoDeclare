@@ -11,6 +11,7 @@
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
     <link href="{% static "dico/css/petition.css" %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -46,8 +47,7 @@
 		}
 		
 		function htmlEncode(input){
-			str = $('<div>').text(input).html();
-		    return String(str).replace(/ /g, '&nbsp;');
+			return $('<div>').text(input).html();
 		}
 		
 		// Display all of the interests in the system.
@@ -214,7 +214,7 @@
 			containerObj.append(li);
 			$(li).append(newParagraph);
 
-			$(newParagraph).append(arg['description']);
+			$(newParagraph).append(htmlEncode(arg['description']));
 			
 			ratingCell = document.createElement("td");
 			$(li).append(ratingCell);
@@ -418,7 +418,7 @@
 									$("#supportButton").button('toggle');
 								}
 								else if (json['userVote'] == 0) {
-									$('#opposeRadio').attr('checked', true);
+									$('#opposeRadio').prop('checked', true);
 									$("#opposeButton").button('toggle');
 								}
 							}
@@ -426,7 +426,7 @@
 						else
 						{
 							if (init_user_vote) {
-								$('#noOpinionRadio').attr('checked', true);
+								$('#noOpinionRadio').prop('checked', true);
 								$('#noOpinionButton').button('toggle');
 							}
 						}
@@ -483,23 +483,24 @@
 		
 	</script>
 
-	<div id='container' class="container">
-		<nav class="navbar navbar-default" role="navigation">
-		  <div class="container-fluid">
-			<div class="nav navbar-nav navbar-header pull-left">
-			  <a class="navbar-text" href="{{ backURL }}">
-			  	<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}</a>
+	<div id='container' class="container-fluid">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<div class="nav navbar-nav navbar-header pull-left">
+					<li>
+						<a class="navbar-link" href="{{ backURL }}">
+							<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}
+						</a>
+					</li>
+				</div>
 			</div>
-
-			<!-- Collect the nav links, forms, and other content for toggling -->
-		  </div><!-- /.container-fluid -->
 		</nav>
 
 	    <div id="myAlert"></div>
-		<div class="lightbackground row">
+		<div class="row">
 			<div class="col-xs-12 col-sm-8">
-				<h3 id='id_petition_title' class="toplabel">An Action for Congress:</h3>
-				<p class="lead">{{petition.description}}</p>
+				<h5 id='id_petition_title' class="toplabel">An Action for Congress:</h5>
+				<p class="lead"><strong>{{petition.description}}</strong></p>
 			</div>
 			<div class="col-xs-12 col-sm-4">
 				<div class="issue-column">
@@ -516,9 +517,9 @@
 				</div>
 			</div>
 		</div>
-		<div class="lightbackground row">
+		<div class="row">
 			<div class="col-xs-12 col-sm-8 your-vote-column">
-				<label class="control-label">Your vote</label>
+				<label>Your vote</label>
 				<div class="btn-group" data-toggle="buttons">
 					<label id="supportButton" class="btn btn-default">
 					  <input type="radio" name="voteOptions" id="supportRadio" value=1 />
@@ -531,21 +532,20 @@
 					<label id="noOpinionButton" class="btn btn-default active">
 					  <input type="radio" name="voteOptions" id="noOpinionRadio" value=-1 />No Opinion
 					</label>
-				</div>			
+				</div>
 			</div>
-			<div id="id_total_votes" class="col-xs-12 col-sm-4 total-vote-column">
-			</div>
-		</div>
-		<div class="lightbackground row">
-			<div class="col-xs-12">
-				<hr style="background:#AAA; border:0; height:2px" />
+			<div class="col-xs-12 col-sm-4">
+				<div id="id_total_votes" class="bottom-padding"></div>
 			</div>
 		</div>
-		<div class="lightbackground row">
+		<div class="row">
+				<hr class="simple-separator" />
+		</div>
+		<div class="row">
 			<div class="col-xs-12 col-md-6">
-				<table class="table table-bordered argument-container">
+				<table class="table table-striped table-condensed argument-container">
 					<thead>
-						<th><h5 class="panel-title">Supporting Arguments</h5>
+						<th>Supporting Arguments
 						</th>
 						<th>Your Rating 
 							<button class="btn btn-link btn-xs" onClick="doc_ratings()"}>
@@ -560,7 +560,7 @@
 					<tr>
 						<td>
 							<button class="btn btn-link btn-xs" onClick="add_supporting_argument()"}>
-									Add Supporting Argument
+									Add Your Own Supporting Argument
 							</button>
 						</td>
 						<td></td>
@@ -570,9 +570,9 @@
 				</table>
 			</div>
 			<div class="col-xs-12 col-md-6">
-				<table class="table table-bordered argument-container">
+				<table class="table table-striped table-condensed argument-container">
 					<thead>
-						<th><h5 class="panel-title">Opposing Arguments</h5>
+						<th>Opposing Arguments
 						</th>
 						<th>Your Rating 
 							<button class="btn btn-link btn-xs" onClick="doc_ratings()"}>
@@ -587,7 +587,7 @@
 					<tr>
 						<td>
 							<button class="btn btn-link btn-xs" onClick="add_opposing_argument()"}>
-									Add Opposing Argument
+									Add Your Own Opposing Argument
 							</button>
 						</td>
 						<td></td>
@@ -598,12 +598,10 @@
 			</div>
 		</div>
 		{% if user.id == petition.constituent.user.id or user.is_superuser %}
-		<div class="lightbackground row">
-			<div class="col-xs-12">
+		<div class="row">
 				<hr class="simple-separator no-top-padding" />
-			</div>
 		</div>
-		<div class="lightbackground row bottom-padding">
+		<div class="row delete-row-padding">
 			<div class="col-xs-12 col-md-6 col-md-offset-6">
 				<button id="id_deleteActionButton" class="btn btn-default btn-block">
 					<span class="text-danger">Delete Action</span>

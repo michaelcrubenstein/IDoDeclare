@@ -5,7 +5,7 @@ from django.contrib import admin
 ##from django import forms
 
 # Register your models here.
-from dico.models import Issue, Constituent, ConstituentInterest, \
+from dico.models import Issue, Constituent, ConstituentInterest, ContactMethod, \
     Petition, PetitionIssue, Argument, ArgumentRating, \
     MC, Event, MCInterest, EventIssue
     
@@ -34,7 +34,6 @@ class IssueAdmin(admin.ModelAdmin):
 class ConstituentInterestInline(admin.StackedInline):
     model = ConstituentInterest
     extra = 3
-
 
 class ConstituentAdmin(admin.ModelAdmin):
 ##    fieldsets = [
@@ -70,6 +69,7 @@ class EventAdmin(admin.ModelAdmin):
 
 admin.site.register(Issue, IssueAdmin)
 admin.site.register(Constituent, ConstituentAdmin)
+admin.site.register(ContactMethod)
 admin.site.register(Petition, PetitionAdmin)
 admin.site.register(Argument, ArgumentAdmin)
 admin.site.register(MC, MCAdmin)

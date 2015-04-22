@@ -76,15 +76,17 @@ DONE 2 - Add a terms of use page to the account creation and account settings pa
 	
 DONE 2 - Fix bug so that password checkmarks appear outside of text boxes.
 
-Add Give Congress a Dose of Democracy data to the account creation and account settings page
+DONE 2 - Add Give Congress a Dose of Democracy data to the account creation and account settings page
 	daily, weekly, not at all
-	via email, via text message, via smart-phone app
+	via email, via text message
 	
-Record times of votes
-Record creation times of arguments
-Record times of argument ratings
+DONE 2 - Record times of votes
+
+DONE 2 - Fix html injection for arguments
+DONE 2 - Update UI with color and Navigation bars Fixed at the top.
 
 Implement https
+Learn more about I Do Declare page.
 
 Have a set of links associated with an action.
 Have a set of news items associated with an action.

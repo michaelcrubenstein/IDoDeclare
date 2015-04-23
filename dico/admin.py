@@ -6,7 +6,7 @@ from django.contrib import admin
 
 # Register your models here.
 from dico.models import Issue, Constituent, ConstituentInterest, ContactMethod, \
-    Petition, PetitionIssue, Argument, ArgumentRating, \
+    Petition, PetitionIssue, PetitionVote, Argument, ArgumentRating, \
     MC, Event, MCInterest, EventIssue
     
 class ArgumentRatingInline(admin.TabularInline):
@@ -33,7 +33,11 @@ class IssueAdmin(admin.ModelAdmin):
 
 class ConstituentInterestInline(admin.StackedInline):
     model = ConstituentInterest
-    extra = 3
+    extra = 1
+
+class ConstituentVoteInline(admin.StackedInline):
+    model = PetitionVote
+    extra = 1
 
 class ConstituentAdmin(admin.ModelAdmin):
 ##    fieldsets = [
@@ -41,7 +45,7 @@ class ConstituentAdmin(admin.ModelAdmin):
 ##        ('Address', {'fields': ['streetAddress', 'zipCode', 'state', 'district']}),
 ##    ]
 ##    list_display = ('firstName', 'lastName', 'email', 'streetAddress', 'zipCodeStr', 'state', 'district',)
-    inlines = [ConstituentInterestInline]
+    inlines = [ConstituentInterestInline, ConstituentVoteInline]
 
 class MCInterestInline(admin.StackedInline):
     model = MCInterest

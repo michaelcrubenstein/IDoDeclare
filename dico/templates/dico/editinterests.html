@@ -83,17 +83,17 @@
 			show_my_interests();
 		});
 
-		function add_interest(newIssueName) {
+		function add_interest(newIssueName, issueDiv) {
 		  deferredObject = $.post("/dico/newinterest/", { csrfmiddlewaretoken: storedcsrftoken, "newissue": newIssueName} 
 		  	)
 		  .done(function(json, textStatus, jqXHR)
 		  	{
 				if (json['success']) {
-					show_my_interests();
-					if (newIssueName == add_interest_text.value) {
-						$("#add_interest_text").val('');
-						$("#add_interest_text").focus();
+					if (issueDiv)
+					{
+						$(issueDiv).remove();
 					}
+					insert_new_interest(newIssueName);
 				}
 				else {
 					bootstrap_alert.warning("Sorry, " + json['error']);
@@ -126,62 +126,122 @@
 			}
 			return false;
 		}
+		
+		function insert_interest(name, j) {
+			var li = document.createElement("div");
+			var col = document.createElement("div");
+			var nameButton = document.createElement("span");
+			var iconButton = document.createElement("button");
+			var newSpan = document.createElement("span");
+			var oldRows = $(".interest-row");
+			$(li).addClass("row interest-row")
+				 .attr("issueName", name)
+				 .append(col);
+			if (j < oldRows.length) {
+				$(li).insertBefore(oldRows.eq(j));
+			}
+			else
+			{
+				$("#my_interests").append(li);
+			}
+			$(col).addClass("col-xs-12 issue-container")
+				  .append(iconButton)
+				  .append(nameButton);
+			$(nameButton).addClass("issue-name issue-name-thin")
+						 .append(htmlEncode(name))
+// 								 .attr("issueName", name)
+// 								 .click(function() {
+// 									remove_interest($(this).attr("issueName"));
+// 								 })
+						 ;
+			$(iconButton).addClass("btn btn-link btn-issue issue-chevron")
+						 .append(newSpan)
+						 .attr("issueName", name)
+						 .click(function() {
+							remove_interest($(this).attr("issueName"));
+						 });
+			$(newSpan).addClass("glyphicon glyphicon-remove-sign");
+		}
+		
+		function insert_new_interest(name) {
+			var j = 0;
+			var oldRows = $('.interest-row');
+			while (j < oldRows.length && oldRows.eq(j).attr("issueName") < name) {
+				j = j + 1;
+			}
+			if (j >= oldRows.length || oldRows.eq(j).attr("issueName") != name) {
+				insert_interest(name, j);
+			}
+		}
 
 		function show_my_interests() {
 		  $.post("/dico/getmyinterests/", { csrfmiddlewaretoken: storedcsrftoken}, function(json){
 			myIssues = json['myIssues'];
 			
-			$("#my_interests").empty();
 			
-			for (i = 0; i < myIssues.length; ++i) {
-				issue = myIssues[i];
+			if (myIssues.length == 0) {
+				$("#my_interests").empty();
 				li = document.createElement("div");
-				col = document.createElement("div");
-				nameButton = document.createElement("button");
-				iconButton = document.createElement("button");
-				newSpan = document.createElement("span");
 				$("#my_interests").append(li);
-				$(li).addClass("row")
-					 .append(col);
-				$(col).addClass("col-xs-12 issue-container")
-					  .append(nameButton)
-					  .append(iconButton);
-				$(nameButton).addClass("btn btn-link btn-xs issue-name issue-name-thin")
-							 .append(htmlEncode(issue['name']))
-							 .attr("issueName", issue['name'])
-							 .click(function() {
-							 	remove_interest($(this).attr("issueName"));
-							 });
-				$(iconButton).addClass("btn btn-link btn-xs issue-chevron")
-							 .append(newSpan)
-							 .attr("issueName", issue['name'])
-							 .click(function() {
-							 	remove_interest($(this).attr("issueName"));
-							 });
-				$(newSpan).addClass("glyphicon glyphicon-remove");
+				$(li).addClass("help-block")
+					 .append("None Expressed" );
+			}
+			else
+			{
+				var oldRows = $('.interest-row');
+				if (oldRows.length == 0) {
+					$("#my_interests").empty();
+				}
+				var j = 0;
+				for (var i = 0; i < myIssues.length; ++i) {
+					var issue = myIssues[i];
+					while (j < oldRows.length && oldRows.eq(j).attr("issueName") < issue['name']) {
+						oldRow = oldRows.eq(j);
+						oldRows = oldRows.not(oldRow);
+						oldRow.remove();
+					}
+					if (j < oldRows.length && oldRows.eq(j).attr("issueName") == issue['name']) {
+						j = j + 1;
+					}
+					else
+					{
+						insert_interest(issue['name'], j);
+						oldRows = $('.interest-row');
+						j = j + 1;
+					}
+				}
+				// Remove the rest of the old rows.
+				while (j < oldRows.length)
+				{
+					oldRow = oldRows.eq(j);
+					oldRows = oldRows.not(oldRow);
+					oldRow.remove();
+				}
 			}
 			
-			// Remove any lingering contents from the mapFrame.
+			// Remove any lingering contents from the set of full issues.
 			$("#issue_div").empty();
-	
-		  	$.getJSON("{% url 'getIssues' %}", {}, function(json){
+
+			$.getJSON("{% url 'getIssues' %}", {}, function(json){
 				var allIssues = json['issues'];
 
 				for (i = 0; i < allIssues.length; ++i) {
 					issue = allIssues[i];
 					if (!hasIssue(myIssues, issue.name))
 					{
+						li = document.createElement("div");
 						newButton = document.createElement('button');
 						newSpan = document.createElement('span');
-						$("#issue_div").append(newButton)
-									   .append(" <br> ");
-						$(newSpan).addClass("glyphicon glyphicon-chevron-left");
-						$(newButton).addClass("btn btn-link btn-xs")
+						$("#issue_div").append(li);
+						$(li).addClass("div")
+							 .append(newButton);
+						$(newSpan).addClass("glyphicon glyphicon-chevron-left new-issue-glyphicon");
+						$(newButton).addClass("btn btn-link btn-issue")
 							.append(newSpan)
-							.append(htmlEncode(issue.name))
+							.append('<span class="text-muted">' + htmlEncode(issue.name) + '</span>')
 							.attr("issuename", issue.name)
 							.click(function(e, inputObject) { 
-								add_interest($(this).attr("issuename")); 
+								add_interest($(this).attr("issuename"), $(this).parent()); 
 							})
 							;
 					}
@@ -216,7 +276,7 @@
 			</div>
 			
 			<div class="col-xs-12 col-sm-7 col-md-8">
-				<label for="issue_div" class="control-label table-label">Other Issues</label>
+				<div class="help-block">Click an issue to vote on actions which impact that issue.</div>
 				<div id="issue_div" class="row">
 				</div>
 			</div>

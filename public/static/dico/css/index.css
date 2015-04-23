@@ -22,10 +22,22 @@
   text-align: left;
 }
 .issue-name-thin {
-  width: 88%;
 }
 .issue-chevron {
-  width: 10%;
+  color: red;
+}
+.new-issue-glyphicon {
+	color: #888;
+}
+
+@media (max-width: 767px) {
+	.new-issue-glyphicon {
+		visibility: hidden;
+	}
+}
+.btn-issue {
+	padding-top: 3px;
+	padding-bottom: 3px;
 }
 .interest-column {
 	padding-left: 0px;

@@ -84,8 +84,10 @@ DONE 2 - Record times of votes
 
 DONE 2 - Fix html injection for arguments
 DONE 2 - Update UI with color and Navigation bars Fixed at the top.
+DONE 2 - Add a message and link to create an account if not signed in.
+DONE 2 - Improve performance and usability of the Edit Interests page.
+DONE 2 - Implement https
 
-Implement https
 Learn more about I Do Declare page.
 
 Have a set of links associated with an action.

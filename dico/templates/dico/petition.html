@@ -386,6 +386,13 @@
 				});
 		}
 		
+		function set_button_display() {
+			if ($(this).children("input").prop('checked'))
+				$(this).addClass("btn-info");
+			else
+				$(this).removeClass("btn-info");
+		}
+		
 		function show_petition_votes(init_user_vote) {
 			deferredObject = $.post("/dico/getpetitionvotes/", { csrfmiddlewaretoken: storedcsrftoken, 
 														  "petition" : "{{petition.id}}"} 
@@ -402,14 +409,40 @@
 							else if (vc.vote == 1)
 								supportVotes = vc.count;
 						}
-						if (supportVotes == 1)
-							supportString = "1 person supports this";
+						
+						if ('userVote' in json && json['userVote'] == 1) {
+							if (supportVotes == 1)
+								supportString = "You support this";
+							else if (supportVotes == 2)
+								supportString = "You and 1 other person support this";
+							else
+								supportString = "You and " + (supportVotes-1) + " people support this";
+						}
 						else
-							supportString = "" + supportVotes + " people support this";
-						if (opposeVotes == 1)
-							opposeString = "1 person opposes this";
-						else
-							opposeString = "" + opposeVotes + " people oppose this";
+						{
+							if (supportVotes == 0)
+								supportString = "No one supports this";
+							else if (supportVotes == 1)
+								supportString = "1 person supports this";
+							else
+								supportString = "" + supportVotes + " people support this";
+						}
+						if ('userVote' in json && json['userVote'] == 0) {
+							if (opposeVotes == 1)
+								opposeString = "You oppose this";
+							else if (opposeVotes == 2)
+								supportString = "You and 1 other person oppose this";
+							else
+								opposeString = "You and " + (opposeVotes-1) + " people oppose this";
+						} else {
+							if (opposeVotes == 0)
+								opposeString = "No one opposes this";
+							else if (opposeVotes == 1)
+								opposeString = "1 person opposes this";
+							else
+								opposeString = "" + opposeVotes + " people oppose this";
+						}
+							
 						$("#id_total_votes").html("<span class='text-muted'><span class='glyphicon glyphicon-thumbs-up'></span> " + supportString + "<br><span class='glyphicon glyphicon-thumbs-down'></span>&nbsp;" + opposeString + "</span>");
 						if ('userVote' in json) {
 							if (init_user_vote) {
@@ -430,7 +463,8 @@
 								$('#noOpinionButton').button('toggle');
 							}
 						}
-							
+						
+						$("input[name=voteOptions]").parent().each(set_button_display);
 					}
 					else {
 						bootstrap_alert.warning(json['error']);
@@ -519,7 +553,7 @@
 		</div>
 		<div class="row">
 			<div class="col-xs-12 col-sm-8 your-vote-column">
-				<label>Your vote</label>
+				<label>Your Vote</label>
 				<div class="btn-group" data-toggle="buttons">
 					<label id="supportButton" class="btn btn-default">
 					  <input type="radio" name="voteOptions" id="supportRadio" value=1 />
@@ -529,7 +563,7 @@
 					  <input type="radio" name="voteOptions" id="opposeRadio" value=0 />
 					  <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;Oppose
 					</label>			
-					<label id="noOpinionButton" class="btn btn-default active">
+					<label id="noOpinionButton" class="btn btn-default">
 					  <input type="radio" name="voteOptions" id="noOpinionRadio" value=-1 />No Opinion
 					</label>
 				</div>

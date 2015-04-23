@@ -786,7 +786,7 @@ def docRatings(request, petition_id):
 
 # Displays a web page for adding a supporting argument to a petition.
 def docTermsOfUse(request):
-    template = loader.get_template('doc/termsOfUse.html')
+    template = loader.get_template('doc/termsofuse.html')
         
     context = RequestContext(request, {
     })

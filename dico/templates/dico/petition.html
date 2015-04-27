@@ -89,9 +89,11 @@
 			// Display the issues associated with the current petition.
 			show_petition_issues();
 
+			// Show the votes for the current petition.
+			show_petition_votes(true);
+
 			// Display the arguments of the current petition.
 			show_petition_arguments();
-			show_petition_votes(true);
 			
 			// After showing the petition votes, set the change methods of the radio buttons
 			// for the current user's vote.
@@ -419,7 +421,7 @@
 							else if (supportVotes == 2)
 								supportString = "You and 1 other person support this";
 							else
-								supportString = "You and " + (supportVotes-1) + " people support this";
+								supportString = "You and " + (supportVotes-1) + " other people support this";
 						}
 						else
 						{
@@ -434,9 +436,9 @@
 							if (opposeVotes == 1)
 								opposeString = "You oppose this";
 							else if (opposeVotes == 2)
-								supportString = "You and 1 other person oppose this";
+								opposeString = "You and 1 other person oppose this";
 							else
-								opposeString = "You and " + (opposeVotes-1) + " people oppose this";
+								opposeString = "You and " + (opposeVotes-1) + " other people oppose this";
 						} else {
 							if (opposeVotes == 0)
 								opposeString = "No one opposes this";

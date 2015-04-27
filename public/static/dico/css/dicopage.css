@@ -1,6 +1,10 @@
 body {
   padding-top: 55px;
 }
+.dico-two-nav-container {
+	padding-top: 55px;
+	padding-bottom: 55px;
+}
 .dico-navbar {
 	background: #D1E1FF;
 	border-radius:0px;

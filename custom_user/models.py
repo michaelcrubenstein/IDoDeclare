@@ -44,7 +44,7 @@ class AuthUser(AbstractBaseUser, PermissionsMixin):
 
     ### Redefine the basic fields that would normally be defined in User ###
     username = models.CharField(max_length=20, validators=[alphanumeric])
-    email = models.EmailField(verbose_name='email address', unique=True, max_length=255)
+    email = models.EmailField(verbose_name='email address', db_index=True, unique=True, max_length=255)
     first_name = models.CharField(max_length=30, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -73,7 +73,7 @@ class AuthUser(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 class PasswordReset(models.Model):
-    email = models.EmailField(verbose_name='email address', unique=True, max_length=255)
+    email = models.EmailField(verbose_name='email address', unique=True, max_length=255, db_index=True)
     reset_key = models.CharField(max_length=50)
     creation_time = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
     

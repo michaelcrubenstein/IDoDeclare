@@ -281,7 +281,7 @@ class Petition(models.Model):
     description = models.TextField()
     constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
     creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
-    issues = models.ManyToManyField(Issue, through='PetitionIssue');
+    issues = models.ManyToManyField(Issue, through='PetitionIssue', db_index=True);
     
     objects = PetitionManager()
     

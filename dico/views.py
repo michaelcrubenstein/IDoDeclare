@@ -387,9 +387,9 @@ def newConstituent(request):
     except IntegrityError as e:
         results = {'success':False, 'error': 'That email address has already been used to sign up.'}
     except Exception as e:
-        log = open('exception.log', 'a')
-        log.write("%s\n" % traceback.format_exc())
-        log.flush()
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
         results = {'success':False, 'error': str(e)}
     
     return JsonResponse(results)

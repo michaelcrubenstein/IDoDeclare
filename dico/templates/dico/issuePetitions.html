@@ -23,7 +23,10 @@
 
 	<!-- Styles for this web page -->
 	<style>
-
+		<!-- Account for bottom navigation bar -->
+		body {
+		  padding-bottom: 55px;
+		}
 	</style>
 
 
@@ -181,6 +184,19 @@
 			</div>
 		</nav>
 
+		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav navbar-nav navbar-header pull-right">
+					{% if user.is_authenticated %}
+						<a class="navbar-text navbar-link dico-nav-edge-link" 
+							href="/dico/createpetition?issue={{issue.id}}&backURL=/dico/{{issue.id}}/issue/">Create an Action</a>
+					{% endif %}
+				</div>
+			</div>
+		</nav>
+		
 	    <div id="myAlert"></div>
 
 		<div class="row">
@@ -198,8 +214,6 @@
 						<tr>
 							<th>
 								<label for="id_issue_petitions" class="control-label">Actions</label>
-								<a class="btn btn-sm btn-link" 
-									href="/dico/createpetition?issue={{issue.id}}&backURL=/dico/{{issue.id}}/issue/">Create an Action</a>
 							</th>
 							<th>Your vote</th>
 							<th></th>

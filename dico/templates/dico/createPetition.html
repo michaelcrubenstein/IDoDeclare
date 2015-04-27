@@ -10,12 +10,13 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>I Do Declare</title>
+    <title>I Do Declare - Create Action</title>
 
     <!-- Bootstrap core CSS -->
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
     <link href="{% static "dico/css/createPetition.css" %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -55,19 +56,24 @@
 				$('.alert').parent().html('');
 			}
 			
-			$("#id_form").on('submit', function (e) {
+			function submitform() {
 				closealert();
 		
-				deferredObject = $.post("/dico/newpetition/", 
+				$.post("/dico/newpetition/", 
 					{ csrfmiddlewaretoken: '{{ csrf_token }}', 
-						"issue": "{{ issue.name }}",
+						{% if issue %}
+							"issue": "{{ issue.name }}",
+						{% endif %}
 						"description": $("#id_textarea").val(),
 					})
 				  .done(function(json, textStatus, jqXHR)
 					{
 						if (json['success']) {
 							closealert();
-							window.location = "/dico/" + json['petition'] + "/petition/?backIssueID="+"{{ issue.id }}"
+							window.location = "/dico/" + json['petition'] + "/petition/"
+							{% if issue %}
+								+ "?backIssueID="+"{{ issue.id }}"
+							{% endif %}
 						}
 						else {
 							bootstrap_alert.warning(json['error']);
@@ -78,6 +84,17 @@
 					console.log( "error: " + textStatus + "; " + errorThrown + ";");
 					console.log( jqXHR.status + "; " + jqXHR.statusText);
 				  });
+			}
+			
+			$("#id_form").on('submit', function (e) {
+				if ($("#id_textarea").val() === "") {
+					bootstrap_alert.warning("Specify a description for the action.");
+					$("id_textarea").focus();
+				}
+				else
+				{
+					submitform();
+				}
 
 			   //stop form submission
 			   e.preventDefault();
@@ -87,20 +104,20 @@
 				window.location = "{{ backURL }}";
 				e.preventDefault();
 			});
-			
-			$("#id_textarea").on("input keyup paste", checkenabled);
-			checkenabled();
+			$("#id_submitbutton").click(function(e) {
+				if ($("#id_textarea").val() === "") {
+					bootstrap_alert.warning("Specify a description for the action.");
+					$("#id_textarea").focus();
+				}
+				else
+				{
+					submitform();
+				}
+
+				e.preventDefault();
+			});
 		});
 
-		function checkenabled() {
-			if ($("#id_textarea").val() === "")
-				$( "#id_submitbutton" ).prop( "disabled", true );
-			else
-			{
-				$( "#id_submitbutton" ).prop( "disabled", false );
-			}
-		};
-		
 		function showTips() {
 			bootstrap_alert.show($('#tipsAlert'), 
 				"<small>Start your action with a verb, such as the following:" +
@@ -117,23 +134,37 @@
 		};
 	</script>
 
-    <div class="container">
+    <div class="container-fluid">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav navbar-nav">
+					<div class="dico-navbar-commands">
+						<span class="dico-pull-left">
+							<span id="cancel_button" class="navbar-text navbar-link dico-navbar-text" href="#">Cancel</span>
+						</span>
+						<span class="dico-fill"><span class="navbar-text"><strong>Create Action</strong></span></span>
+						<span class="dico-pull-right">
+							<span id="id_submitbutton" class="navbar-text navbar-link dico-navbar-text">Create</span>
+						</span>
+					</div>
+				</div><!-- /.nav navbar-nav -->
+			</div>
+		</nav>
+		
 		<form class="form-createpetition" id="id_form">
 			<div class="row">
-				<h3 class="form-createpetition-heading">Create Action</h3>
-				<label for="id_textarea">What action should Congress take regarding {{issue.name}}?</label>
+				{% if issue %}
+					<label for="id_textarea">What action should Congress take regarding {{issue.name}}?</label>
+				{% else %}
+					<label for="id_textarea">What action should Congress take?</label>
+				{% endif %}
 				<div id="myAlert" class="errorAlert"></div>
 				<textarea id="id_textarea" rows=5 maxlength="254" name="description" class="form-control" 
 					placeholder="Pass a law to..." required autofocus></textarea>
 				<a href="##" onClick="showTips()"><small>Tips for writing actions</small></a>
 				<div id="tipsAlert" class="errorAlert"></div>
     		</div>
-			<div class="row">
-				<input id="id_submitbutton" class="btn btn-primary btn-block ok-button" type="submit" value="Create Action"></input>
-			</div>
-		  <div class="row">
-			  <input id="cancel_button" class="btn btn-default btn-block cancel-button" type="button" value="Cancel"></input>
-		  </div>
       </form>
 
     </div> <!-- /container -->

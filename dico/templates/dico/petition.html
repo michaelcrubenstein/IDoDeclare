@@ -23,7 +23,10 @@
 
 	<!-- Styles for this web page -->
 	<style>
-
+		<!-- Account for bottom navigation bar -->
+		body {
+		  padding-bottom: 55px;
+		}
 	</style>
 
 
@@ -527,9 +530,47 @@
 						</a>
 					</li>
 				</div>
+
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<ul class="nav navbar-nav navbar-header pull-right">
+					{% if user.is_authenticated %}
+					<li class="dropdown">
+					  <a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
+					  <ul class="dropdown-menu dropdown-menu-right" role="menu">
+						<li><a id="id_accountSettingsLink">Account Settings</a></li>
+						<li><a id="id_changePasswordLink">Change Password</a></li>
+						<li class="divider"></li>
+						<li><a href="/dico/editinterests/">Edit Interests</a></li>
+						<li class="divider"></li>
+						<li><a href="{% url 'signout' %}">Sign out</a></li>
+					  </ul>
+					</li>
+					{% else %}
+						<a class="navbar-text navbar-link dico-nav-edge-link" href="{% url 'signin' %}">Sign in</a>
+					{% endif %}
+				</ul>
 			</div>
 		</nav>
 
+		{% if user.is_authenticated %}
+		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav navbar-nav navbar-header pull-left">
+					<span class="navbar-text navbar-link dico-navbar-text" onClick="add_supporting_argument()"}>
+						Add Supporting Argument
+					</span>
+				</div>
+				<div class="nav navbar-nav navbar-header pull-right">
+					<span class="navbar-text navbar-link dico-navbar-text" onClick="add_opposing_argument()"}>
+						Add Opposing Argument
+					</span>
+				</div>
+			</div>
+		</nav>
+		{% endif %}
+		
 	    <div id="myAlert"></div>
 		<div class="row">
 			<div class="col-xs-12 col-sm-8">
@@ -553,6 +594,7 @@
 		</div>
 		<div class="row">
 			<div class="col-xs-12 col-sm-8 your-vote-column">
+				{% if user.is_authenticated %}
 				<label>Your Vote</label>
 				<div class="btn-group" data-toggle="buttons">
 					<label id="supportButton" class="btn btn-default">
@@ -567,6 +609,7 @@
 					  <input type="radio" name="voteOptions" id="noOpinionRadio" value=-1 />No Opinion
 					</label>
 				</div>
+				{% endif %}
 			</div>
 			<div class="col-xs-12 col-sm-4">
 				<div id="id_total_votes" class="bottom-padding"></div>
@@ -590,17 +633,6 @@
 					</thead>
 					<tbody id='id_supporting_arguments'>
 					</tbody>
-					<tbody>
-					<tr>
-						<td>
-							<button class="btn btn-link btn-xs" onClick="add_supporting_argument()"}>
-									Add Your Own Supporting Argument
-							</button>
-						</td>
-						<td></td>
-						<td></td>
-					</tr>
-					</tbody>
 				</table>
 			</div>
 			<div class="col-xs-12 col-md-6">
@@ -616,17 +648,6 @@
 						<th></th>
 					</thead>
 					<tbody id='id_opposing_arguments'>
-					</tbody>
-					<tbody>
-					<tr>
-						<td>
-							<button class="btn btn-link btn-xs" onClick="add_opposing_argument()"}>
-									Add Your Own Opposing Argument
-							</button>
-						</td>
-						<td></td>
-						<td></td>
-					</tr>
 					</tbody>
 				</table>
 			</div>

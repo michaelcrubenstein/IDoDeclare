@@ -43,9 +43,11 @@ def index(request):
 @requires_csrf_token
 def signin(request):
     template = loader.get_template('dico/signin.html')
+    
+    backURL = request.GET.get(u'backURL', "/dico/")
         
     context = RequestContext(request, {
-        'backURL' : "/dico/",
+        'backURL' : backURL,
     })
     return HttpResponse(template.render(context))
 
@@ -159,6 +161,8 @@ def createPetition(request):
     if 'issue' in request.GET:
         issueID = request.GET['issue']
         issue = Issue.objects.filter(pk=issueID).get()
+    else:
+        issue = None
 
     context = RequestContext(request, {
         'user': request.user,

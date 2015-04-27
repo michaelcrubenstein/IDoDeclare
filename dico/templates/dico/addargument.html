@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>I Do Declare</title>
+    <title>I Do Declare - Add {{ voteLabel }} Argument</title>
 
     <!-- Bootstrap -->
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
@@ -61,38 +61,46 @@
         		$('.alert').parent().html('');
         	}
         	
-        	b = document.getElementById("id_add_argument_button")
-        	$("#id_new_argument_text").on("keyup input paste", checkenabled);
-        	checkenabled();
-        	
-			$(b).click(function() {
+			$("#id_add_argument_button").click(function() {
 				add_argument($("#id_new_argument_text").val());
 			});
+			
+			$("#cancel_button").click(function(e) {
+				window.location = "/dico/{{petition.id}}/petition/?backIssueID={{backIssueID}}";
+				e.preventDefault();
+			});
 
-			document.getElementById("id_new_argument_text").focus();
+			$("#id_new_argument_text").focus();
 		});
 
 		function add_argument(newArgumentText) {
 		  closealert();
-		  deferredObject = $.post("/dico/newargument/", { csrfmiddlewaretoken: storedcsrftoken, 
-		  												  "petition" : "{{petition.id}}", 
-		  												  "vote" : {{ argumentVote }}, 
-		  												  "description": newArgumentText} 
-		  	)
-		  .done(function(json, textStatus, jqXHR)
-		  	{
-				if (json['success']) {
-					window.location.href = "/dico/{{petition.id}}/petition/?backIssueID={{backIssueID}}"
-				}
-				else {
-					bootstrap_alert.warning(json['error']);
-				}
-			})
-		  .fail(function(jqXHR, textStatus, errorThrown) {
-		    bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
-			console.log( "error: " + textStatus + "; " + errorThrown + ";");
-			console.log( jqXHR.status + "; " + jqXHR.statusText);
-		  });
+		  if (newArgumentText.length == 0) {
+			bootstrap_alert.warning("First specify the argument.");
+			$("#id_new_argument_text").focus();
+		  }
+		  else
+		  {
+				$.post("/dico/newargument/", { csrfmiddlewaretoken: storedcsrftoken, 
+															  "petition" : "{{petition.id}}", 
+															  "vote" : {{ argumentVote }}, 
+															  "description": newArgumentText} 
+				)
+			  .done(function(json, textStatus, jqXHR)
+				{
+					if (json['success']) {
+						window.location.href = "/dico/{{petition.id}}/petition/?backIssueID={{backIssueID}}"
+					}
+					else {
+						bootstrap_alert.warning(json['error']);
+					}
+				})
+			  .fail(function(jqXHR, textStatus, errorThrown) {
+				bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+				console.log( "error: " + textStatus + "; " + errorThrown + ";");
+				console.log( jqXHR.status + "; " + jqXHR.statusText);
+			  });
+		  }
 		}
 
 		function enter_new_argument(e, inputObject){
@@ -103,10 +111,6 @@
 			}
 		}
 		
-		function checkenabled() {
-			$("#id_add_argument_button").prop("disabled", $("#id_new_argument_text").val().length == 0);
-		}
-				
 		function showTips() {
 			bootstrap_alert.show($('#tipsAlert'), 
 				"<small>Double check your spelling and grammer. Don't use all capital letters and" + 
@@ -119,15 +123,24 @@
 	<div id='container' class="container-fluid">
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
-				<!-- Brand and toggle get grouped for better mobile display -->
-				<div class="nav navbar-nav navbar-header pull-left">
-				  <a class="navbar-text navbar-link dico-nav-edge-link" href="/dico/{{petition.id}}/petition/?backIssueID={{backIssueID}}">
-					Cancel</a>
-				</div>
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav navbar-nav">
+					<div class="dico-navbar-commands">
+						<span class="dico-pull-left">
+							<span id="cancel_button" class="navbar-text navbar-link dico-navbar-text" href="#">Cancel</span>
+						</span>
+						<span class="dico-fill"><span class="navbar-text"><strong>Add {{voteLabel}} Argument</strong></span></span>
+						<span class="dico-pull-right">
+							<span id="id_add_argument_button" class="navbar-text navbar-link dico-navbar-text">Add</span>
+						</span>
+					</div>
+				</div><!-- /.nav navbar-nav -->
 			</div>
 		</nav>
 
-	    <div id="myAlert" class="row"></div>
+		<div class="row">
+	    	<div id="myAlert" class="col-xs-12"></div>
+		</div>
 
 		<div class="row">
 			<div class="col-xs-12 col-sm-8">
@@ -161,9 +174,6 @@
 					 onKeyPress="enter_new_argument(event, this)"></textarea>
 				<a class="btn btn-link btn-xs" href="##" onClick="showTips()">Tips for writing arguments</a>
 				<div id="tipsAlert"></div>
-				<button type="button" id="id_add_argument_button" class="btn btn-primary btn-block argument_addbutton" >
-					Add Argument
-				</button>
 			</div>
 		</div>
 	</div>

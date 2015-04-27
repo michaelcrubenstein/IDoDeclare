@@ -7,6 +7,46 @@ body {
 	margin-bottom: 0px;
 	min-height: 40px;
 }
+.dico-navbar-text {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-left: 15px;
+	margin-right: 15px;
+}
+.dico-navbar-text:hover {
+	text-decoration: none;
+	cursor: pointer;
+}
+
+/* The container for a trio of items in a navigation bar. */
+.dico-navbar-commands {
+	display: table;
+	width: 100%;
+}
+
+/* The center of a trio of items in a navigation bar. */
+.dico-fill {
+	display: table-cell;
+    vertical-align: middle;
+    width: 90%;
+	text-align: center;
+	margin 0;
+}
+
+/* The left of a trio of items in a navigation bar. */
+.dico-pull-left {
+	display: table-cell;
+    vertical-align: middle;
+    width: auto;
+}
+
+/* The right of a trio of items in a navigation bar. */
+.dico-pull-right {
+	display: table-cell;
+    vertical-align: middle;
+    width: auto;
+}
+
 @media (max-width: 767px) {
 	.navbar-brand {
 		display: none;

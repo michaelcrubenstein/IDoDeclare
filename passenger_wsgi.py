@@ -11,21 +11,20 @@ sys.path.insert(0,cwd + '/dico')  #You must add your project here
 sys.path.insert(0,cwd + '/custom_user')  #You must add your project here
 sys.path.append(cwd)
 
-try:
-    log = open('/home/micrub9/idodeclare.org/passengerwsgi.log', 'a')
-    log.write("Running %s at %s\n" % [(sys.executable), datetime.datetime.now()])
-    log.write("  Version %s\n" % (sys.version))
-    log.write("  Path: %s\n" % (sys.path))
-    log.flush()
-except Exception as e:
-    log.write("  Exception: %s\n" % (e))
-    log.write("%s\n" % traceback.format_exc())
-    log.flush()
-    log = open('/home/micrub9/idodeclare.org/passengerwsgi.log', 'a')
-    log.write("Running %s\n" % (sys.executable))
-    log.write("  Version %s\n" % (sys.version))
-    log.write("  Path: %s\n" % (sys.path))
-    log.flush()
+with open('/home/micrub9/idodeclare.org/passengerwsgi.log', 'a') as log:
+    try:
+        log.write("Running %s\n" % (sys.executable))
+        log.write("Running at %s\n" % (datetime.datetime.now()))
+        log.write("  Version %s\n" % (sys.version))
+        log.write("  Path: %s\n" % (sys.path))
+        log.flush()
+    except Exception as e:
+        log.write("  Exception: %s\n" % (e))
+        log.write("%s\n" % traceback.format_exc())
+        log.write("Running %s\n" % (sys.executable))
+        log.write("  Version %s\n" % (sys.version))
+        log.write("  Path: %s\n" % (sys.path))
+        log.flush()
 
 #Switch to new python
 if sys.version < "3.4.2": os.execl(cwd+"/env/bin/python3.4", cwd+"/env/bin/python3.4", *sys.argv)
@@ -41,8 +40,8 @@ try:
     application = get_wsgi_application()
 
 except Exception as e:
-    log = open('/home/micrub9/idodeclare.org/passengerwsgi.log', 'a')
-    log.write("Error: %s\n" % e)
-    log.write("%s\n" % traceback.format_exc())
-    log.flush()
+    with open('/home/micrub9/idodeclare.org/passengerwsgi.log', 'a') as log:
+        log.write("Error: %s\n" % e)
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
 

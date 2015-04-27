@@ -452,13 +452,13 @@
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
 				<!-- Brand and toggle get grouped for better mobile display -->
-				<div class="nav navbar-nav navbar-header pull-left">
+				<div class="nav navbar-header pull-left">
 				  <div class="navbar-brand">I Do Declare</div>
 				</div>
 
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-nav navbar-header pull-right">
-					{% if user.is_authenticated %}
+				{% if user.is_authenticated %}
+					<div class="nav navbar-nav navbar-header pull-right">
 						<li class="dropdown">
 						  <a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
 						  <ul class="dropdown-menu dropdown-menu-right" role="menu">
@@ -470,10 +470,12 @@
 							<li><a href="{% url 'signout' %}">Sign out</a></li>
 						  </ul>
 						</li>
-					{% else %}
-						<a class="navbar-text navbar-link dico-nav-edge-link" href="{% url 'signin' %}">Sign in</a>
-					{% endif %}
-				</div>
+					</div>
+				{% else %}
+					<div class="nav navbar-header pull-right">
+						<a class="navbar-text navbar-link pull-right dico-navbar-text" href="{% url 'signin' %}">Sign in</a>
+					</div>
+				{% endif %}
 			</div>
 		</nav>
 		
@@ -481,9 +483,9 @@
 			<div class="container-fluid">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-nav navbar-header pull-right">
+				<div class="nav navbar-header pull-right">
 					{% if user.is_authenticated %}
-						<a class="navbar-text navbar-link dico-navbar-text dico-nav-edge-link" 
+						<a class="navbar-text navbar-link pull-right dico-navbar-text" 
 							href="/dico/createpetition?backURL=/dico/">Create an Action</a>
 					{% endif %}
 				</div>

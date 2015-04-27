@@ -158,16 +158,20 @@ def createPetition(request):
     else:
         backURL = ""
         
+    allIssues = []
     if 'issue' in request.GET:
         issueID = request.GET['issue']
         issue = Issue.objects.filter(pk=issueID).get()
     else:
         issue = None
+        for i in Issue.get_issues():
+            allIssues += [i]
 
     context = RequestContext(request, {
         'user': request.user,
         'backURL': backURL,
         'issue': issue,
+        'allIssues': allIssues,
     })
     return HttpResponse(template.render(context))
 

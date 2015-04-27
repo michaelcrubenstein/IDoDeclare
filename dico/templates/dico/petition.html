@@ -523,32 +523,32 @@
 	<div id='container' class="container-fluid">
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
-				<div class="nav navbar-nav navbar-header pull-left">
-					<li>
-						<a class="navbar-link" href="{{ backURL }}">
-							<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}
-						</a>
-					</li>
-				</div>
+				<ul class="nav navbar-header pull-left">
+					<a class="navbar-text navbar-link pull-left dico-navbar-text" href="{{ backURL }}">
+						<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}
+					</a>
+				</ul>
 
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<ul class="nav navbar-nav navbar-header pull-right">
-					{% if user.is_authenticated %}
-					<li class="dropdown">
-					  <a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
-					  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-						<li><a id="id_accountSettingsLink">Account Settings</a></li>
-						<li><a id="id_changePasswordLink">Change Password</a></li>
-						<li class="divider"></li>
-						<li><a href="/dico/editinterests/">Edit Interests</a></li>
-						<li class="divider"></li>
-						<li><a href="{% url 'signout' %}">Sign out</a></li>
-					  </ul>
-					</li>
-					{% else %}
-						<a class="navbar-text navbar-link dico-nav-edge-link" href="{% url 'signin' %}">Sign in</a>
-					{% endif %}
-				</ul>
+				{% if user.is_authenticated %}
+					<ul class="nav navbar-nav navbar-header pull-right">
+						<li class="dropdown">
+						  <a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
+						  <ul class="dropdown-menu dropdown-menu-right" role="menu">
+							<li><a id="id_accountSettingsLink">Account Settings</a></li>
+							<li><a id="id_changePasswordLink">Change Password</a></li>
+							<li class="divider"></li>
+							<li><a href="/dico/editinterests/">Edit Interests</a></li>
+							<li class="divider"></li>
+							<li><a href="{% url 'signout' %}">Sign out</a></li>
+						  </ul>
+						</li>
+					</ul>
+				{% else %}
+					<ul class="nav navbar-header pull-right">
+						<a class="navbar-text navbar-link pull-right dico-navbar-text" href="{% url 'signin' %}">Sign in</a>
+					</ul>
+				{% endif %}
 			</div>
 		</nav>
 
@@ -557,13 +557,13 @@
 			<div class="container-fluid">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-nav navbar-header pull-left">
-					<span class="navbar-text navbar-link dico-navbar-text" onClick="add_supporting_argument()"}>
+				<div class="nav navbar-header pull-left">
+					<span class="navbar-text navbar-link pull-left dico-navbar-text" onClick="add_supporting_argument()"}>
 						Add Supporting Argument
 					</span>
 				</div>
-				<div class="nav navbar-nav navbar-header pull-right">
-					<span class="navbar-text navbar-link dico-navbar-text" onClick="add_opposing_argument()"}>
+				<div class="nav navbar-header pull-right">
+					<span class="navbar-text navbar-link pull-right dico-navbar-text" onClick="add_opposing_argument()"}>
 						Add Opposing Argument
 					</span>
 				</div>

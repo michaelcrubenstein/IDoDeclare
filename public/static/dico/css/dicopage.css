@@ -32,6 +32,11 @@ body {
 	text-align: center;
 	margin 0;
 }
+.dico-inner-fill {
+	display: block;
+	text-align: center;
+	width: 100%;
+}
 
 /* The left of a trio of items in a navigation bar. */
 .dico-pull-left {

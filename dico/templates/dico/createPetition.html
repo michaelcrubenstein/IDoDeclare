@@ -56,6 +56,11 @@
 				$('.alert').parent().html('');
 			}
 			
+			function getNewIssueName()
+			{
+				return $('input[name=issueRadio]:checked').val();
+			}
+			
 			function submitform() {
 				closealert();
 		
@@ -63,6 +68,8 @@
 					{ csrfmiddlewaretoken: '{{ csrf_token }}', 
 						{% if issue %}
 							"issue": "{{ issue.name }}",
+						{% else %}
+							"issue": getNewIssueName(),
 						{% endif %}
 						"description": $("#id_textarea").val(),
 					})
@@ -86,11 +93,22 @@
 				  });
 			}
 			
+			$("#id_step2").css('display', 'none');
+			
 			$("#id_form").on('submit', function (e) {
 				if ($("#id_textarea").val() === "") {
 					bootstrap_alert.warning("Specify a description for the action.");
 					$("id_textarea").focus();
 				}
+				{% if issue == null %}
+				else if ($("#id_step2").css('display') == 'none') {
+					closealert();
+					$("#id_submitbutton").text('Create');
+					$("#cancel_button").text('Back');
+					$("#id_step2").css('display', 'table');
+					$("#id_step1").css('display', 'none');
+				}
+				{% endif %}
 				else
 				{
 					submitform();
@@ -100,15 +118,42 @@
 			   e.preventDefault();
 			});
 			
+			{% if issue %}
+			$("#id_submitbutton").text('Create');
+			{% endif %}
+			
 			$("#cancel_button").click(function(e) {
-				window.location = "{{ backURL }}";
-				e.preventDefault();
+				{% if issue == null %}
+				if ($("#id_step2").css('display') == 'none') {
+				{% endif %}
+					window.location = "{{ backURL }}";
+					e.preventDefault();
+				{% if issue == null %}
+				}
+				else
+				{
+					$("#id_submitbutton").text('Next');
+					$("#cancel_button").text('Cancel');
+					$("#id_step1").css('display', 'table');
+					$("#id_step2").css('display', 'none');
+					$("#id_textarea").focus();
+				}
+				{% endif %}
 			});
 			$("#id_submitbutton").click(function(e) {
 				if ($("#id_textarea").val() === "") {
 					bootstrap_alert.warning("Specify a description for the action.");
 					$("#id_textarea").focus();
 				}
+				{% if issue == null %}
+				else if ($("#id_step2").css('display') == 'none') {
+					closealert();
+					$("#id_submitbutton").text('Create');
+					$("#cancel_button").text('Back');
+					$("#id_step2").css('display', 'table');
+					$("#id_step1").css('display', 'none');
+				}
+				{% endif %}
 				else
 				{
 					submitform();
@@ -138,22 +183,22 @@
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-nav">
+				<div class="nav navbar-header">
 					<div class="dico-navbar-commands">
 						<span class="dico-pull-left">
-							<span id="cancel_button" class="navbar-text navbar-link dico-navbar-text" href="#">Cancel</span>
+							<span id="cancel_button" class="navbar-text navbar-link pull-left dico-navbar-text">Cancel</span>
 						</span>
-						<span class="dico-fill"><span class="navbar-text"><strong>Create Action</strong></span></span>
+						<div class="dico-fill"><span class="navbar-text dico-inner-fill"><strong>Create Action</strong></span></div>
 						<span class="dico-pull-right">
-							<span id="id_submitbutton" class="navbar-text navbar-link dico-navbar-text">Create</span>
+							<span id="id_submitbutton" class="navbar-text navbar-link pull-right dico-navbar-text">Next</span>
 						</span>
 					</div>
-				</div><!-- /.nav navbar-nav -->
+				</div><!-- /.nav -->
 			</div>
 		</nav>
 		
 		<form class="form-createpetition" id="id_form">
-			<div class="row">
+			<div id = "id_step1" class="row">
 				{% if issue %}
 					<label for="id_textarea">What action should Congress take regarding {{issue.name}}?</label>
 				{% else %}
@@ -164,6 +209,19 @@
 					placeholder="Pass a law to..." required autofocus></textarea>
 				<a href="##" onClick="showTips()"><small>Tips for writing actions</small></a>
 				<div id="tipsAlert" class="errorAlert"></div>
+    		</div>
+    		<div id="id_step2" class="row">
+    			<div class="col-xs-12 help-block">Select an issue associated with this new action.</div>
+    			{% if allIssues %} 
+					{% for testIssue in allIssues %}
+						<div class="col-xs-12">
+							<label class="btn btn-link btn-xs">
+								<input type="radio" name="issueRadio" value="{{testIssue.name}}"> </input>
+								{{ testIssue.name }}
+							</label>
+						</div>
+					{% endfor %}
+				{% endif %}
     		</div>
       </form>
 

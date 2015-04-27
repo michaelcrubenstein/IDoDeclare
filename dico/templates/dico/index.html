@@ -164,13 +164,23 @@
 
 				// Clear the radii of all of the circles.
 				circles.attr("r", 0);
-		
+				
+				if (newScope == districtScope)
+					$("#id_constituent_area_label").text('District');
+				else
+					$("#id_constituent_area_label").text('State');
+				$("#id_constituent_table_body").empty();
+				
 				for (i = 0; i < interests.length; ++i) {
 					var interest = interests[i];
 					var interestID;
 					
+					tr = document.createElement("tr");
+					$("#id_constituent_table_body").append(tr);
+					td = document.createElement("td");
+					$(tr).append(td);
 					if (newScope == districtScope) {
-						s = s + interest['state'] + "-" + interest['district'] + ": " + interest['constituent_count'] + "<br>"
+						$(td).text(interest['state'] + "-" + interest['district']);
 						// Handle the special case for 'DC' here. The case for states with only one district
 						// is handled elsewhere.
 						if (interest['state'] == 'DC') {
@@ -180,9 +190,12 @@
 						}
 					}
 					else {
-						s = s + interest['state'] + ": " + interest['constituent_count'] + "<br>"
+						$(td).text(interest['state']);
 						interestID=stateCodes.indexOf(interest['state']);
 					}
+					td = document.createElement("td");
+					$(tr).append(td);
+					$(td).text(interest['constituent_count']);
 
 					var ba = circles.filter(function() { return (this.getAttribute("id")==interestID);})
 					if (ba.size() == 0 && newScope == districtScope && interest['district'] == 1) {
@@ -193,7 +206,6 @@
 					}
 				}
 			}
-			$("#my_score").html('').append(s);
 		  });
 		}
 
@@ -492,8 +504,8 @@
 			</div>
 		</nav>
 		
+		{% if user.is_authenticated %}
 		<div class="row">
-			{% if user.is_authenticated %}
 			<div class="col-xs-12 col-md-6 col-md-push-3">
 				<label class="control-label table-label">News</label>
 				<table id='my_news' class="table table-striped table-condensed full-width-table" max-width="100%">
@@ -584,16 +596,48 @@
 					</div>
 				</div>
 			</div>
-			{% else %}
-			<div class="col-xs-12 help block">
-				<a href="{% url 'signin' %}">Sign in</a> to identify the issues you care about and vote on actions
-				Congress can take!
-			</div>
-			<div class="col-xs-12 help block">
-	  			Don't have an account? <a href="{% url 'createConstituent' %}?back={% url 'index' %}">Create one now.</a>
-			</div>
-			{% endif %}
 		</div>
+		{% else %}
+			<div class="jombotron">
+				<h2>Welcome to I Do Declare</h2>
+				<p>
+					I Do Declare is dedicated to helping all of us understand important issues 
+				and to voice our opinions on the matters before the legislators who are responsible
+				for representing us in the U.S. Congress.
+				</p>
+				<p>
+					Here you can:
+					<ul>
+						<li>create actions that should be taken up
+					by Congress;</li>
+						<li>discover actions others have created;</li>
+						<li>support or oppose any action;</li>
+						<li>give your reasons for supporting or opposing
+					an action;</li>
+						<li>rank the reasons that other people give.</li>
+					</ul>
+				</p>
+				<p>
+					We look forward to cross-partisan conversations where we can
+					come together to appreciate different points of view and better
+					understand why we hold the positions that we do.
+				</p>
+				<h4>Getting Started</h4>
+				<p>
+					<a href="{% url 'signin' %}">Sign in</a> to identify the issues you care about 
+					and vote on actions Congress can take. 
+					Pick an issue you care about, vote on an action associated with that issue, 
+					or create a new action that you think our Congress should take. 
+					Give your reasons. Feel good about participating in our Democracy.
+				</p>
+				<p>
+					Don't have an account? <a href="{% url 'createConstituent' %}?back={% url 'index' %}">Create one now.</a>
+				</p>
+				<p>
+					Send feedback to <a href="mailto:feedback@idodeclare.org">feedback@idodeclare.org</a>. 
+				</p>
+			</div>
+		{% endif %}
 
 		<div class="row">
 				<hr class="separator-bold" />
@@ -623,9 +667,19 @@
 		<div class="row">
 			<div id="mapFrame" class="col-xs-12"> </div>
 			<div class="col-xs-7 col-sm-8 col-md-9">
-				<label id="district_label" for="district_span" class="control-label">District:</label> 
+				<label id="district_label" for="district_span" class="control-label">District: </label> 
 				<span id="district_span"></span><br>
-				<label for="my_score" id="my_label" class="control-label">Table</label> <span id="my_score"></span>
+				<label for="id_constituent_table" id="my_label" class="control-label">By the numbers</label>
+				<table id='id_constituent_table' class="table table-striped table-condensed">
+					<thead>
+						<th id="id_constituent_area_label">District
+						</th>
+						<th>Count
+						</th>
+					</thead>
+					<tbody id='id_constituent_table_body'>
+					</tbody>
+				</table>
 			</div>
 		</div>
 

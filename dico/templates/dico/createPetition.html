@@ -198,17 +198,27 @@
 		</nav>
 		
 		<form class="form-createpetition" id="id_form">
-			<div id = "id_step1" class="row">
-				{% if issue %}
-					<label for="id_textarea">What action should Congress take regarding {{issue.name}}?</label>
-				{% else %}
-					<label for="id_textarea">What action should Congress take?</label>
-				{% endif %}
-				<div id="myAlert" class="errorAlert"></div>
-				<textarea id="id_textarea" rows=5 maxlength="254" name="description" class="form-control" 
-					placeholder="Pass a law to..." required autofocus></textarea>
-				<a href="##" onClick="showTips()"><small>Tips for writing actions</small></a>
-				<div id="tipsAlert" class="errorAlert"></div>
+			<div id = "id_step1">
+				<div class="row">
+					{% if issue %}
+						<label class="col-xs-12" for="id_textarea">What action should Congress take regarding {{issue.name}}?</label>
+					{% else %}
+						<label class="col-xs-12" for="id_textarea">What action should Congress take?</label>
+					{% endif %}
+				</div>
+				<div class="row">
+					<div id="myAlert" class="errorAlert col-xs-12"></div>
+				</div>
+				<div class="row">
+					<textarea id="id_textarea" rows=5 maxlength="254" name="description" class="form-control col-xs-12" 
+						placeholder="Pass a law to..." required autofocus></textarea>
+				</div>
+				<div class="row">
+					<a class="col-xs-12" href="##" onClick="showTips()"><small>Tips for writing actions</small></a>
+				</div>
+				<div class="row">
+					<div id="tipsAlert" class="errorAlert col-xs-12"></div>
+				</div>
     		</div>
     		<div id="id_step2" class="row">
     			<div class="col-xs-12 help-block">Select an issue associated with this new action.</div>

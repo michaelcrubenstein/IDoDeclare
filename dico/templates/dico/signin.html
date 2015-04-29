@@ -53,6 +53,10 @@
         	closealert = function() { 
         		$(".alert").parent().html('');
         	}
+        	
+        	var encodedURL = encodeURIComponent("{{backURL}}");
+        	$("#id_create_constituent_link").attr("href", "{% url 'createConstituent' %}?back="+encodedURL);
+        	$("#id_forgot_password_link").attr("href", "{% url 'forgotPassword' %}?back="+encodedURL);
 			
 			$("#id_signinform").on('submit', function (e) {
 				closealert();
@@ -73,7 +77,7 @@
 		});
 		
 		function sign_in() {
-		  $.post("/dico/submitsignin/", { csrfmiddlewaretoken: storedcsrftoken, 
+		  $.post("{% url 'submitSignin' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 		  								  "username" : $("#id_username").val(),
 		  								  "password" : $("#id_password").val() }, 
 		  								function(json){
@@ -107,10 +111,10 @@
       </form>
 
 	  <div class="div-create-new-account">
-	  	Don't have an account? <a href="/dico/createConstituent/?back={{backURL}}">Create one now.</a>
+	  	Don't have an account? <a id="id_create_constituent_link">Create one now.</a>
 	  </div>
 	  <div class="div-forgot-password">
-		Forgot your password? <a href="/dico/forgotpassword/?back={{backURL}}">Reset it now.</a>
+		Forgot your password? <a id="id_forgot_password_link">Reset it now.</a>
 	  </div>
 	  
     </div> <!-- /container -->

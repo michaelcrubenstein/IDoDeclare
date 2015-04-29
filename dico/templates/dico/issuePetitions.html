@@ -83,15 +83,19 @@
         		$('.alert').parent().html('');
         	}
 			
-			$("#id_accountSettingsLink").attr("href", "/dico/account/?back="+window.location.href);
-			$("#id_changePasswordLink").attr("href", "/dico/password/?back="+window.location.href);
+			var encodedRef = encodeURIComponent(window.location.href);
+			var backName = encodeURIComponent("{{issue.name}}");
+			$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
+			$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
+			$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
+			$("#id_createActionLink").attr("href", "{% url 'createPetition' %}?backURL="+encodedRef+";backName="+backName);
 			
 			// Display the interests of the currently logged-in user.
 			show_issue_petitions();
 		});
 
 		function show_issue_petitions() {
-		  $.post("/dico/getissuepetitions/", { csrfmiddlewaretoken: storedcsrftoken, "issue" : "{{issue.id}}" }, function(json){
+		  $.post("{% url 'getIssuePetitions' %}", { csrfmiddlewaretoken: storedcsrftoken, "issue" : "{{issue.id}}" }, function(json){
 		  	if (json['success']) {
 				petitions = json['petitions'];
 			
@@ -109,10 +113,12 @@
 					$(li).append(td);
 					newButton = document.createElement("a");
 					newSpan = document.createElement("span");
+					var backName = encodeURIComponent("{{issue.name}}");
+					var backURL = encodeURIComponent("/dico/" + {{issue.id}} + "/issue/");
 					if (petition['vote'] === 0) {
 						$(td).append(newButton);
 						$(newButton).addClass("btn btn-link btn-xs")
-									.attr("href", "/dico/" + petition['id'] + "/petition/?backIssueID={{issue.id}}")
+									.attr("href", "/dico/" + petition['id'] + "/petition/?backURL="+backURL+";backName="+backName)
 									.append(newSpan);
 						$(newSpan).addClass("label label-info")
 								  .append("Oppose");
@@ -122,7 +128,7 @@
 					} else if (petition['vote'] === 1) {
 						$(td).append(newButton);
 						$(newButton).addClass("btn btn-link btn-xs")
-									.attr("href", "/dico/" + petition['id'] + "/petition/?backIssueID={{issue.id}}")
+									.attr("href", "/dico/" + petition['id'] + "/petition/?backURL="+backURL+";backName="+backName)
 									.append(newSpan);
 						$(newSpan).addClass("label label-info")
 								  .append("Support");
@@ -140,7 +146,7 @@
 					$(td).addClass("align-right-column")
 						 .append(newButton);
 					$(newButton).addClass("btn btn-link btn-xs")
-					            .attr("href", "/dico/" + petition['id'] + "/petition/?backIssueID={{issue.id}}")
+					            .attr("href", "/dico/" + petition['id'] + "/petition/?backURL="+backURL+";backName="+backName)
 					            .append(newSpan);
 					$(newSpan).addClass("glyphicon glyphicon-chevron-right");
 				}
@@ -157,7 +163,7 @@
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<ul class="nav navbar-nav navbar-header pull-left">
 					<li>
-					<a class="navbar-link" href="/dico/">
+					<a class="navbar-link" href="{% url 'home' %}">
 						<span class="glyphicon glyphicon-chevron-left"></span>Home
 					</a>
 					</li>
@@ -172,7 +178,7 @@
 						<li><a id="id_accountSettingsLink">Account Settings</a></li>
 						<li><a id="id_changePasswordLink">Change Password</a></li>
 						<li class="divider"></li>
-						<li><a href="/dico/editinterests/">Edit Interests</a></li>
+						<li><a id="id_editInterestsLink">Edit Interests</a></li>
 						<li class="divider"></li>
 						<li><a href="{% url 'signout' %}">Sign out</a></li>
 					  </ul>
@@ -190,8 +196,7 @@
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="nav navbar-nav navbar-header pull-right">
 					{% if user.is_authenticated %}
-						<a class="navbar-text navbar-link dico-nav-edge-link" 
-							href="/dico/createpetition?issue={{issue.id}}&backURL=/dico/{{issue.id}}/issue/">Create an Action</a>
+						<a id="id_createActionLink" class="navbar-text navbar-link dico-nav-edge-link">Create an Action</a>
 					{% endif %}
 				</div>
 			</div>

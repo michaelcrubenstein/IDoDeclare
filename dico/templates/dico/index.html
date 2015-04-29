@@ -12,6 +12,7 @@
 
     <!-- Custom styles for this template -->
     <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
+    <link href="{% static "dico/css/mapus.css" %}" rel="stylesheet">
     <link href="{% static "dico/css/index.css" %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -39,36 +40,38 @@
   <body class="dico-two-nav-container">
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="{% static "jquery/js/jquery.min.js" %}"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+    
+    <script src="{% static "dico/js/mapus.js" %}"></script>
 
 	<!-- Scripts for this web page -->
-	<script type="text/JavaScript">
-
-		var stateCodes = ["", 
-			"AL", "AK", "AS", "AZ", "AR", "CA", "??", "CO", "CT", "DE", 
-			"DC", "FL", "GA", "GU", "HI", "ID", "IL", "IN", "IA", "KS", 
-			"KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", 
-			"NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", 
-			"OR", "PA", "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VT", 
-			"VA", "VI", "WA", "WV", "WI", "WY"];
-			
-		var districtScope = "district",
-			stateScope = "state";
-		
-		
+	<script type="text/JavaScript">				
 		function htmlDecode(input){
 		  var e = document.createElement('div');
 		  e.innerHTML = input;
 		  return e.childNodes[0].nodeValue;
 		}
 
+		function htmlEncode(input){
+			str = $('<div>').text(input).html();
+		    return String(str).replace(/ /g, '&nbsp;');
+		}
+		
 		$(document).ready (function() {
-			$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+window.location.href);
-			$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+window.location.href);
+			var encodedRef = encodeURIComponent(window.location.href);
+			$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
+			$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
+			$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
+			$("#id_expressInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
+			$("#id_createActionLink").attr("href", "{% url 'createPetition' %}?back="+encodedRef);
+			
+			$(".petition-news-item").click(function(e) {
+				window.location.href="/dico/" + $(this).attr("petition") + "/petition/?backURL="+encodedRef+";backName=Home"
+			});
 
-			initmap();
+			initmap("#mapFrame", "{% static "dico/us.json" %}");
 			
 			show_issue_map();
 
@@ -76,70 +79,18 @@
 		});
 
 		$(window).resize(function() {
-		  	resize_map();
+		  	resize_interest_map();
 		});
 		
-		function initmap() {
-			// Initialize the map.
-			var width = $("#mapFrame").width();
-			var height = width / 8 * 5;
-			if (height > window.innerHeight - 110) {
-				height = window.innerHeight - 110;
-				width = height / 5 * 8;
-			}
-			
-		
-			function ready(error, us) {
-			  if (error) return console.error(error);
-
-				var projection = d3.geo.albersUsa()
-					.scale(width * 4 / 3)
-					.translate([width / 2, height / 2]);
-
-				var path = d3.geo.path()
-					.projection(projection);
-
-				// add the path for all of the us land.
-				svg.append("defs").append("path")
-				  .attr("id", "land")
-				  .datum(topojson.feature(us, us.objects.land))
-				  .attr("d", path);
-
-				svg.append("clipPath")
-				  .attr("id", "clip-land")
-				  .append("use")
-					.attr("xlink:href", "#land");
-					
-				svg.append("g")
-				  .attr("class", "land")
-				  .attr("clip-path", "url(#clip-land)");
-			}
-
-			svg = d3.select("#mapFrame").append("svg")
-				.attr("width", width)
-				.attr("height", height);
-				
-			// json files for us state map and us districts map taken from https://gist.github.com/mbostock/4090846
-			queue()
-				.defer(d3.json, "{% static "dico/us.json" %}")
-				.await(ready);
-		}
-		
-		function resetCircles() { 
-		  	if ($("#byDistrictRadio").prop("checked")) { 
-		  		change_issue($("#issue_select").val(), districtScope);
-		  	} else {
-		  		change_issue($("#issue_select").val(), stateScope);
-		  	}
-		  }
-
 		function addHandlers() {
-		  $("#issue_select").change( function() { resetCircles() });
+		  $("#issue_select").change( function() { 
+		  	change_issue($("#issue_select").val(), getscope()) 
+		  });
 		  $("#byDistrictRadio").change( function() {
-		  	show_map($("#issue_select").val(), districtScope);
+		  	show_interest_map(districtScope);
 		  });
 		  $("#byStateRadio").change( function() { 
-		  	show_map($("#issue_select").val(), stateScope);
+		  	show_interest_map(stateScope);
 		  });
 		}
 		
@@ -150,70 +101,16 @@
 			if (json['error']) {
 				s = json['error'];
 			} else {
-				var interests = json['interests'];
-				var countMax = d3.max(interests, function(d) {return d.constituent_count; })
-		
-				if (countMax < 10) { countMax = 10; }
-		
-				var svg = d3.select("#mapFrame").select("svg");
-				var circles = svg.selectAll(".bubble");
-		
-				rScale = d3.scale.linear()
-							.domain([0, countMax])
-							.range([0, 30]);
-
-				// Clear the radii of all of the circles.
-				circles.attr("r", 0);
-				
-				if (newScope == districtScope)
-					$("#id_constituent_area_label").text('District');
-				else
-					$("#id_constituent_area_label").text('State');
-				$("#id_constituent_table_body").empty();
-				
-				for (i = 0; i < interests.length; ++i) {
-					var interest = interests[i];
-					var interestID;
-					
-					tr = document.createElement("tr");
-					$("#id_constituent_table_body").append(tr);
-					td = document.createElement("td");
-					$(tr).append(td);
-					if (newScope == districtScope) {
-						$(td).text(interest['state'] + "-" + interest['district']);
-						// Handle the special case for 'DC' here. The case for states with only one district
-						// is handled elsewhere.
-						if (interest['state'] == 'DC') {
-							interestID=100*stateCodes.indexOf(interest['state']) + 98;
-						} else {
-							interestID=100*stateCodes.indexOf(interest['state']) + interest['district'];
-						}
-					}
-					else {
-						$(td).text(interest['state']);
-						interestID=stateCodes.indexOf(interest['state']);
-					}
-					td = document.createElement("td");
-					$(tr).append(td);
-					$(td).text(interest['constituent_count']);
-
-					var ba = circles.filter(function() { return (this.getAttribute("id")==interestID);})
-					if (ba.size() == 0 && newScope == districtScope && interest['district'] == 1) {
-						ba = circles.filter(function() { return (this.getAttribute("id")==interestID-1);})
-					}
-					if (ba.size() > 0) {
-						ba[0][0].setAttribute("r", rScale(interest['constituent_count']));
-					}
-				}
+				mapdatapoints("#mapFrame", 
+							  "#id_constituent_area_label", 
+							  "#id_constituent_table_body", 
+							  newScope, 
+							  json['interests'],
+							  'constituent_count');
 			}
 		  });
 		}
 
-		function htmlEncode(input){
-			str = $('<div>').text(input).html();
-		    return String(str).replace(/ /g, '&nbsp;');
-		}
-		
 		function show_my_interests() {
 		  $.post("{% url 'getMyInterests' %}", { csrfmiddlewaretoken: '{{ csrf_token }}'}, function(json){
 			
@@ -271,193 +168,34 @@
 					newOption.value = allIssues[i].id;
 					selectElement.appendChild(newOption);
 				}
-				reset_map();
+				show_interest_map(getscope());
 			});
 		}
 		
-		function resize_map() {
-			var width = $("#mapFrame").width();
-			var height = width / 8 * 5;
-			if (height > window.innerHeight - 110) {
-				height = window.innerHeight - 110;
-				width = height / 5 * 8;
-			}
-
-			var projection = d3.geo.albersUsa()
-				.scale(width * 4 / 3)
-				.translate([width / 2, height / 2]);
-
-			var path = d3.geo.path()
-				.projection(projection);
-
-			var svg = d3.select("#mapFrame").select("svg");
-
-			// add the path for all of the us land.
-			svg.select("defs").select("path")
-			  .attr("d", path);
-			
-			reset_map();
+		function resize_interest_map() {
+			resizemap("#mapFrame");			
+			show_interest_map(getscope());
 		}
 		
-		function reset_map() {
+		function getscope() {
 		  	if ($("#byDistrictRadio").prop("checked")) { 
-		  		show_map($("#issue_select").val(), districtScope);
+		  		return districtScope;
 		  	} else {
-		  		show_map($("#issue_select").val(), stateScope);
+		  		return stateScope;
 		  	}
+			
 		}
-
-		function show_map(newIssue, newScope) {
-			var circleData = [];
-	
-			function mouseoverstate() {
-			  stateIndex = parseInt(d3.select(this).select("title").text());
-			  s = stateCodes[stateIndex]; 
-			  $("#district_span").html('').append(s);
-			}
-
-			function mouseoverdistrict() {
-			  thisTitle = parseInt(d3.select(this).select("title").text());
-			  stateIndex = (thisTitle / 100 | 0);
-			  districtIndex = thisTitle % 100;
-			  s = stateCodes[stateIndex] + "-"; 
-			  if (districtIndex == 0) {
-				s = s + "01";
-			  } else if (districtIndex < 10) {
-				s = s + "0" + districtIndex;
-			  } else {
-				s = s + districtIndex;
-			  }
-
-			  $("#district_span").html('').append(s);
-			}
-
-			function mouseoutstate() {
-			  $("#district_span").html('');
-			}
-
-			function mouseoutdistrict() {
-			  $("#district_span").html('');
-			}
-	
-			function ready(error, us, congress) {
-			  if (error) return console.error(error);
-
-			var districts = congress.objects.districts;
-
-			var width = $("#mapFrame").width(),
-				height = width / 8 * 5;
-			if (height > window.innerHeight - 110) {
-				height = window.innerHeight - 110;
-				width = height / 5 * 8;
-			}
-
-			svg.attr("width", width)
-			   .attr("height", height);
-			   
-			var projection = d3.geo.albersUsa()
-				.scale(width * 4 / 3)
-				.translate([width / 2, height / 2]);
-
-			var path = d3.geo.path()
-				.projection(projection);
-
-			circleData = [];
-	  
-			// Count the circleArray positions manually in case the indexes are not continuous.
-			i = 0;
-			var district = svg.select("g").selectAll("path");
-			
-			pathNodes = null;	
-			if (newScope == districtScope) {
-				  pathNodes = district.data(topojson.feature(congress, districts).features)
-				.enter().append("path")
-				  .attr("d", path)
-				  .attr("class", "district")
-				  .on("mouseover", mouseoverdistrict)
-				  .on("mouseout", mouseoutdistrict)
-				  .each(function(d){
-						// Get the centroid or, if the centroid is degenerate, the bounds.
-						centroid = path.centroid(d);
-						if (isNaN(centroid[0]))
-							centroid = path.bounds(d);
-
-						if (!isNaN(centroid[0])) {
-							circleData[i] = {"cx": centroid[0], "cy": centroid[1], "r": 0, "id": d.id};
-							i++;
-						}
-					});
-			} else {
-				  pathNodes = district.data(topojson.feature(us, us.objects.states).features)
-				.enter().append("path")
-				  .attr("d", path)
-				  .attr("class", "state")
-				  .on("mouseover", mouseoverstate)
-				  .on("mouseout", mouseoutstate)
-				  .each(function(d){
-						// Get the centroid or, if the centroid is degenerate, the bounds.
-						centroid = path.centroid(d);
-						if (isNaN(centroid[0]))
-							centroid = path.bounds(d);
-
-						if (!isNaN(centroid[0])) {
-							circleData[i] = {"cx": centroid[0], "cy": centroid[1], "r": 0, "id": d.id};
-							i++;
-						}
-					});
-			}
-
-			  pathNodes
-				  .append("title")
-				  .text(function(d) { return d.id; });
-	  
-			if (newScope == districtScope) {
-			  svg.append("path")
-				  .attr("class", "border border--district")
-				  .datum(topojson.mesh(congress, congress.objects.districts, function(a, b) { return a !== b && (a.id / 1000 | 0) === (b.id / 1000 | 0); }))
-				  .attr("d", path);
-			}
-
-			  svg.append("path")
-				  .attr("class", "border border--state")
-				  .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
-				  .attr("d", path);
-		  
-				circles = svg.selectAll("circle")
-					.data(circleData)
-					.enter()
-					.append("circle")
-						.attr("class", "bubble")
-						.attr("cx", function(d, i) { return d.cx; })
-						.attr("cy", function(d) { return d.cy; })
-						.attr("r", function(d) { return d.r; })
-						.attr("id", function(d) { return d.id; })
-						.call(function() {change_issue(newIssue, newScope); });
-	  
-	  			// Set the label for the object when mousing over.
-	  			if (newScope == districtScope)
-	  				$("#district_label").html('').append("District:");
-	  			else
-	  				$("#district_label").html('').append("State:");
-			}
-
-			// Remove any lingering contents from the mapFrame.
-			
-			var svg = d3.select("#mapFrame").select("svg");
-			
-			svg.selectAll(".district").remove();
-			svg.selectAll(".state").remove();
-			svg.selectAll(".border").remove();
-			svg.selectAll(".bubble").remove();
-
-			// json files for us state map and us districts map taken from https://gist.github.com/mbostock/4090846
-			queue()
-				.defer(d3.json, "{% static "dico/us.json" %}")
-				.defer(d3.json, "{% static "dico/us-congress-113.json" %}")
-				.await(ready);
+		
+		function show_interest_map(newScope)
+		{
+			show_map("#mapFrame", $("#district_label"), $("#district_span"), 
+					 "{% static "dico/us.json" %}",
+					 "{% static "dico/us-congress-113.json" %}",
+					 function() {change_issue($("#issue_select").val(), newScope); }, 
+					 newScope);
 		}
-
-		d3.select(self.frameElement).style("height", ($("#mapFrame").width() / 8 * 5) + "px");
+		
+		initmapheight("#mapFrame");
 	</script>
 
 	<div id='container' class="container-fluid">
@@ -477,7 +215,7 @@
 							<li><a id="id_accountSettingsLink">Account Settings</a></li>
 							<li><a id="id_changePasswordLink">Change Password</a></li>
 							<li class="divider"></li>
-							<li><a href="{% url 'editInterests' %}">Edit Interests</a></li>
+							<li><a id="id_editInterestsLink">Edit Interests</a></li>
 							<li class="divider"></li>
 							<li><a href="{% url 'signout' %}">Sign out</a></li>
 						  </ul>
@@ -497,8 +235,7 @@
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="nav navbar-header pull-right">
 					{% if user.is_authenticated %}
-						<a class="navbar-text navbar-link pull-right dico-navbar-text" 
-							href="/dico/createpetition?backURL=/dico/">Create an Action</a>
+						<a id="id_createActionLink" class="navbar-text navbar-link pull-right dico-navbar-text">Create an Action</a>
 					{% endif %}
 				</div>
 			</div>
@@ -519,9 +256,9 @@
 								{% endif %}
 								{{ news_item.description }} </td>
 							<td width="100px">
-								<a class="btn btn-link btn-xs" href="/dico/{{ news_item.id }}/petition/">Vote Now
+								<span class="btn btn-link btn-xs petition-news-item" petition="{{ news_item.id }}">Vote Now
 									<span class="glyphicon glyphicon-chevron-right"></span>
-								</a>
+								</span>
 							</td>
 						</tr>
 						{% endfor %}
@@ -536,8 +273,7 @@
 				<div>
 					<div class="row">
 						<div class="col-xs-12">
-						<label class="control-label table-label">Your Interests</label>
-						<a class="btn btn-sm btn-link" href="{% url 'editInterests' %}">Edit</a>
+							<label class="control-label table-label">Your Interests</label>
 						</div>
 					</div>
 					{% if my_issue_list %}
@@ -556,7 +292,7 @@
 					{% else %}
 						<div class="row">
 							<div class="col-xs-12 issue-container">
-								<a class="btn btn-sm btn-link" href="{% url 'editInterests' %}">Express Interests</a>
+								<a id="id_expressInterestsLink" class="btn btn-sm btn-link">Express Interests</a>
 							</div>
 						</div>
 					{% endif %}
@@ -631,7 +367,7 @@
 					Give your reasons. Feel good about participating in our Democracy.
 				</p>
 				<p>
-					Don't have an account? <a href="{% url 'createConstituent' %}?back={% url 'index' %}">Create one now.</a>
+					Don't have an account? <a href="{% url 'createConstituent' %}?back={% url 'home' %}">Create one now.</a>
 				</p>
 				<p>
 					Send feedback to <a href="mailto:feedback@idodeclare.org">feedback@idodeclare.org</a>. 

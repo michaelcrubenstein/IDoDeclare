@@ -55,6 +55,12 @@
 		var storedcsrftoken = "{{ csrf_token }}";
 
 		$(document).ready (function(e) {
+			var backURL = encodeURIComponent("{{backURL}}");
+			var backName = encodeURIComponent("{{backName}}");
+			$("#id_done_anchor").attr("href", "/dico/{{petition.id}}/petition/?backURL="+backURL+";backName="+backName);
+		});
+
+		$(document).ready (function(e) {
 			<!-- Block of code for an alert area at the top of the window -->
 			$(".close").click(function(){
 				$(this).parent().alert();
@@ -73,7 +79,7 @@
 		});
 
 		function add_petition_issue(issueID) {
-		  deferredObject = $.post("/dico/newpetitionissue/", { csrfmiddlewaretoken: storedcsrftoken, 
+		  deferredObject = $.post("{% url 'newPetitionIssue' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 		  		"issue": issueID,
 		  		"petition": {{petition.id}}
 		  		} 
@@ -82,7 +88,9 @@
 		  	{
 				if (json['success']) {
 					closealert();
-					window.location = "/dico/{{petition.id}}/petition/?backIssueID={{backIssueID}}";
+					var backURL = encodeURIComponent("{{backURL}}");
+					var backName = encodeURIComponent("{{backName}}");
+					window.location.href = "/dico/{{petition.id}}/petition/?backURL="+backURL+";backName="+backName;
 				}
 				else {
 					bootstrap_alert.warning("Sorry, " + json['error']);
@@ -111,7 +119,7 @@
 			<div class="container-fluid">
 				<div class="nav navbar-nav navbar-header pull-left">
 					<li>
-						<a class="navbar-link dico-nav-edge-link" href="/dico/{{petition.id}}/petition/?backIssueID={{backIssueID}}">
+						<a id="id_done_anchor" class="navbar-link dico-nav-edge-link">
 			  				Done
 			  			</a>
 			  		</li>

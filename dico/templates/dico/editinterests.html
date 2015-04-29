@@ -81,10 +81,16 @@
 			
 			// Display the interests of the currently logged-in user.
 			show_my_interests();
+			
+			$("#done_button").click(function(e) {
+				window.location = "{{ backURL }}";
+				e.preventDefault();
+			});
+
 		});
 
 		function add_interest(newIssueName, issueDiv) {
-		  deferredObject = $.post("/dico/newinterest/", { csrfmiddlewaretoken: storedcsrftoken, "newissue": newIssueName} 
+		  deferredObject = $.post("{% url 'newInterest' %}", { csrfmiddlewaretoken: storedcsrftoken, "newissue": newIssueName} 
 		  	)
 		  .done(function(json, textStatus, jqXHR)
 		  	{
@@ -107,7 +113,7 @@
 		}
 
 		function remove_interest(issueName) {
-		  $.post("/dico/submitdeleteinterest/", { csrfmiddlewaretoken: storedcsrftoken, 'oldinterest': issueName}, function(json){
+		  $.post("{% url 'deleteInterest' %}", { csrfmiddlewaretoken: storedcsrftoken, 'oldinterest': issueName}, function(json){
 			if (json['success']) {
 				show_my_interests();
 			}
@@ -175,7 +181,7 @@
 		}
 
 		function show_my_interests() {
-		  $.post("/dico/getmyinterests/", { csrfmiddlewaretoken: storedcsrftoken}, function(json){
+		  $.post("{% url 'getMyInterests' %}", { csrfmiddlewaretoken: storedcsrftoken}, function(json){
 			myIssues = json['myIssues'];
 			
 			
@@ -249,7 +255,6 @@
 			});
 		  });
 		}
-		
 	</script>
 
 	<div id='container' class="container-fluid">
@@ -258,8 +263,9 @@
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<div class="nav navbar-header pull-left">
 					<li>
-			  			<a class="navbar-link dico-nav-edge-link" href="/dico/">
-			  			<span class="glyphicon glyphicon-chevron-left"></span>Home</a>
+						<span class="dico-pull-left">
+							<span id="done_button" class="navbar-text navbar-link pull-left dico-navbar-text">Done</span>
+						</span>
 					</li>
 				</div>
 			</div><!-- /.container-fluid -->

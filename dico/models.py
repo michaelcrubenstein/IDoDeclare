@@ -289,7 +289,7 @@ class Petition(models.Model):
         pi = PetitionIssue(petition=self, issue=issue, constituent=constituent)
         pi.save()
 
-    def get_votes(petition_id):
+    def get_vote_totals(petition_id):
         with connection.cursor() as c:
             sql = "SELECT vote, COUNT(*) as vote_count" + \
                   " FROM dico_petitionvote" + \
@@ -302,6 +302,45 @@ class Petition(models.Model):
                 countList.append({'vote': vc[0], 'count': vc[1]})
             return countList
     
+    def get_votes(self, scope='district'):
+        with connection.cursor() as c:
+            if scope == 'district':
+                sql = "SELECT state,district,SUM(support_count),SUM(oppose_count) FROM " + \
+                    "(SELECT state, district, COUNT(*) as support_count, 0 as oppose_count" + \
+                    " FROM dico_petitionvote, dico_constituent" + \
+                    " WHERE %s = dico_petitionvote.petition_id" + \
+                    " AND   dico_petitionvote.constituent_id = dico_constituent.user_id" + \
+                    " AND   dico_petitionvote.vote = 1" + \
+                    " GROUP BY state, district" + \
+                    " UNION " + \
+                    " SELECT state, district, 0, COUNT(*)" + \
+                    " FROM dico_petitionvote, dico_constituent" + \
+                    " WHERE %s = dico_petitionvote.petition_id" + \
+                    " AND   dico_petitionvote.constituent_id = dico_constituent.user_id" + \
+                    " AND   dico_petitionvote.vote = 0" + \
+                    " GROUP BY state, district)" + \
+                    " GROUP BY state, district" + \
+                    " ORDER BY state, district"
+            else:
+                sql = "SELECT state, SUM(support_count), SUM(oppose_count) FROM " + \
+                      "(SELECT state, COUNT(*) as support_count, 0 as oppose_count" + \
+                      " FROM dico_petitionvote, dico_constituent" + \
+                      " WHERE %s = dico_petitionvote.petition_id" + \
+                      " AND   dico_petitionvote.constituent_id = dico_constituent.user_id" + \
+                      " AND   dico_petitionvote.vote = 1" + \
+                      " GROUP BY state" + \
+                      " UNION " + \
+                      " SELECT state, 0 as support_count, COUNT(*) as oppose_count" + \
+                      " FROM dico_petitionvote, dico_constituent" + \
+                      " WHERE %s = dico_petitionvote.petition_id" + \
+                      " AND   dico_petitionvote.constituent_id = dico_constituent.user_id" + \
+                      " AND   dico_petitionvote.vote = 0" + \
+                      " GROUP BY state)" + \
+                      " GROUP BY state" + \
+                      " ORDER BY state"
+            c.execute(sql, [self.id, self.id])
+            return c.fetchall()
+            
     # Gets an array of dictionaries that have the id, name and the constituent_id of
     # the user who connected the issue to the specified petition.
     def get_issues(petition_id):

@@ -38,6 +38,11 @@
 
 	<!-- Scripts for this web page -->
 	<script type="text/JavaScript">
+		$(document).ready (function(e) {
+			var backURL = encodeURIComponent("{{backURL}}");
+			var backName = encodeURIComponent("{{backName}}");
+			$("#id_done_anchor").attr("href", "/dico/{{petition.id}}/petition/?backURL="+backURL+";backName="+backName);
+		});
 	</script>
 
 	<div id='container' class="container-fluid">
@@ -45,7 +50,7 @@
 			<div class="container-fluid">
 			<!-- Brand and toggle get grouped for better mobile display -->
 				<div class="nav navbar-nav navbar-header pull-left">
-				  <a class="navbar-text navbar-link dico-nav-edge-link" href="/dico/{{petition.id}}/petition/?backIssueID={{backIssueID}}">
+				  <a id="id_done_anchor" class="navbar-text navbar-link dico-nav-edge-link">
 					Done</a>
 				</div>
 			</div>

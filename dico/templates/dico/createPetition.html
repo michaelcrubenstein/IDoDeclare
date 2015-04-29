@@ -64,7 +64,7 @@
 			function submitform() {
 				closealert();
 		
-				$.post("/dico/newpetition/", 
+				$.post("{$ url 'newPetition' %}", 
 					{ csrfmiddlewaretoken: '{{ csrf_token }}', 
 						{% if issue %}
 							"issue": "{{ issue.name }}",
@@ -77,10 +77,9 @@
 					{
 						if (json['success']) {
 							closealert();
-							window.location = "/dico/" + json['petition'] + "/petition/"
-							{% if issue %}
-								+ "?backIssueID="+"{{ issue.id }}"
-							{% endif %}
+							var backURL = encodeURIComponent("{{backURL}}");
+							var backName = encodeURIComponent("{{backName}}");
+							window.location.href = "/dico/" + json['petition'] + "/petition/?backURL="+backURL+";backName="+backName;
 						}
 						else {
 							bootstrap_alert.warning(json['error']);

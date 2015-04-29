@@ -56,7 +56,7 @@
 		// Display all of the interests in the system.
 		var storedcsrftoken = "{{ csrf_token }}";
 		var elementToDelete = null;
-
+		
 		$(document).ready (function(e) {
 			<!-- Block of code for an alert area at the top of the window -->
 			$(".close").click(function(){
@@ -74,6 +74,11 @@
         		$('.alert').parent().html('');
         	}
 			
+			encodedRef = encodeURIComponent(window.location.href);
+			$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
+			$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
+			$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
+
 			$("#id_confirmDeleteButton").click(function() {
 				remove_argument(elementToDelete, $("#id_deleteDialog").attr("argumentId"));
 			});
@@ -112,7 +117,7 @@
 		});
 
 		function show_petition_issues() {
-		  $.post("/dico/getpetitionissues/", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
+		  $.post("{% url 'getPetitionIssues' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
 		  	if (json['success']) {
 				issues = json['issues'];
 			
@@ -154,11 +159,13 @@
 		}
 		
 		function add_issue() {
-			window.location = "/dico/{{petition.id}}/addpetitionissue/?backIssueID={{backIssueID}}";
+			var backURL = encodeURIComponent("{{backURL}}");
+			var backName = encodeURIComponent("{{backName}}");
+			window.location.href = "/dico/{{petition.id}}/addpetitionissue/?backURL="+backURL+";backName="+backName;
 		}
 		
 		function remove_issue(li, issue_id) {
-		  $.post("/dico/deletepetitionissue/", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : "{{petition.id}}", "issue_id" : issue_id }, function(json){
+		  $.post("{% url 'deletePetitionIssue' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : "{{petition.id}}", "issue_id" : issue_id }, function(json){
 		  	if (json['success']) {
 		  		$(li).remove();
 			}
@@ -168,7 +175,7 @@
 		}
 		
 		function show_petition_arguments() {
-		  $.post("/dico/getpetitionarguments/", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
+		  $.post("{% url 'getPetitionArguments' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
 		  	if (json['success']) {
 				supportingArguments = json['supportingArguments'];
 				opposingArguments = json['opposingArguments'];
@@ -311,7 +318,7 @@
 		}
 		
 		function remove_argument(li, argument_id) {
-		  $.post("/dico/deleteargument/", { csrfmiddlewaretoken: storedcsrftoken, "argument" : argument_id }, function(json){
+		  $.post("{% url 'deleteArgument' %}", { csrfmiddlewaretoken: storedcsrftoken, "argument" : argument_id }, function(json){
 		  	if (json['success']) {
 		  		$(li).remove();
 		  		if ($($("#id_supporting_arguments").children()[0]).children().length == 0)
@@ -326,20 +333,32 @@
 		    });
 		}
 		
+		function show_petition_vote_details() {
+			var backURL = encodeURIComponent("{{backURL}}");
+			var backName = encodeURIComponent("{{backName}}");
+			window.location = "{% url 'petitionVotes' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+		}
+		
 		function add_supporting_argument() {
-			window.location = "/dico/{{petition.id}}/addsupportingargument/?backIssueID={{backIssueID}}";
+			var backURL = encodeURIComponent("{{backURL}}");
+			var backName = encodeURIComponent("{{backName}}");
+			window.location = "{% url 'addSupportingArgument' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
 		}
 		
 		function add_opposing_argument() {
-			window.location = "/dico/{{petition.id}}/addopposingargument/?backIssueID={{backIssueID}}";
+			var backURL = encodeURIComponent("{{backURL}}");
+			var backName = encodeURIComponent("{{backName}}");
+			window.location = "{% url 'addOpposingArgument' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
 		}
 		
 		function doc_ratings() {
-			window.location = "/dico/{{petition.id}}/docratings/?backIssueID={{backIssueID}}";
+			var backURL = encodeURIComponent("{{backURL}}");
+			var backName = encodeURIComponent("{{backName}}");
+			window.location = "{% url 'docRatings' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
 		}
 		
 		function cast_vote(vote) {
-			deferredObject = $.post("/dico/newpetitionvote/", { csrfmiddlewaretoken: storedcsrftoken, 
+			deferredObject = $.post("{% url 'newPetitionVote' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 														  "petition" : "{{petition.id}}",
 														  "vote" : vote} 
 				)
@@ -371,7 +390,7 @@
 		}
 		
 		function vote_no_opinion() {
-			deferredObject = $.post("/dico/deletepetitionvote/", { csrfmiddlewaretoken: storedcsrftoken, 
+			deferredObject = $.post("{% url 'deletePetitionVote' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 														  "petition" : "{{petition.id}}"} 
 				)
 				.done(function(json, textStatus, jqXHR)
@@ -399,7 +418,7 @@
 		}
 		
 		function show_petition_votes(init_user_vote) {
-			deferredObject = $.post("/dico/getpetitionvotes/", { csrfmiddlewaretoken: storedcsrftoken, 
+			deferredObject = $.get("{% url 'getPetitionVoteTotals' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 														  "petition" : "{{petition.id}}"} 
 				)
 				.done(function(json, textStatus, jqXHR)
@@ -447,8 +466,9 @@
 							else
 								opposeString = "" + opposeVotes + " people oppose this";
 						}
-							
-						$("#id_total_votes").html("<span class='text-muted'><span class='glyphicon glyphicon-thumbs-up'></span> " + supportString + "<br><span class='glyphicon glyphicon-thumbs-down'></span>&nbsp;" + opposeString + "</span>");
+						
+						$("#id_support_span").text(supportString);
+						$("#id_oppose_span").text(opposeString);
 						if ('userVote' in json) {
 							if (init_user_vote) {
 								if (json['userVote'] == 1) {
@@ -486,10 +506,10 @@
 		function rate_argument(li, argument_id, rating) {
 			var deferredObject;
 			if (rating == -1)
-				deferredObject = $.post("/dico/unrateargument/", { csrfmiddlewaretoken: storedcsrftoken, 
+				deferredObject = $.post("{% url 'unrateArgument' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 														  "argument" : argument_id});
 			else
-				deferredObject = $.post("/dico/rateargument/", { csrfmiddlewaretoken: storedcsrftoken, 
+				deferredObject = $.post("{% url 'rateArgument' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 														  "argument" : argument_id,
 														  "rating" : rating});
 
@@ -511,7 +531,7 @@
 		}
 		
 		function remove_petition() {
-		  $.post("/dico/deletepetition/", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : {{ petition.id }} }, function(json){
+		  $.post("{% url 'deletePetition' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : {{ petition.id }} }, function(json){
 		  	if (json['success']) {
 		  		window.location.href = "{{ backURL }}";
 			}
@@ -540,7 +560,7 @@
 							<li><a id="id_accountSettingsLink">Account Settings</a></li>
 							<li><a id="id_changePasswordLink">Change Password</a></li>
 							<li class="divider"></li>
-							<li><a href="/dico/editinterests/">Edit Interests</a></li>
+							<li><a id="id_editInterestsLink">Edit Interests</a></li>
 							<li class="divider"></li>
 							<li><a href="{% url 'signout' %}">Sign out</a></li>
 						  </ul>
@@ -614,7 +634,15 @@
 				{% endif %}
 			</div>
 			<div class="col-xs-12 col-sm-4">
-				<div id="id_total_votes" class="bottom-padding"></div>
+				<div id="id_total_votes" class="bottom-padding">
+					<span class='text-muted'>
+						<span class="dico-span-link" onClick="show_petition_vote_details()">
+							<span class='glyphicon glyphicon-thumbs-up'></span>
+							<span id="id_support_span"></span><br>
+							<span class='glyphicon glyphicon-thumbs-down'></span>
+							<span id="id_oppose_span"></span>
+						</span>
+				</div>
 			</div>
 		</div>
 		<div class="row">

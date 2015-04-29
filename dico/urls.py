@@ -4,11 +4,11 @@ from dico import views
 
 urlpatterns = patterns(
 	'',
-    url(r'^$', views.index, name='index'),
+    url(r'^$', views.index, name='home'),
     # ex: /dico/signin/
     url(r'^signin/', views.signin, name='signin'),
     # ex: /dico/submitsignin/
-    url(r'^submitsignin/', views.submitsignin, name='submitsignin'),
+    url(r'^submitsignin/', views.submitsignin, name='submitSignin'),
     # ex: /dico/signout/
     url(r'^signout/', views.signout, name='signout'),
     # ex: /dico/editinterests/
@@ -18,7 +18,7 @@ urlpatterns = patterns(
     # ex: /dico/password/
     url(r'^password/', views.password, name='password'),
     # ex: /dico/forgotpassword/
-    url(r'^forgotpassword/', views.forgotPassword, name='forgotpassword'),
+    url(r'^forgotpassword/', views.forgotPassword, name='forgotPassword'),
     # ex: /dico/resetpassword/
     url(r'^resetpassword/', views.resetPassword, name='resetPassword'),
     # ex: /dico/passwordreset/
@@ -26,17 +26,19 @@ urlpatterns = patterns(
     # ex: /dico/passwordreset/
     url(r'^setresetpassword/', views.setResetPassword, name='setResetPassword'),
 	# ex: /dico/issue/5/
-	url(r'^(?P<issue_id>\d+)/issue/$', views.issue, name='issue'),
+	url(r'^(?P<issue_id>\d+)/issue/', views.issue, name='issue'),
 	# ex: /dico/petition/5/
-	url(r'^(?P<petition_id>\d+)/petition/$', views.petition, name='petition'),
+	url(r'^(?P<petition_id>\d+)/petition/', views.petition, name='petition'),
 	# ex: /dico/createPetition/
-	url(r'^createpetition/$', views.createPetition, name='createPetition'),
+	url(r'^createpetition/', views.createPetition, name='createPetition'),
 	# ex: /dico/addpetitionissue/5/
-	url(r'^(?P<petition_id>\d+)/addpetitionissue/$', views.addPetitionIssue, name='addPetitionIssue'),
+	url(r'^(?P<petition_id>\d+)/addpetitionissue/', views.addPetitionIssue, name='addPetitionIssue'),
+	# ex: /dico/petitionvotes/
+	url(r'^petitionvotes/', views.petitionVotes, name='petitionVotes'),
     # ex: /dico/newinterest/
     url(r'^newinterest/', views.newInterest, name='newInterest'),
     # ex: /dico/submitdeleteinterest/
-    url(r'^submitdeleteinterest/', views.submitdeleteinterest, name='deleteinterest'),
+    url(r'^submitdeleteinterest/', views.submitdeleteinterest, name='deleteInterest'),
 	# ex: /dico/createConstituent/
     url(r'^createConstituent/', views.createConstituent, name='createConstituent'),
 	# ex: /dico/newconstituent/
@@ -46,41 +48,29 @@ urlpatterns = patterns(
 	# ex: /dico/updatepassword/
 	url(r'^updatepassword/', views.updatePassword, name='updatePassword'),
     # ex: /dico/getissuepetitions/
-    url(r'^getissuepetitions/', views.getIssuePetitions, name='getissuepetitions'),
+    url(r'^getissuepetitions/', views.getIssuePetitions, name='getIssuePetitions'),
     # ex: /dico/newpetition/
-    url(r'^newpetition/', views.newPetition, name='newpetition'),
+    url(r'^newpetition/', views.newPetition, name='newPetition'),
     # ex: /dico/deletepetition/
-    url(r'^deletepetition/', views.deletePetition, name='deletepetition'),
+    url(r'^deletepetition/', views.deletePetition, name='deletePetition'),
     # ex: /dico/updatepetition/
-    url(r'^updatepetition/', views.updatePetition, name='updatepetition'),
+    url(r'^updatepetition/', views.updatePetition, name='updatePetition'),
     # ex: /dico/getpetitionissues/
-    url(r'^getpetitionissues/', views.getPetitionIssues, name='getpetitionissues'),
+    url(r'^getpetitionissues/', views.getPetitionIssues, name='getPetitionIssues'),
     # ex: /dico/getpetitionarguments/
-    url(r'^getpetitionarguments/', views.getPetitionArguments, name='getpetitionarguments'),
+    url(r'^getpetitionarguments/', views.getPetitionArguments, name='getPetitionArguments'),
     # ex: /dico/newpetitionissue/
-    url(r'^newpetitionissue/', views.newPetitionIssue, name='newpetitionissue'),
+    url(r'^newpetitionissue/', views.newPetitionIssue, name='newPetitionIssue'),
     # ex: /dico/deletepetitionissue/
-    url(r'^deletepetitionissue/', views.deletePetitionIssue, name='deletepetitionissue'),
-    # ex: /dico/getpetitionvotes/
-    url(r'^getpetitionvotes/', views.getPetitionVotes, name='getpetitionvotes'),
+    url(r'^deletepetitionissue/', views.deletePetitionIssue, name='deletePetitionIssue'),
     # ex: /dico/newpetitionvote/
-    url(r'^newpetitionvote/', views.newPetitionVote, name='newpetitionvote'),
+    url(r'^newpetitionvote/', views.newPetitionVote, name='newPetitionVote'),
     # ex: /dico/deletepetitionvote/
-    url(r'^deletepetitionvote/', views.deletePetitionVote, name='deletepetitionvote'),
-    # ex: /dico/updatepetitionvote/
-    url(r'^updatepetitionvote/', views.updatePetitionVote, name='updatepetitionvote'),
-	# ex: /dico/addsupportingargument/5/
-	url(r'^(?P<petition_id>\d+)/addsupportingargument/$', views.addSupportingArgument, name='addSupportingArgument'),
-	# ex: /dico/addopposingargument/5/
-	url(r'^(?P<petition_id>\d+)/addopposingargument/$', views.addOpposingArgument, name='addOpposingArgument'),
+    url(r'^deletepetitionvote/', views.deletePetitionVote, name='deletePetitionVote'),
     # ex: /dico/newargument/
     url(r'^newargument/', views.newArgument, name='newArgument'),
     # ex: /dico/deleteargument/
     url(r'^deleteargument/', views.deleteArgument, name='deleteArgument'),
-    # ex: /dico/rateargument/
-    url(r'^rateargument/', views.rateArgument, name='rateArgument'),
-    # ex: /dico/unrateargument/
-    url(r'^unrateargument/', views.unrateArgument, name='unrateArgument'),
 	# ex: /dico/5/
 	url(r'^(?P<constituent_id>\d+)/$', views.dashboard, name='dashboard'),
 	# ex: /dico/5/addissue/
@@ -102,11 +92,25 @@ urlpatterns = patterns(
 	# ex: /dico/getmymembers -- Get information about all of the members for the current logged-in user.
 	url(r'^getmymembers/', views.getMyMembers, name='getMyMembers'),
 	#
+	# from the petition.html page
+    # ex: /dico/getpetitionvotetotals/
+    url(r'^getpetitionvotetotals/', views.getPetitionVoteTotals, name='getPetitionVoteTotals'),
+	# ex: dico/5/getpetitionvotes/
+	url(r'^getpetitionvotesbyscope/', views.getPetitionVotesByScope, name='getPetitionVotesByScope'),
+    # ex: /dico/rateargument/
+    url(r'^rateargument/', views.rateArgument, name='rateArgument'),
+    # ex: /dico/unrateargument/
+    url(r'^unrateargument/', views.unrateArgument, name='unrateArgument'),
+	# ex: /dico/addsupportingargument/5/
+	url(r'^addsupportingargument/', views.addSupportingArgument, name='addSupportingArgument'),
+	# ex: /dico/addopposingargument/5/
+	url(r'^addopposingargument/', views.addOpposingArgument, name='addOpposingArgument'),
+	#
 	# documentation urls.
 	# ex: /dico/doctermsofuse
 	url(r'^doctermsofuse/', views.docTermsOfUse, name='docTermsOfUse'),
 	# ex: /dico/docratings
-	url(r'^(?P<petition_id>\d+)/docratings/$', views.docRatings, name='docRatings'),
+	url(r'^docratings/', views.docRatings, name='docRatings'),
 	# ex: /dico/docyourinterests
 	url(r'^docyourinterests/', views.docYourInterests, name='docYourInterests'),
 	

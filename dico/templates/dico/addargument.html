@@ -66,7 +66,9 @@
 			});
 			
 			$("#cancel_button").click(function(e) {
-				window.location = "/dico/{{petition.id}}/petition/?backIssueID={{backIssueID}}";
+				var backURL = encodeURIComponent("{{backURL}}");
+				var backName = encodeURIComponent("{{backName}}");
+				window.location.href = "/dico/{{petition.id}}/petition/?backURL="+backURL+";backName="+backName;
 				e.preventDefault();
 			});
 
@@ -81,7 +83,7 @@
 		  }
 		  else
 		  {
-				$.post("/dico/newargument/", { csrfmiddlewaretoken: storedcsrftoken, 
+				$.post("{% url 'newArgument' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 															  "petition" : "{{petition.id}}", 
 															  "vote" : {{ argumentVote }}, 
 															  "description": newArgumentText} 
@@ -89,7 +91,9 @@
 			  .done(function(json, textStatus, jqXHR)
 				{
 					if (json['success']) {
-						window.location.href = "/dico/{{petition.id}}/petition/?backIssueID={{backIssueID}}"
+						var backURL = encodeURIComponent("{{backURL}}");
+						var backName = encodeURIComponent("{{backName}}");
+						window.location.href = "/dico/{{petition.id}}/petition/?backURL="+backURL+";backName="+backName;
 					}
 					else {
 						bootstrap_alert.warning(json['error']);

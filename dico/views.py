@@ -13,6 +13,7 @@ from dico.emailer import Emailer
 
 import traceback
 import urllib
+import urllib.parse
 import json
 import uuid
 
@@ -47,7 +48,7 @@ def signin(request):
     backURL = request.GET.get(u'backURL', "/dico/")
         
     context = RequestContext(request, {
-        'backURL' : backURL,
+        'backURL' : urllib.parse.unquote_plus(backURL),
     })
     return HttpResponse(template.render(context))
 
@@ -81,9 +82,11 @@ def editInterests(request):
         return signin(request)
     
     template = loader.get_template('dico/editinterests.html')
+    backURL = request.GET.get('back', "")
         
     context = RequestContext(request, {
         'user': request.user,
+        'backURL': urllib.parse.unquote_plus(backURL),
     })
     return HttpResponse(template.render(context))
 
@@ -101,7 +104,7 @@ def account(request):
     context = RequestContext(request, {
         'user': request.user,
         'constituent': constituent,
-        'backURL': backURL,
+        'backURL': urllib.parse.unquote_plus(backURL),
         'contactMethod': contactMethod
     })
     return HttpResponse(template.render(context))
@@ -115,7 +118,7 @@ def password(request):
         
     context = RequestContext(request, {
         'user': request.user,
-        'backURL': backURL
+        'backURL': urllib.parse.unquote_plus(backURL)
     })
     return HttpResponse(template.render(context))
 
@@ -129,7 +132,7 @@ def forgotPassword(request):
     backURL = request.GET.get('back', "")
         
     context = RequestContext(request, {
-        'backURL': backURL
+        'backURL': urllib.parse.unquote_plus(backURL)
     })
     return HttpResponse(template.render(context))
 
@@ -152,11 +155,8 @@ def createPetition(request):
         return signin(request)
     
     template = loader.get_template('dico/createPetition.html')
-        
-    if 'backURL' in request.GET:
-        backURL = request.GET['backURL']
-    else:
-        backURL = ""
+    backURL = request.GET.get('backURL', '/dico/');    
+    backName = request.GET.get('backName', 'Home')
         
     allIssues = []
     if 'issue' in request.GET:
@@ -169,7 +169,8 @@ def createPetition(request):
 
     context = RequestContext(request, {
         'user': request.user,
-        'backURL': backURL,
+        'backURL': urllib.parse.unquote_plus(backURL),
+        'backName': urllib.parse.unquote_plus(backName),
         'issue': issue,
         'allIssues': allIssues,
     })
@@ -190,7 +191,8 @@ def addPetitionIssue(request, petition_id):
     template = loader.get_template('dico/addpetitionissue.html')
         
     petition = Petition.objects.filter(pk=petition_id).select_related().get()
-    backIssueID = int(request.GET.get(u'backIssueID', 0));
+    backURL = request.GET.get('backURL', '/dico/');    
+    backName = request.GET.get('backName', 'Home')
     
     petitionIssues = petition.issues.all();
     allIssues = []
@@ -202,7 +204,8 @@ def addPetitionIssue(request, petition_id):
         'user': request.user,
         'petition': petition,
         'allIssues': allIssues,
-        'backIssueID': backIssueID,
+        'backURL': urllib.parse.unquote_plus(backURL),
+        'backName': urllib.parse.unquote_plus(backName),
     })
     return HttpResponse(template.render(context))
 
@@ -328,7 +331,7 @@ def createConstituent(request):
     backURL = request.GET.get('back', "")
 
     context = RequestContext(request, {
-        'backURL' : backURL
+        'backURL' : urllib.parse.unquote_plus(backURL)
     })
     return HttpResponse(template.render(context))
     
@@ -622,34 +625,6 @@ def deletePetitionIssue(request):
     
     return JsonResponse(results)
 
-def getPetitionVotes(request):
-    results = {'success':False, 'error': 'getPetitionVotes failed'}
-    try:
-        if request.method != "POST":
-            raise Exception("getPetitionVotes only responds to POST requests")
-            
-        # Get the petition info.
-        petition_id = request.POST['petition']
-        voteCounts = Petition.get_votes(petition_id)
-        # Return the results.
-        results = {'success':True, 'votes':voteCounts}
-        
-        if request.user.is_authenticated:
-            constituent = Constituent.get_constituent(request.user)
-            if constituent is not None:
-                query_set = PetitionVote.objects.filter(petition_id=petition_id). \
-                    filter(constituent_id=constituent.user.id)
-                if (query_set.count() > 0):
-                    results['userVote'] = query_set.get().vote
-            
-    except Exception as e:
-        log = open('exception.log', 'a')
-        log.write("%s\n" % traceback.format_exc())
-        log.flush()
-        results = {'success':False, 'error': str(e)}
-    
-    return JsonResponse(results)
-        
 def newPetitionVote(request):
     results = {'success':False, 'error': 'newPetitionVote failed'}
     try:
@@ -713,82 +688,88 @@ def deletePetitionVote(request):
     
     return JsonResponse(results)
 
-def updatePetitionVote(request):
-    results = {'success':False, 'error': 'updatePetitionVote failed'}
-    try:
-        if request.method != "POST":
-            raise Exception("updatePetitionVote only responds to POST requests")
-        if not request.user.is_authenticated:
-            raise Exception("The current login is invalid")
-
-        # Get the petition info.
-        petition_vote_id = request.POST['id']
-        vote = request.POST['vote']
-
-        # Do the model operation
-        
-        # Return the results.
-        results = {'success':True}
-    except Exception as e:
-        log = open('exception.log', 'a')
-        log.write("%s\n" % traceback.format_exc())
-        log.flush()
-        results = {'success':False, 'error': str(e)}
+# Displays a web page for the vote analytics of the specified petition.
+def petitionVotes(request):
+    if not request.user.is_authenticated:
+        return signin(request)
     
-    return JsonResponse(results)
+    petition_id = request.GET['petition']
+    backURL = request.GET.get('backURL', '/dico/')
+    backName = request.GET.get('backName', 'Home')
+    
+    template = loader.get_template('dico/petitionvotes.html')
+        
+    petition = Petition.objects.filter(pk=petition_id).select_related().get()
+    
+    context = RequestContext(request, {
+        'user': request.user,
+        'petition': petition,
+        'backURL': urllib.parse.unquote_plus(backURL),
+        'backName': urllib.parse.unquote_plus(backName),
+    })
+    return HttpResponse(template.render(context))
 
 # Displays a web page for adding a supporting argument to a petition.
-def addSupportingArgument(request, petition_id):
+def addSupportingArgument(request):
     if not request.user.is_authenticated:
         return signin(request)
     
     template = loader.get_template('dico/addargument.html')
         
+    petition_id = request.GET.get('petition', 0)
     petition = Petition.objects.filter(pk=petition_id).select_related().get()
-    backIssueID = int(request.GET.get(u'backIssueID', 0));
+    backURL = request.GET.get(u'backURL', '/dico/')
+    backName = request.GET.get('backName', 'Home')
     
     context = RequestContext(request, {
         'user': request.user,
         'petition': petition,
-        'backIssueID': backIssueID,
+        'backURL': urllib.parse.unquote_plus(backURL),
+        'backName': urllib.parse.unquote_plus(backName),
         'argumentVote': 1,
         'voteLabel': "Supporting",
     })
     return HttpResponse(template.render(context))
 
 # Displays a web page for adding a supporting argument to a petition.
-def addOpposingArgument(request, petition_id):
+def addOpposingArgument(request):
     if not request.user.is_authenticated:
         return signin(request)
     
     template = loader.get_template('dico/addargument.html')
         
+    petition_id = request.GET.get('petition', 0)
     petition = Petition.objects.filter(pk=petition_id).select_related().get()
-    backIssueID = int(request.GET.get(u'backIssueID', 0));
+    backURL = request.GET.get(u'backURL', '/dico/')
+    backName = request.GET.get('backName', 'Home')
     
     context = RequestContext(request, {
         'user': request.user,
         'petition': petition,
-        'backIssueID': backIssueID,
+        'backURL': urllib.parse.unquote_plus(backURL),
+        'backName': urllib.parse.unquote_plus(backName),
         'argumentVote': 0,
         'voteLabel': "Opposing",
     })
     return HttpResponse(template.render(context))
 
 # Displays a web page for adding a supporting argument to a petition.
-def docRatings(request, petition_id):
+def docRatings(request):
     if not request.user.is_authenticated:
         return signin(request)
     
     template = loader.get_template('doc/ratings.html')
         
+    petition_id = request.GET.get('petition', 0)
     petition = Petition.objects.filter(pk=petition_id).select_related().get()
-    backIssueID = int(request.GET.get(u'backIssueID', 0));
+    backURL = request.GET.get(u'backURL', '/dico/')
+    backName = request.GET.get('backName', 'Home')
     
     context = RequestContext(request, {
         'user': request.user,
         'petition': petition,
-        'backIssueID': backIssueID,
+        'backURL': urllib.parse.unquote_plus(backURL),
+        'backName': urllib.parse.unquote_plus(backName),
     })
     return HttpResponse(template.render(context))
 
@@ -948,22 +929,15 @@ def issue(request, issue_id):
 def petition(request, petition_id):
     template = loader.get_template('dico/petition.html')
     
-    issueID = int(request.GET.get(u'backIssueID', 0))
-    if (issueID != 0):
-        issue = Issue.objects.filter(pk=issueID).get()
-        backName = issue.name
-        backURL = "/dico/" + str(issueID) + "/issue/"
-    else:
-        backName = "Home"
-        backURL = "/dico/"
+    backURL = request.GET.get(u'backURL', '/dico/')
+    backName = request.GET.get('backName', 'Home')
         
     filter = Petition.objects.filter(id=petition_id)
     context = RequestContext(request, {
         'user': request.user,
         'petition': filter.get(),
-        'backName' : backName,
-        'backURL' : backURL,
-        'backIssueID' : issueID,
+        'backURL' : urllib.parse.unquote_plus(backURL),
+        'backName': urllib.parse.unquote_plus(backName),
     })
     return HttpResponse(template.render(context))
 
@@ -1189,3 +1163,74 @@ def getPetitionArguments(request):
     
     return JsonResponse(results)
 
+def getPetitionVoteTotals(request):
+    results = {'success':False, 'error': 'getPetitionVoteTotals failed'}
+    try:
+        # Get the petition info.
+        if request.method == "POST":
+            qs = request.POST
+        else:
+            qs = request.GET
+        petition_id = int(qs['petition'])
+        voteCounts = Petition.get_vote_totals(petition_id)
+        # Return the results.
+        results = {'success':True, 'votes':voteCounts}
+        
+        if request.user.is_authenticated:
+            constituent = Constituent.get_constituent(request.user)
+            if constituent is not None:
+                query_set = PetitionVote.objects.filter(petition_id=petition_id). \
+                    filter(constituent_id=constituent.user.id)
+                if (query_set.count() > 0):
+                    results['userVote'] = query_set.get().vote
+            
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+        
+# Handles a GET request to get the votes based on specific petition.
+# Request GET element pk: the primary key of the petition
+# Request GET element scope: 'district' for the counts at the district level or 'state' for counts
+# at the state level. Default is 'district'.
+# Returns: JsonResponse with results. 
+# Return element success: True if the operation is successful, False otherwise.
+# Return element error: Present if there was an error with a text description of the error.
+# Return element interests: Present if there was no error. Contains an array of dictionaries 
+# for each scope that contains at least one interested constituent. Each dictionary 
+# contains a 'state', a 'district' and a 'support_count' and an 'oppose_count' for district scope; each
+# dictionary contains a 'state' and a 'support_count' and an 'oppose_count' for state scope.
+def getPetitionVotesByScope(request):
+    results = {'success':False, 'error': 'getPetitionVotesByScope failed'}
+    try:
+        if request.method == u'GET':
+            qs = request.GET
+        else:
+            qs = request.POST
+        pk = int(qs['petition'])
+        scope = qs.get('scope', 'district')
+        if pk != 0:
+            try:
+                petition = Petition.objects.get(pk=pk)
+                try:
+                    votes = petition.get_votes(scope=scope)
+                    voteList = []
+                    if scope == 'district':
+                        for i in votes:
+                            voteList.append({'state': i[0], 'district': i[1], 'support_count':i[2], 'oppose_count':i[3]})
+                    else:
+                        for i in votes:
+                            voteList.append({'state': i[0], 'support_count':i[1], 'oppose_count':i[2]})
+                    results = {'success':True, 'votes':voteList}
+                except Exception as ex:
+                    results = {'success':False, 'error': str(ex)}
+            except Exception as ex:
+                results = {'success':False, 'error': 'Petition was not found'}
+    except Exception as e:
+        results = {'success':False, 'error': str(e)}
+
+    return JsonResponse(results)
+    

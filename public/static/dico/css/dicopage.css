@@ -22,6 +22,12 @@ body {
 	cursor: pointer;
 }
 
+/* A span that functions as a link to another page. */
+.dico-span-link:hover {
+	text-decoration: none;
+	cursor: pointer;
+}
+
 /* The container for a trio of items in a navigation bar. */
 .dico-navbar-commands {
 	display: table;

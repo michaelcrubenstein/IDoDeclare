@@ -50,7 +50,7 @@
 				closealert();
 				bootstrap_alert.show($('#myAlert'), "Updating Account...", "alert-info");
 				
-				deferredObject = $.post("/dico/updateconstituent/", 
+				deferredObject = $.post("{% url 'updateConstituent' %}", 
 					{ csrfmiddlewaretoken: '{{ csrf_token }}', 
 						"newUsername": $("#id_username").val(),
 						"newFirstName": $("#id_firstname").val(),

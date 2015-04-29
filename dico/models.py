@@ -305,7 +305,7 @@ class Petition(models.Model):
     def get_votes(self, scope='district'):
         with connection.cursor() as c:
             if scope == 'district':
-                sql = "SELECT state,district,SUM(support_count),SUM(oppose_count) FROM " + \
+                sql = "SELECT a.state, a.district,SUM(a.support_count),SUM(a.oppose_count) FROM " + \
                     "(SELECT state, district, COUNT(*) as support_count, 0 as oppose_count" + \
                     " FROM dico_petitionvote, dico_constituent" + \
                     " WHERE %s = dico_petitionvote.petition_id" + \
@@ -318,11 +318,11 @@ class Petition(models.Model):
                     " WHERE %s = dico_petitionvote.petition_id" + \
                     " AND   dico_petitionvote.constituent_id = dico_constituent.user_id" + \
                     " AND   dico_petitionvote.vote = 0" + \
-                    " GROUP BY state, district)" + \
+                    " GROUP BY state, district) as a" + \
                     " GROUP BY state, district" + \
                     " ORDER BY state, district"
             else:
-                sql = "SELECT state, SUM(support_count), SUM(oppose_count) FROM " + \
+                sql = "SELECT a.state, SUM(a.support_count), SUM(a.oppose_count) FROM " + \
                       "(SELECT state, COUNT(*) as support_count, 0 as oppose_count" + \
                       " FROM dico_petitionvote, dico_constituent" + \
                       " WHERE %s = dico_petitionvote.petition_id" + \
@@ -335,7 +335,7 @@ class Petition(models.Model):
                       " WHERE %s = dico_petitionvote.petition_id" + \
                       " AND   dico_petitionvote.constituent_id = dico_constituent.user_id" + \
                       " AND   dico_petitionvote.vote = 0" + \
-                      " GROUP BY state)" + \
+                      " GROUP BY state) as a" + \
                       " GROUP BY state" + \
                       " ORDER BY state"
             c.execute(sql, [self.id, self.id])

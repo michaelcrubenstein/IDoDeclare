@@ -262,8 +262,8 @@
 			$(ratingGroupDiv).append(ratingButton)
 							 .append(ratingMenu);
 							 
-			if (ratingVote === null)
-				ratingText = '-';
+			if (ratingVote === null || ratingVote == -1)
+				ratingText = 'Rate Now';
 			else
 				ratingText = ratingData[ratingData.length - 1 - ratingVote].text;
 				

@@ -10,12 +10,13 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>I Do Declare</title>
+    <title>I Do Declare - Sign In</title>
 
     <!-- Bootstrap core CSS -->
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
     <link href="{% static "dico/css/signin.css" %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -58,6 +59,13 @@
         	$("#id_create_constituent_link").attr("href", "{% url 'createConstituent' %}?back="+encodedURL);
         	$("#id_forgot_password_link").attr("href", "{% url 'forgotPassword' %}?back="+encodedURL);
 			
+			$("#cancel_button").click(function(e) {
+				var backURL = encodeURIComponent("{{backURL}}");
+				var backName = encodeURIComponent("{{backName}}");
+				window.location.href = "{{backURL}}";
+				e.preventDefault();
+			});
+
 			$("#id_signinform").on('submit', function (e) {
 				closealert();
 				sign_in();
@@ -77,7 +85,8 @@
 		});
 		
 		function sign_in() {
-		  $.post("{% url 'submitSignin' %}", { csrfmiddlewaretoken: storedcsrftoken, 
+			bootstrap_alert.show($('#myAlert'), "Signing In...", "alert-info");
+		    $.post("{% url 'submitSignin' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 		  								  "username" : $("#id_username").val(),
 		  								  "password" : $("#id_password").val() }, 
 		  								function(json){
@@ -90,13 +99,36 @@
 		  	}
 		  	else
 				bootstrap_alert.warning(json['error']);
-		  });
+		  })
+		  	.fail(function(jqXHR, textStatus, errorThrown)
+			{
+				bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+				console.log( "error: " + textStatus + "; " + errorThrown + ";");
+				console.log( jqXHR.status + "; " + jqXHR.statusText);
+			});
+;
 		}
 	</script>
 	
     <div class="container">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav">
+					<div class="dico-navbar-commands">
+						<span class="dico-pull-left">
+							<span id="cancel_button" class="navbar-text navbar-link pull-left dico-navbar-text">Cancel</span>
+						</span>
+						<span class="dico-fill"><span class="navbar-text dico-inner-fill dico-navbar-text"><strong>Sign In</strong></span></span>
+						<span class="dico-pull-left">
+							<span class="navbar-text navbar-link pull-left dico-navbar-text dico-spacer">Cancel</span>
+						</span>
+					</div>
+				</div><!-- /.nav -->
+			</div>
+		</nav>
+
       <form id="id_signinform" class="form-signin">
-        <h3 class="form-signin-heading">Sign in to I Do Declare</h3>
 	    <div id="myAlert"></div>
         <label for="id_username" class="sr-only">Email address</label>
         <input type="email" id="id_username" maxlength="254" name="username" class="form-control" placeholder="Email address" required autofocus>

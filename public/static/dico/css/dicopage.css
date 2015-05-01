@@ -21,6 +21,9 @@ body {
 	text-decoration: none;
 	cursor: pointer;
 }
+.dico-spacer {
+	visibility: hidden;
+}
 
 /* A span that functions as a link to another page. */
 .dico-span-link:hover {

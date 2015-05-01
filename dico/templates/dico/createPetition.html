@@ -64,7 +64,7 @@
 			function submitform() {
 				closealert();
 		
-				$.post("{$ url 'newPetition' %}", 
+				$.post("{% url 'newPetition' %}", 
 					{ csrfmiddlewaretoken: '{{ csrf_token }}', 
 						{% if issue %}
 							"issue": "{{ issue.name }}",

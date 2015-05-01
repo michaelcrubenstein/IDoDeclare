@@ -88,7 +88,9 @@
 			$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
 			$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
 			$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
-			$("#id_createActionLink").attr("href", "{% url 'createPetition' %}?issue={{issue.id}};backURL="+encodedRef+";backName="+backName);
+			$("#id_createActionLink").click (function(e) {
+				window.location.href = "{% url 'createPetition' %}?issue={{issue.id}};backURL="+encodedRef+";backName="+backName;
+			});
 			
 			// Display the interests of the currently logged-in user.
 			show_issue_petitions();

@@ -88,7 +88,7 @@
 			$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
 			$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
 			$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
-			$("#id_createActionLink").attr("href", "{% url 'createPetition' %}?backURL="+encodedRef+";backName="+backName);
+			$("#id_createActionLink").attr("href", "{% url 'createPetition' %}?issue={{issue.id}};backURL="+encodedRef+";backName="+backName);
 			
 			// Display the interests of the currently logged-in user.
 			show_issue_petitions();
@@ -194,11 +194,13 @@
 			<div class="container-fluid">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-nav navbar-header pull-right">
-					{% if user.is_authenticated %}
-						<a id="id_createActionLink" class="navbar-text navbar-link dico-nav-edge-link">Create an Action</a>
-					{% endif %}
+				{% if user.is_authenticated %}
+				<div class="nav navbar-header pull-right">
+					<span id="id_createActionLink" class="navbar-text navbar-link pull-right dico-navbar-text"}>
+						Create an Action
+					</span>
 				</div>
+				{% endif %}
 			</div>
 		</nav>
 		

@@ -148,7 +148,9 @@ class Constituent(models.Model):
                   "  WHERE pi.issue_id = i.id" + \
                   "  AND NOT EXISTS(SELECT * FROM dico_petitionvote pv" + \
                                   " WHERE pv.petition_id = pi.petition_id" + \
-                                  " AND pv.constituent_id = %s)) " + \
+                                  " AND pv.constituent_id = %s)), " + \
+                  " (SELECT COUNT(*) FROM dico_petitionissue pi " + \
+                  "  WHERE pi.issue_id = i.id) " + \
                   " FROM dico_issue i, dico_constituentinterest ci" + \
                   " WHERE ci.constituent_id = %s" + \
                   " AND ci.issue_id = i.id" + \
@@ -156,7 +158,7 @@ class Constituent(models.Model):
             c.execute(sql, [user.id, user.id])
             interests = []
             for i in c.fetchall():
-                interests.append({'id': i[0], 'name': i[1], 'petition_count': i[2]})
+                interests.append({'id': i[0], 'name': i[1], 'unvoted_petition_count': i[2], 'petition_count': i[3]})
             return interests
 
     # First, get a list of all of the petitions that the current user hasn't voted on,
@@ -288,6 +290,13 @@ class Petition(models.Model):
     def add_issue(self, issue, constituent):
         pi = PetitionIssue(petition=self, issue=issue, constituent=constituent)
         pi.save()
+        
+    def add_issue_by_name(self, issueName, constituent):
+        query_set = Issue.objects.filter(name=issueName)
+        if query_set.count() == 0:
+            raise ValueError('the issue "{}" is not recognized'.format(issueName))
+        else:
+            self.add_issue(query_set.get(), constituent);
 
     def get_vote_totals(petition_id):
         with connection.cursor() as c:
@@ -420,6 +429,32 @@ class ArgumentRating(models.Model):
 
     def __str__(self):
         return str(self.constituent) + ": " + str(self.vote)
+
+class StoryManager(models.Manager):
+    def get_stories(petition_id):
+        with connection.cursor() as c:
+            sql = "SELECT a.id, a.constituent_id, a.description, a.link, a.creation_time " + \
+                  " FROM dico_story a" + \
+                  " WHERE a.petition_id = %s" + \
+                  " ORDER BY a.creation_time DESC"
+            c.execute(sql, [petition_id])
+            stories = []
+            for i in c.fetchall():
+                stories.append({'id': i[0], 'constituent_id': int(i[1]), 'description': i[2], 'link': i[3], \
+                                  'creation_time': i[4]})
+            return stories
+    
+class Story(models.Model):
+    petition = models.ForeignKey(Petition, db_index=True, db_column='petition_id')
+    constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
+    description = models.TextField()
+    link = models.TextField()
+    creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+    
+    objects = StoryManager()
+    
+    def __str__(self):
+        return self.description
 
 class MC(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, primary_key=True, db_column='user_id');

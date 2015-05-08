@@ -27,15 +27,9 @@
 		{
 			padding-top: 40px;
 		}
-		.new-issue-glyphicon {
-			color: #888;
-		}
 		btn-issue:hover {
 			text-decoration: none;
 			cursor: pointer;
-		}
-		.glyphicon {
-			margin-right: 3px;
 		}
 	</style>
 
@@ -61,7 +55,7 @@
 	    <div id="myAlert" class="row"></div>
 
 		<div class="row">
-			<div class="col-xs-12 help-block">Click each issue that you are interested in.</div>
+			<div class="col-xs-12 help-block">{{ helpText }}</div>
 		</div>
 		<div id="issue_div" class="row">
 		</div>
@@ -132,59 +126,6 @@
 
 		});
 
-		function add_interest(newIssueName, issueButton) {
-		  var x = $.post("{% url 'newInterest' %}", { csrfmiddlewaretoken: storedcsrftoken, "newissue": newIssueName} 
-		  	)
-		  .done(function(json, textStatus, jqXHR)
-		  	{
-				if (json['success']) {
-					//$(issueButton).children("span").css("font-weight", "bold");
-					// $(issueButton).children(".glyphicon").addClass("glyphicon-ok");
-					$(issueButton).children(".glyphicon").css("visibility", "visible");
-					$(issueButton).attr("ismine", true);
-				}
-				else {
-					bootstrap_alert.warning("Sorry, " + json['error']);
-				}
-			})
-		  .fail(function(jqXHR, textStatus, errorThrown) {
-		    bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
-			console.log( "error: " + textStatus + "; " + errorThrown + ";");
-			console.log( jqXHR.status + "; " + jqXHR.statusText);
-		  });
-		}
-
-		function remove_interest(issueName, issueButton) {
-		  var x = $.post("{% url 'deleteInterest' %}", { csrfmiddlewaretoken: storedcsrftoken, 'oldinterest': issueName})
-		  .done(function(json, textStatus, jqXHR)
-		  	{
-			if (json['success']) {
-				//$(issueButton).children("span").css("font-weight", "normal");
-				// $(issueButton).children(".glyphicon").removeClass("glyphicon-ok");
-				$(issueButton).children(".glyphicon").css("visibility", "hidden");
-				$(issueButton).attr("ismine", false);
-			}
-			else {
-				bootstrap_alert.warning("Sorry, " + json['error']);
-			}
-		  })
-		  .fail(function(jqXHR, textStatus, errorThrown) {
-		    bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
-			console.log( "error: " + textStatus + "; " + errorThrown + ";");
-			console.log( jqXHR.status + "; " + jqXHR.statusText);
-		  });
-		}
-
-		function hasIssue(issues, oldName) {
-			var i;
-			for (i = 0; i < issues.length; ++i) {
-				if (issues[i]['name'] == oldName) {
-					return true;
-				}
-			}
-			return false;
-		}
-		
 		var allIssues = [];
 		
 		function layout_issues()
@@ -219,52 +160,42 @@
 			// Remove any lingering contents from the set of full issues.
 			$("#issue_div").empty();
 
-				divs = d3.select("#issue_div").selectAll("div")
-					.data(divIssues)
-					.enter()
-					.append("div")
-					.classed("col-xs-"+(12/divIssues.length), true);
-				
-				var buttons = divs.selectAll("div")
-					.data(function(d) { return d; })
-					.enter()
-					.append("div")	// So that each button appears on its own row.
-					.append("button")
-					.classed("btn btn-link btn-issue", true)
-					.attr("issueName", function(issue) { return issue.name })
-					.attr("ismine", function(issue) {
-						return hasIssue(myIssues, issue.name);
-					})
-					.on("click", function(e, inputObject) {
-							if ($(this).attr("ismine") === "true")
-								remove_interest($(this).attr("issueName"), this); 
-							else
-								add_interest($(this).attr("issueName"), this); 
-						});
-				buttons.append("span")
-					.classed("glyphicon new-issue-glyphicon glyphicon-ok", true)
-					.style("visibility", function() {
-							if ($(this).parent().attr("ismine") === "true")
-								return "visible";
-							else
-								return "hidden";
-						});
-				buttons.append("span")
-					.classed("text-muted", true)
-					.text(function() {
-						return $(this).parent().attr("issueName");
+			divs = d3.select("#issue_div").selectAll("div")
+				.data(divIssues)
+				.enter()
+				.append("div")
+				.classed("col-xs-"+(12/divIssues.length), true);
+			
+			var buttons = divs.selectAll("div")
+				.data(function(d) { return d; })
+				.enter()
+				.append("div")	// So that each button appears on its own row.
+				.append("button")
+				.classed("btn btn-link btn-issue", true)
+				.attr("issueName", function(issue) { return issue.name })
+				.attr("issueID", function(issue) { return issue.id })
+				.on("click", function(e, inputObject) {
+					window.location.href = "{% url 'issue' %}?issue="+$(this).attr("issueID")+";actionPanel={{actionPanel}}";
 					});
+			
+			buttons.append("span")
+				.classed("text-muted", true)
+				.text(function() {
+					return $(this).parent().attr("issueName");
+				});
+			
+			buttons.append("span")
+				.classed("text-muted small", true)
+				.text(function(d) {
+					return " (" + d['petition_count'] + ")";
+				});
 			
 		}
 		
 		function show_my_interests() {
 		  $.post("{% url 'getMyInterests' %}", { csrfmiddlewaretoken: storedcsrftoken}, function(json){
-			myIssues = json['myIssues'];
-			
-			$.getJSON("{% url 'getIssues' %}", {}, function(json){
-				allIssues = json['issues'];
-				layout_issues();
-			});
+			allIssues = json['myIssues'];
+			layout_issues();
 		  });
 		}
 	</script>

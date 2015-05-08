@@ -25,7 +25,7 @@
 	<style>
 		<!-- Account for bottom navigation bar -->
 		body {
-		  padding-bottom: 55px;
+		  padding-top: 55px;
 		}
 	</style>
 
@@ -116,11 +116,11 @@
 					newButton = document.createElement("a");
 					newSpan = document.createElement("span");
 					var backName = encodeURIComponent("{{issue.name}}");
-					var backURL = encodeURIComponent("/dico/" + {{issue.id}} + "/issue/");
+					var backURL = encodeURIComponent(window.location.href);
 					if (petition['vote'] === 0) {
 						$(td).append(newButton);
 						$(newButton).addClass("btn btn-link btn-xs")
-									.attr("href", "/dico/" + petition['id'] + "/petition/?backURL="+backURL+";backName="+backName)
+									.attr("href", "/dico/" + petition['id'] + "/petition/?{{actionPanel}};backURL="+backURL+";backName="+backName)
 									.append(newSpan);
 						$(newSpan).addClass("label label-info")
 								  .append("Oppose");
@@ -130,7 +130,7 @@
 					} else if (petition['vote'] === 1) {
 						$(td).append(newButton);
 						$(newButton).addClass("btn btn-link btn-xs")
-									.attr("href", "/dico/" + petition['id'] + "/petition/?backURL="+backURL+";backName="+backName)
+									.attr("href", "/dico/" + petition['id'] + "/petition/?{{actionPanel}};backURL="+backURL+";backName="+backName)
 									.append(newSpan);
 						$(newSpan).addClass("label label-info")
 								  .append("Support");
@@ -148,7 +148,7 @@
 					$(td).addClass("align-right-column")
 						 .append(newButton);
 					$(newButton).addClass("btn btn-link btn-xs")
-					            .attr("href", "/dico/" + petition['id'] + "/petition/?backURL="+backURL+";backName="+backName)
+					            .attr("href", "/dico/" + petition['id'] + "/petition/?{{actionPanel}};backURL="+backURL+";backName="+backName)
 					            .append(newSpan);
 					$(newSpan).addClass("glyphicon glyphicon-chevron-right");
 				}
@@ -192,29 +192,15 @@
 			</div>
 		</nav>
 
-		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
-			<div class="container-fluid">
-				<!-- Brand and toggle get grouped for better mobile display -->
-				<!-- Collect the nav links, forms, and other content for toggling -->
-				{% if user.is_authenticated %}
-				<div class="nav navbar-header pull-right">
-					<span id="id_createActionLink" class="navbar-text navbar-link pull-right dico-navbar-text"}>
-						Create an Action
-					</span>
-				</div>
-				{% endif %}
-			</div>
-		</nav>
-		
 	    <div id="myAlert"></div>
 
 		<div class="row">
 			<div class="col-xs-12">
 				<h3 id='id_issue_title' issueID='{{issue.id}}'>{{issue.name}}</h3>
 			</div>
-			<div class="col-xs-12">
-				<p>What actions should Congress take on this issue?</p>
-			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12 help-block">{{ helpText }}</div>
 		</div>
 		<div class="row">
 			<div class="col-xs-12">

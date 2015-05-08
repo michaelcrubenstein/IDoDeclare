@@ -24,7 +24,13 @@
 
 	<!-- Styles for this web page -->
 	<style>
-
+		<!-- Account for bottom navigation bar -->
+		body {
+		  padding-top: 55px;
+		}
+		.lead {
+			padding-top: 10px;
+		}
 	</style>
 
 
@@ -68,7 +74,7 @@
 			$("#cancel_button").click(function(e) {
 				var backURL = encodeURIComponent("{{backURL}}");
 				var backName = encodeURIComponent("{{backName}}");
-				window.location.href = "/dico/{{petition.id}}/petition/?backURL="+backURL+";backName="+backName;
+				window.location.href = "/dico/{{petition.id}}/petition/?debate;backURL="+backURL+";backName="+backName;
 				e.preventDefault();
 			});
 
@@ -93,7 +99,7 @@
 					if (json['success']) {
 						var backURL = encodeURIComponent("{{backURL}}");
 						var backName = encodeURIComponent("{{backName}}");
-						window.location.href = "/dico/{{petition.id}}/petition/?backURL="+backURL+";backName="+backName;
+						window.location.href = "/dico/{{petition.id}}/petition/?debate;backURL="+backURL+";backName="+backName;
 					}
 					else {
 						bootstrap_alert.warning(json['error']);
@@ -174,7 +180,7 @@
 		{% endif %}
 			<div class="col-xs-12 col-md-6">
 				<label for="new_issue_input_group"">New {{ voteLabel }} Argument</label>
-				<textarea id="id_new_argument_text" rows="4" maxlength="254" class="form-control argument_textarea"
+				<textarea id="id_new_argument_text" rows="4" maxlength="254" class="form-control"
 					 onKeyPress="enter_new_argument(event, this)"></textarea>
 				<a class="btn btn-link btn-xs" href="##" onClick="showTips()">Tips for writing arguments</a>
 				<div id="tipsAlert"></div>

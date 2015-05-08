@@ -8,7 +8,6 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
 
     <title>I Do Declare - Create Action</title>
 
@@ -29,10 +28,63 @@
 
   <body>
 
+    <div class="container-fluid">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav navbar-header">
+					<div class="dico-navbar-commands">
+						<span class="dico-pull-left">
+							<span id="cancel_button" class="navbar-text navbar-link pull-left dico-navbar-text">Cancel</span>
+						</span>
+						<div class="dico-fill"><span class="navbar-text dico-inner-fill"><strong>Create Action</strong></span></div>
+						<span class="dico-pull-right">
+							<span id="id_submitbutton" class="navbar-text navbar-link pull-right dico-navbar-text">Next</span>
+						</span>
+					</div>
+				</div><!-- /.nav -->
+			</div>
+		</nav>
+		
+		<div class="row">
+			<div id="myAlert" class="errorAlert col-xs-12"></div>
+		</div>
+		<form class="form-createpetition" id="id_form">
+			<div id = "id_step1">
+				<div class="row">
+					{% if issue %}
+						<label class="col-xs-12" for="id_textarea">What action should Congress take regarding {{issue.name}}?</label>
+					{% else %}
+						<label class="col-xs-12" for="id_textarea">What action should Congress take?</label>
+					{% endif %}
+				</div>
+				<div class="row">
+					<textarea id="id_textarea" rows=5 maxlength="254" name="description" class="form-control col-xs-12" 
+						placeholder="Pass a law to..." required autofocus></textarea>
+				</div>
+				<div class="row">
+					<a class="col-xs-12" href="##" onClick="showTips()"><small>Tips for writing actions</small></a>
+				</div>
+				<div class="row">
+					<div id="tipsAlert" class="errorAlert col-xs-12"></div>
+				</div>
+    		</div>
+    		<div id="id_step2">
+    			<div class="row">
+    				<div class="col-xs-12 help-block">Select an issue associated with this new action.</div>
+    			</div>
+    			<div id="issue_div" class="row"></div>
+    		</div>
+		</form>
+
+    </div> <!-- /container -->
+
+
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+	<script src="{% static "d3/d3.v3.min.js" %}"></script>
 
 	<!-- Scripts for this web page -->
 	<script type="text/JavaScript">
@@ -58,7 +110,12 @@
 			
 			function getNewIssueName()
 			{
-				return $('input[name=issueRadio]:checked').val();
+				nameList = [];
+				$('input[name=issueName]:checked').each(function()
+					{
+						nameList = nameList.concat($(this).val());
+					});
+				return nameList;
 			}
 			
 			function submitform() {
@@ -94,6 +151,16 @@
 			
 			$("#id_step2").css('display', 'none');
 			
+			function show_step_2()
+			{
+					closealert();
+					$("#id_submitbutton").text('Create');
+					$("#cancel_button").text('Back');
+					$("#id_step2").css('display', 'table');
+					$("#id_step1").css('display', 'none');
+					show_issues();
+			}
+			
 			$("#id_form").on('submit', function (e) {
 				if ($("#id_textarea").val() === "") {
 					bootstrap_alert.warning("Specify a description for the action.");
@@ -101,11 +168,7 @@
 				}
 				{% if issue == null %}
 				else if ($("#id_step2").css('display') == 'none') {
-					closealert();
-					$("#id_submitbutton").text('Create');
-					$("#cancel_button").text('Back');
-					$("#id_step2").css('display', 'table');
-					$("#id_step1").css('display', 'none');
+					show_step_2();
 				}
 				{% endif %}
 				else
@@ -146,11 +209,7 @@
 				}
 				{% if issue == null %}
 				else if ($("#id_step2").css('display') == 'none') {
-					closealert();
-					$("#id_submitbutton").text('Create');
-					$("#cancel_button").text('Back');
-					$("#id_step2").css('display', 'table');
-					$("#id_step1").css('display', 'none');
+					show_step_2();
 				}
 				{% endif %}
 				else
@@ -160,8 +219,81 @@
 
 				e.preventDefault();
 			});
+			
+			$(window).resize(function() {
+				myIssues = getNewIssueName();
+				layout_issues();
+			});
 		});
 
+		var allIssues = [];
+		var myIssues = [];
+		
+		function show_issues() {
+			$.getJSON("{% url 'getIssues' %}", {}, function(json){
+				allIssues = json['issues'];
+				layout_issues();
+			});
+		}
+
+		function layout_issues()
+		{
+			var divIssues;
+			if ($(window).width() < 768) {
+				// one column
+				divIssues = [allIssues];
+			}
+			else if ($(window).width() < 992) {
+				// Two columns
+				numSpan = (allIssues.length + 1) / 2;
+				divIssues = [allIssues.slice(0, numSpan),
+							 allIssues.slice(numSpan, allIssues.length)];
+			}
+			else if ($(window).width() < 1200) {
+				// Three columns
+				numSpan = (allIssues.length + 2) / 3;
+				divIssues = [allIssues.slice(0, numSpan),
+							 allIssues.slice(numSpan, numSpan * 2),
+							 allIssues.slice(numSpan * 2, allIssues.length)];
+			}
+			else {
+				// Four columns.
+				numSpan = (allIssues.length + 3) / 4;
+				divIssues = [allIssues.slice(0, numSpan),
+							 allIssues.slice(numSpan, numSpan * 2),
+							 allIssues.slice(numSpan * 2, numSpan * 3),
+							 allIssues.slice(numSpan * 3, allIssues.length)];
+			}
+			
+			// Remove any lingering contents from the set of full issues.
+			$("#issue_div").empty();
+
+			divs = d3.select("#issue_div").selectAll("div")
+				.data(divIssues)
+				.enter()
+				.append("div")
+				.classed("col-xs-"+(12/divIssues.length), true);
+			
+			var labels = divs.selectAll("div")
+				.data(function(d) { return d; })
+				.enter()
+				.append("div")	// So that each button appears on its own row.
+				.classed("checkbox", true)
+				.append("label");
+				
+			labels
+				.append("input")
+				.attr("type", "checkbox")
+				.attr("name", "issueName")
+				.attr("value", function(issue) { return issue.name })
+				.style("cursor", "pointer")
+				.property("checked", function(issue) { return myIssues.indexOf(issue.name) !== -1; });
+				
+			labels.append("span")
+				  .text(function(issue) { return issue.name });
+			
+		}
+		
 		function showTips() {
 			bootstrap_alert.show($('#tipsAlert'), 
 				"<small>Start your action with a verb, such as the following:" +
@@ -177,65 +309,6 @@
 				"alert-info");
 		};
 	</script>
-
-    <div class="container-fluid">
-		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
-			<div class="container-fluid">
-				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-header">
-					<div class="dico-navbar-commands">
-						<span class="dico-pull-left">
-							<span id="cancel_button" class="navbar-text navbar-link pull-left dico-navbar-text">Cancel</span>
-						</span>
-						<div class="dico-fill"><span class="navbar-text dico-inner-fill"><strong>Create Action</strong></span></div>
-						<span class="dico-pull-right">
-							<span id="id_submitbutton" class="navbar-text navbar-link pull-right dico-navbar-text">Next</span>
-						</span>
-					</div>
-				</div><!-- /.nav -->
-			</div>
-		</nav>
-		
-		<form class="form-createpetition" id="id_form">
-			<div id = "id_step1">
-				<div class="row">
-					{% if issue %}
-						<label class="col-xs-12" for="id_textarea">What action should Congress take regarding {{issue.name}}?</label>
-					{% else %}
-						<label class="col-xs-12" for="id_textarea">What action should Congress take?</label>
-					{% endif %}
-				</div>
-				<div class="row">
-					<div id="myAlert" class="errorAlert col-xs-12"></div>
-				</div>
-				<div class="row">
-					<textarea id="id_textarea" rows=5 maxlength="254" name="description" class="form-control col-xs-12" 
-						placeholder="Pass a law to..." required autofocus></textarea>
-				</div>
-				<div class="row">
-					<a class="col-xs-12" href="##" onClick="showTips()"><small>Tips for writing actions</small></a>
-				</div>
-				<div class="row">
-					<div id="tipsAlert" class="errorAlert col-xs-12"></div>
-				</div>
-    		</div>
-    		<div id="id_step2" class="row">
-    			<div class="col-xs-12 help-block">Select an issue associated with this new action.</div>
-    			{% if allIssues %} 
-					{% for testIssue in allIssues %}
-						<div class="col-xs-12">
-							<label class="btn btn-link btn-xs">
-								<input type="radio" name="issueRadio" value="{{testIssue.name}}"> </input>
-								{{ testIssue.name }}
-							</label>
-						</div>
-					{% endfor %}
-				{% endif %}
-    		</div>
-      </form>
-
-    </div> <!-- /container -->
-
 
 <!--     IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="{% static "bootstrap/assets/js/ie10-viewport-bug-workaround.js" %}"></script>

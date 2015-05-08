@@ -22,22 +22,196 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
+	<!-- Styles for this web page -->
+	<style>
+	</style>
+  </head>
+  <body class="dico-two-nav-container">
+	<div id='container' class="container-fluid">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="nav navbar-header pull-left">
+				  <div class="navbar-brand">I Do Declare</div>
+				</div>
+
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				{% if user.is_authenticated %}
+					<div class="nav navbar-nav navbar-header pull-right">
+						<li class="dropdown">
+						  <a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
+						  <ul class="dropdown-menu dropdown-menu-right" role="menu">
+							<li><a id="id_accountSettingsLink">Account Settings</a></li>
+							<li><a id="id_changePasswordLink">Change Password</a></li>
+							<li class="divider"></li>
+							<li><a id="id_editInterestsLink">Edit Interests</a></li>
+							<li class="divider"></li>
+							<li><a href="{% url 'signout' %}">Sign out</a></li>
+						  </ul>
+						</li>
+					</div>
+				{% else %}
+					<div class="nav navbar-header pull-right">
+						<a class="navbar-text navbar-link pull-right dico-navbar-text" href="{% url 'signin' %}">Sign in</a>
+					</div>
+				{% endif %}
+			</div>
+		</nav>
+		
+		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav navbar-header pull-right">
+					{% if user.is_authenticated %}
+						<a id="id_createActionLink" class="navbar-text navbar-link pull-right dico-navbar-text">Create an Action</a>
+					{% endif %}
+				</div>
+			</div>
+		</nav>
+		
+		<div class="row">
+			<div class="col-xs-12 col-md-6 col-md-push-3">
+				<label class="control-label table-label">News</label>
+				<table id='my_news' class="table table-striped table-condensed full-width-table" max-width="100%">
+				{% if news_list %}
+					<tbody>
+						{% for news_item in news_list %}
+						<tr>
+							<td width="auto">
+								{% if news_item.section == "petition" %}
+									<span class="text-muted">This action needs your vote:<br> </span>
+								{% endif %}
+								{{ news_item.description }} </td>
+							<td width="100px">
+								<span class="btn btn-link btn-xs petition-news-item" petition="{{ news_item.id }}">Vote Now
+									<span class="glyphicon glyphicon-chevron-right"></span>
+								</span>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				{% else %}
+					<tr><td>No news at the moment.</td></tr>
+				{% endif %}
+				</table>
+			</div>
+
+			<div class="col-xs-12 col-sm-6 col-md-3 col-md-pull-6">
+				<div>
+					<div class="row">
+						<div class="col-xs-12">
+							<label class="control-label table-label">Your Interests</label>
+						</div>
+					</div>
+					{% if my_issue_list %}
+						{% for issue in my_issue_list %}
+							<div class="row">
+								<div class="col-xs-12 issue-container">
+									<a class="btn btn-link btn-xs issue-name"
+										href="/dico/{{issue.id}}/issue/">{{ issue.name }}
+										{% if issue.petition_count > 0 %}
+										 <span class="badge">{{issue.petition_count}}</span>
+										{% endif %}
+									</a>
+								</div>
+							</div>
+						{% endfor %}
+					{% else %}
+						<div class="row">
+							<div class="col-xs-12 issue-container">
+								<a id="id_expressInterestsLink" class="btn btn-sm btn-link">Express Interests</a>
+							</div>
+						</div>
+					{% endif %}
+				</div>
+			</div>
+			
+			<div class="col-xs-12 visible-xs-inline" style="border:0; height:7px">
+			</div>
+
+			<div class="col-xs-12 col-sm-5 col-sm-offset-1 col-md-3 col-md-offset-0">
+				<div class="dark-column member-column">
+					<div class="row">
+						<div class="col-xs-12">
+							<label class="control-label table-label">Your Members</label>
+						</div>
+					</div>
+					<div>
+						{% if member_list %}
+							{% for member in member_list %}
+								<div class="member-row">
+									<a href="{{ member.website }}" target="_blank"">
+										<div class="hidden-xs member-title">
+											{{ member.title }} {{ member.first_name }} {{ member.last_name }} {{ member.suffix }}
+										</div>
+										<div class="member-picture">
+											<img width="50" src="http://theunitedstates.io/images/congress/original/{{ member.bioguide_id }}.jpg" />
+										</div>
+										<div class="visible-xs-inline-block member-title">
+											{{ member.title }} {{ member.first_name }} {{ member.last_name }} {{ member.suffix }}
+										</div>
+									</a>
+								</div>
+							{% endfor %}
+						{% else %}
+							<p>No members are available.</p>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+				<hr class="separator-bold" />
+		</div>
+		<div class="row">
+			{% if issue_list %}
+			<div class="col-xs-7 col-sm-7">
+				<div class="map-select-column">
+					<label for="issue_select" class="control-label">Where People Care About</label>
+					<select id="issue_select" class="form-control">
+					</select>
+				</div>
+			</div>
+
+			{% endif %}
+			<div class="col-xs-4 map-options-column">
+				<label class="radio-inline">
+				  <input type="radio" name="scopeOptions" id="byDistrictRadio" value=districtScope checked /> by District
+				</label>
+				<label class="radio-inline">
+				  <input type="radio" name="scopeOptions" id="byStateRadio" value=stateScope /> by State
+				</label>			
+			</div>
+		</div>
+
+		<div class="row">
+			<div id="mapFrame" class="col-xs-12"> </div>
+			<div class="col-xs-7 col-sm-8 col-md-9">
+				<label id="district_label" for="district_span" class="control-label">District: </label> 
+				<span id="district_span"></span><br>
+				<label for="id_constituent_table" id="my_label" class="control-label">By the numbers</label>
+				<table id='id_constituent_table' class="table table-striped table-condensed">
+					<thead>
+						<th id="id_constituent_area_label">District
+						</th>
+						<th>Count
+						</th>
+					</thead>
+					<tbody id='id_constituent_table_body'>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+	</div> <!-- container -->
+</body>
+
     <!-- Scripts for data mapping --!>
     <script src="{% static "d3/d3.v3.min.js" %}"></script>
     <script src="{% static "d3/queue.v1.min.js" %}"></script>
     <script src="{% static "d3/topojson.v1.min.js" %}"></script>
-
-	<!-- Styles for this web page -->
-	<style>
-		<!-- Account for bottom navigation bar -->
-		body {
-		  padding-bottom: 55px;
-		}
-	</style>
-
-
-  </head>
-  <body class="dico-two-nav-container">
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="{% static "jquery/js/jquery.min.js" %}"></script>
@@ -201,226 +375,3 @@
 		initmapheight("#mapFrame");
 	</script>
 
-	<div id='container' class="container-fluid">
-		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
-			<div class="container-fluid">
-				<!-- Brand and toggle get grouped for better mobile display -->
-				<div class="nav navbar-header pull-left">
-				  <div class="navbar-brand">I Do Declare</div>
-				</div>
-
-				<!-- Collect the nav links, forms, and other content for toggling -->
-				{% if user.is_authenticated %}
-					<div class="nav navbar-nav navbar-header pull-right">
-						<li class="dropdown">
-						  <a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
-						  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-							<li><a id="id_accountSettingsLink">Account Settings</a></li>
-							<li><a id="id_changePasswordLink">Change Password</a></li>
-							<li class="divider"></li>
-							<li><a id="id_editInterestsLink">Edit Interests</a></li>
-							<li class="divider"></li>
-							<li><a href="{% url 'signout' %}">Sign out</a></li>
-						  </ul>
-						</li>
-					</div>
-				{% else %}
-					<div class="nav navbar-header pull-right">
-						<a class="navbar-text navbar-link pull-right dico-navbar-text" href="{% url 'signin' %}">Sign in</a>
-					</div>
-				{% endif %}
-			</div>
-		</nav>
-		
-		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
-			<div class="container-fluid">
-				<!-- Brand and toggle get grouped for better mobile display -->
-				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-header pull-right">
-					{% if user.is_authenticated %}
-						<a id="id_createActionLink" class="navbar-text navbar-link pull-right dico-navbar-text">Create an Action</a>
-					{% endif %}
-				</div>
-			</div>
-		</nav>
-		
-		{% if user.is_authenticated %}
-		<div class="row">
-			<div class="col-xs-12 col-md-6 col-md-push-3">
-				<label class="control-label table-label">News</label>
-				<table id='my_news' class="table table-striped table-condensed full-width-table" max-width="100%">
-				{% if news_list %}
-					<tbody>
-						{% for news_item in news_list %}
-						<tr>
-							<td width="auto">
-								{% if news_item.section == "petition" %}
-									<span class="text-muted">This action needs your vote:<br> </span>
-								{% endif %}
-								{{ news_item.description }} </td>
-							<td width="100px">
-								<span class="btn btn-link btn-xs petition-news-item" petition="{{ news_item.id }}">Vote Now
-									<span class="glyphicon glyphicon-chevron-right"></span>
-								</span>
-							</td>
-						</tr>
-						{% endfor %}
-					</tbody>
-				{% else %}
-					<tr><td>No news at the moment.</td></tr>
-				{% endif %}
-				</table>
-			</div>
-
-			<div class="col-xs-12 col-sm-6 col-md-3 col-md-pull-6">
-				<div>
-					<div class="row">
-						<div class="col-xs-12">
-							<label class="control-label table-label">Your Interests</label>
-						</div>
-					</div>
-					{% if my_issue_list %}
-						{% for issue in my_issue_list %}
-							<div class="row">
-								<div class="col-xs-12 issue-container">
-									<a class="btn btn-link btn-xs issue-name"
-										href="/dico/{{issue.id}}/issue/">{{ issue.name }}
-										{% if issue.petition_count > 0 %}
-										 <span class="badge">{{issue.petition_count}}</span>
-										{% endif %}
-									</a>
-								</div>
-							</div>
-						{% endfor %}
-					{% else %}
-						<div class="row">
-							<div class="col-xs-12 issue-container">
-								<a id="id_expressInterestsLink" class="btn btn-sm btn-link">Express Interests</a>
-							</div>
-						</div>
-					{% endif %}
-				</div>
-			</div>
-			
-			<div class="col-xs-12 visible-xs-inline" style="border:0; height:7px">
-			</div>
-
-			<div class="col-xs-12 col-sm-5 col-sm-offset-1 col-md-3 col-md-offset-0">
-				<div class="dark-column member-column">
-					<div class="row">
-						<div class="col-xs-12">
-							<label class="control-label table-label">Your Members</label>
-						</div>
-					</div>
-					<div>
-						{% if member_list %}
-							{% for member in member_list %}
-								<div class="member-row">
-									<a href="{{ member.website }}" target="_blank"">
-										<div class="hidden-xs member-title">
-											{{ member.title }} {{ member.first_name }} {{ member.last_name }} {{ member.suffix }}
-										</div>
-										<div class="member-picture">
-											<img width="50" src="http://theunitedstates.io/images/congress/original/{{ member.bioguide_id }}.jpg" />
-										</div>
-										<div class="visible-xs-inline-block member-title">
-											{{ member.title }} {{ member.first_name }} {{ member.last_name }} {{ member.suffix }}
-										</div>
-									</a>
-								</div>
-							{% endfor %}
-						{% else %}
-							<p>No members are available.</p>
-						{% endif %}
-					</div>
-				</div>
-			</div>
-		</div>
-		{% else %}
-			<div class="jombotron">
-				<h2>Welcome to I Do Declare</h2>
-				<p>
-					I Do Declare is dedicated to helping all of us understand important issues 
-				and to voice our opinions on the matters before the legislators who are responsible
-				for representing us in the U.S. Congress.
-				</p>
-				<p>
-					Here you can:
-					<ul>
-						<li>create actions that should be taken up
-					by Congress;</li>
-						<li>discover actions others have created;</li>
-						<li>support or oppose any action;</li>
-						<li>give your reasons for supporting or opposing
-					an action;</li>
-						<li>rank the reasons that other people give.</li>
-					</ul>
-				</p>
-				<p>
-					We look forward to cross-partisan conversations where we can
-					come together to appreciate different points of view and better
-					understand why we hold the positions that we do.
-				</p>
-				<h4>Getting Started</h4>
-				<p>
-					<a href="{% url 'signin' %}">Sign in</a> to identify the issues you care about 
-					and vote on actions Congress can take. 
-					Pick an issue you care about, vote on an action associated with that issue, 
-					or create a new action that you think our Congress should take. 
-					Give your reasons. Feel good about participating in our Democracy.
-				</p>
-				<p>
-					Don't have an account? <a href="{% url 'createConstituent' %}?back={% url 'home' %}">Create one now.</a>
-				</p>
-				<p>
-					Send feedback to <a href="mailto:feedback@idodeclare.org">feedback@idodeclare.org</a>. 
-				</p>
-			</div>
-		{% endif %}
-
-		<div class="row">
-				<hr class="separator-bold" />
-		</div>
-		<div class="row">
-			{% if issue_list %}
-			<div class="col-xs-7 col-sm-7">
-				<div class="map-select-column">
-					<label for="issue_select" class="control-label">Where People Care About</label>
-					<select id="issue_select" class="form-control">
-					</select>
-				</div>
-			</div>
-
-			{% endif %}
-			<div class="col-xs-4 map-options-column">
-				<label class="radio-inline">
-				  <input type="radio" name="scopeOptions" id="byDistrictRadio" value=districtScope checked /> by District
-				</label>
-				<label class="radio-inline">
-				  <input type="radio" name="scopeOptions" id="byStateRadio" value=stateScope /> by State
-				</label>			
-			</div>
-		</div>
-
-
-		<div class="row">
-			<div id="mapFrame" class="col-xs-12"> </div>
-			<div class="col-xs-7 col-sm-8 col-md-9">
-				<label id="district_label" for="district_span" class="control-label">District: </label> 
-				<span id="district_span"></span><br>
-				<label for="id_constituent_table" id="my_label" class="control-label">By the numbers</label>
-				<table id='id_constituent_table' class="table table-striped table-condensed">
-					<thead>
-						<th id="id_constituent_area_label">District
-						</th>
-						<th>Count
-						</th>
-					</thead>
-					<tbody id='id_constituent_table_body'>
-					</tbody>
-				</table>
-			</div>
-		</div>
-
-</div> <!-- container -->
-</body>

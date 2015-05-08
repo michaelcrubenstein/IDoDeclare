@@ -25,523 +25,16 @@
 	<style>
 		<!-- Account for bottom navigation bar -->
 		body {
+		  padding-top: 55px;
 		  padding-bottom: 55px;
 		}
+		section>section {
+			padding-top: 10px;
+		}
 	</style>
-
-
   </head>
+  
   <body class="dico-two-nav-container">
-
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
-
-	<!-- Scripts for this web page -->
-	<script type="text/JavaScript">
-	
-		var deferredObject;
-
-		function htmlDecode(input){
-		  var e = document.createElement('div');
-		  e.innerHTML = input;
-		  return e.childNodes[0].nodeValue;
-		}
-		
-		function htmlEncode(input){
-			return $('<div>').text(input).html();
-		}
-		
-		// Display all of the interests in the system.
-		var storedcsrftoken = "{{ csrf_token }}";
-		var elementToDelete = null;
-		
-		$(document).ready (function(e) {
-			<!-- Block of code for an alert area at the top of the window -->
-			$(".close").click(function(){
-				$(this).parent().alert();
-			});
-			
-			bootstrap_alert = function() {}
-			bootstrap_alert.show = function(parentDiv, message, alertClass) {
-				parentDiv.html('<div class="alert ' + alertClass + ' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
-			}
-			bootstrap_alert.warning = function(message) {
-				bootstrap_alert.show($('#myAlert'), message, "alert-danger");
-			}
-        	closealert = function() { 
-        		$('.alert').parent().html('');
-        	}
-			
-			encodedRef = encodeURIComponent(window.location.href);
-			$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
-			$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
-			$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
-
-			$("#id_confirmDeleteButton").click(function() {
-				remove_argument(elementToDelete, $("#id_deleteDialog").attr("argumentId"));
-			});
-
-			$("#id_confirmDeleteActionButton").click(function() {
-				remove_petition();
-			});
-			
-			$("#id_deleteActionButton").click(function() {
-				$("#id_deleteActionDialog").modal('show');
-			});
-
-			// Display the issues associated with the current petition.
-			show_petition_issues();
-
-			// Show the votes for the current petition.
-			show_petition_votes(true);
-
-			// Display the arguments of the current petition.
-			show_petition_arguments();
-			
-			// After showing the petition votes, set the change methods of the radio buttons
-			// for the current user's vote.
-			$("#supportRadio").change(function() {
-				cast_vote(1);
-			});
-			
-			$("#opposeRadio").change(function() {
-				cast_vote(0);
-			});
-			
-			$("#noOpinionRadio").change(function() {
-				vote_no_opinion();
-			});
-			
-		});
-
-		function show_petition_issues() {
-		  $.post("{% url 'getPetitionIssues' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
-		  	if (json['success']) {
-				issues = json['issues'];
-			
-				$("#id_petition_issues").empty();
-			
-				for (i = 0; i < issues.length; ++i) {
-					issue = issues[i];
-					li = document.createElement("div");
-					$(li).addClass("row");
-					$("#id_petition_issues").append(li);
-					newButton = document.createElement("a");
-					newDiv = document.createElement("div");
-					$(li).append(newDiv);
-					$(newDiv).addClass("col-xs-9")
-							 .append(newButton);
-					$(newButton).append(htmlEncode(issue['name']));
-					$(newButton).addClass("btn-xs text-muted");
-					$(newButton).attr("href", "/dico/" + issue['id'] + "/issue/");
-
-					<!-- Add a button to delete the issue from the petition -->
-					newButton = document.createElement("button");
-					$(newButton).addClass("btn btn-link btn-xs col-xs-3 pull-right");
-					$(li).append(newButton);
-					if (issue['isEditable'] && issues.length > 1) {
-						newSpan = document.createElement("span");
-						$(newButton).append(newSpan);
-						$(newButton).attr("issueID", issue['id']);
-						$(newButton).click(function() {
-							closealert();
-							remove_issue($(this).parent(), $(this).attr("issueID"));
-						});
-						$(newSpan).addClass("glyphicon glyphicon-remove");
-					}
-				}
-			}
-			else
-				bootstrap_alert.warning(json['error']);
-		  });
-		}
-		
-		function add_issue() {
-			var backURL = encodeURIComponent("{{backURL}}");
-			var backName = encodeURIComponent("{{backName}}");
-			window.location.href = "/dico/{{petition.id}}/addpetitionissue/?backURL="+backURL+";backName="+backName;
-		}
-		
-		function remove_issue(li, issue_id) {
-		  $.post("{% url 'deletePetitionIssue' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : "{{petition.id}}", "issue_id" : issue_id }, function(json){
-		  	if (json['success']) {
-		  		$(li).remove();
-			}
-			else
-				bootstrap_alert.warning(json['error']);
-		    });
-		}
-		
-		function show_petition_arguments() {
-		  $.post("{% url 'getPetitionArguments' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
-		  	if (json['success']) {
-				supportingArguments = json['supportingArguments'];
-				opposingArguments = json['opposingArguments'];
-			
-				$("#id_supporting_arguments").empty();
-				if (supportingArguments.length == 0) {
-					append_zero_arguments($("#id_supporting_arguments"));
-				} else {
-					for (i = 0; i < supportingArguments.length; ++i) {
-						append_argument(supportingArguments[i], $("#id_supporting_arguments"));
-					}
-				}
-				$("#id_opposing_arguments").empty();
-				if (opposingArguments.length == 0) {
-					append_zero_arguments($("#id_opposing_arguments"));
-				} else {
-					for (i = 0; i < opposingArguments.length; ++i) {
-						append_argument(opposingArguments[i], $("#id_opposing_arguments"));
-					}
-				}
-			}
-			else
-				bootstrap_alert.warning(json['error']);
-		  });
-		}
-		
-		function append_zero_arguments(containerObj) {
-			li = document.createElement("tr");
-			containerObj.append(li);
-			textdiv = document.createElement("td");
-			$(li).append(textdiv);
-			$(textdiv).html("None");
-			$(li).append(document.createElement("td"));
-			$(li).append(document.createElement("td"));
-		}
-		
-		ratingData = [ {'text' : 'Central', 'value' : 5},
-					   {'text' : 'Peripheral', 'value' : 4},
-					   {'text' : 'Irrelevent', 'value' : 3},
-					   {'text' : 'Opinion', 'value' : 2},
-					   {'text' : 'Misleading', 'value' : 1},
-					   {'text' : 'False', 'value' : 0},
-					  ];
-					  
-		function append_argument(arg, containerObj) {
-			li = document.createElement("tr");
-			newParagraph = document.createElement("td");
-			containerObj.append(li);
-			$(li).append(newParagraph);
-
-			$(newParagraph).append(htmlEncode(arg['description']));
-			
-			ratingCell = document.createElement("td");
-			$(li).append(ratingCell);
-			ratingGroupDiv = document.createElement("div");
-			$(ratingCell).append(ratingGroupDiv);
-			$(ratingGroupDiv).addClass("btn-group");
-			set_rating_button(ratingGroupDiv, arg['rating_vote'], arg['id']);
-							
-			newCell = document.createElement("td");
-			$(li).append(newCell);
-			if (arg['isEditable']) {
-				newButton = document.createElement("button");
-				newSpan = document.createElement("span");
-				$(newCell).append(newButton);
-				$(newButton).append(newSpan);
-				$(newButton).addClass("btn btn-link btn-xs");
-				$(newButton).attr("argumentId", arg['id']);
-				$(newButton).click(function() {
-					closealert();
-					$("#id_deleteDialog").attr("argumentId", $(this).attr("argumentId"));
-					elementToDelete = $(this).parent().parent();
-					$("#id_deleteDialog").modal('show');
-				});
-				$(newSpan).addClass("glyphicon glyphicon-remove");
-			}
-		}
-		
-		function set_rating_button(ratingGroupDiv, ratingVote, argumentID) {
-			$(ratingGroupDiv).empty();
-			var ratingButton = document.createElement("button");
-			ratingCaret = document.createElement("span");
-			ratingMenu = document.createElement("ul");
-			$(ratingGroupDiv).append(ratingButton)
-							 .append(ratingMenu);
-							 
-			if (ratingVote === null || ratingVote == -1)
-				ratingText = 'Rate Now';
-			else
-				ratingText = ratingData[ratingData.length - 1 - ratingVote].text;
-				
-			$(ratingButton).prop("type", "button")
-						   .addClass("btn btn-xs btn-link block-display dropdown-toggle")
-						   .attr("data-toggle", "dropdown")
-						   .html(ratingText + ' ')
-						   .append(ratingCaret);
-			$(ratingCaret).addClass("caret");
-			$(ratingMenu).addClass("dropdown-menu")
-						 .attr("role", "menu");
-			
-			for (var i = 0; i < ratingData.length; ++i) {
-				ratingItem = document.createElement("li");
-				ratingItemButton = document.createElement("button");
-				ratingItemSpan = document.createElement("span");
-				$(ratingMenu).append(ratingItem);
-				$(ratingItem).append(ratingItemButton);
-				$(ratingItemButton).append(ratingItemSpan)
-								   .append(ratingData[i].text);
-							 
-				$(ratingItemSpan).addClass("btn btn-xs btn-link glyphicon glyphicon-ok");
-				if (ratingVote != ratingData[i].value)
-					$(ratingItemSpan).addClass("invisible");
-					
-				$(ratingItemButton).val(ratingData[i].value)
-								   .addClass("btn btn-xs btn-link")
-								   .attr("argumentId", argumentID)
-								   .click(function() { 
-								     theDiv = $(this).parents(".btn-group")[0];
-								     rate_argument(theDiv, $(this).attr("argumentId"), $(this).val());
-								   	 });
-			}
-
-			if (ratingVote !== null) {
-				ratingItem = document.createElement("li");
-				$(ratingMenu).append(ratingItem);
-				$(ratingItem).addClass("divider");
-				ratingItem = document.createElement("li");
-				ratingItemButton = document.createElement("button");
-				$(ratingMenu).append(ratingItem);
-				$(ratingItem).append(ratingItemButton);
-				$(ratingItemButton).text("Remove this rating")
-								   .val(-1)
-								   .addClass("btn btn-xs btn-link")
-								   .attr("argumentId", argumentID)
-								   .click(function() { 
-								     theDiv = $(this).parents(".btn-group")[0];
-								     rate_argument(theDiv, $(this).attr("argumentId"), $(this).val());
-								   	 });
-			}
-		}
-		
-		function remove_argument(li, argument_id) {
-		  $.post("{% url 'deleteArgument' %}", { csrfmiddlewaretoken: storedcsrftoken, "argument" : argument_id }, function(json){
-		  	if (json['success']) {
-		  		$(li).remove();
-		  		if ($($("#id_supporting_arguments").children()[0]).children().length == 0)
-		  			append_zero_arguments($("#id_supporting_arguments"));
-
-		  		if ($($("#id_opposing_arguments").children()[0]).children().length == 0)
-		  			append_zero_arguments($("#id_opposing_arguments"));
-
-			}
-			else
-				bootstrap_alert.warning(json['error']);
-		    });
-		}
-		
-		function show_petition_vote_details() {
-			var backURL = encodeURIComponent("{{backURL}}");
-			var backName = encodeURIComponent("{{backName}}");
-			window.location = "{% url 'petitionVotes' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
-		}
-		
-		function add_supporting_argument() {
-			var backURL = encodeURIComponent("{{backURL}}");
-			var backName = encodeURIComponent("{{backName}}");
-			window.location = "{% url 'addSupportingArgument' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
-		}
-		
-		function add_opposing_argument() {
-			var backURL = encodeURIComponent("{{backURL}}");
-			var backName = encodeURIComponent("{{backName}}");
-			window.location = "{% url 'addOpposingArgument' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
-		}
-		
-		function doc_ratings() {
-			var backURL = encodeURIComponent("{{backURL}}");
-			var backName = encodeURIComponent("{{backName}}");
-			window.location = "{% url 'docRatings' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
-		}
-		
-		function cast_vote(vote) {
-			deferredObject = $.post("{% url 'newPetitionVote' %}", { csrfmiddlewaretoken: storedcsrftoken, 
-														  "petition" : "{{petition.id}}",
-														  "vote" : vote} 
-				)
-				.done(function(json, textStatus, jqXHR)
-				{
-					if (json['success']) {
-						show_petition_votes(false);
-					}
-					else {
-						bootstrap_alert.warning(json['error']);
-					}
-				})
-				.fail(function(jqXHR, textStatus, errorThrown)
-				{
-		    		bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
-					console.log( "error: " + textStatus + "; " + errorThrown + ";");
-					console.log( jqXHR.status + "; " + jqXHR.statusText);
-				});
-		}
-		
-		function cast_support_vote(e, inputObj) {
-			cast_vote(inputObj.value);
-			e.stopPropagation();
-		}
-		
-		function cast_oppose_vote(e, inputObj) {
-			cast_vote(inputObj.value);
-			e.stopPropagation();
-		}
-		
-		function vote_no_opinion() {
-			deferredObject = $.post("{% url 'deletePetitionVote' %}", { csrfmiddlewaretoken: storedcsrftoken, 
-														  "petition" : "{{petition.id}}"} 
-				)
-				.done(function(json, textStatus, jqXHR)
-				{
-					if (json['success']) {
-						show_petition_votes(false);
-					}
-					else {
-						bootstrap_alert.warning(json['error']);
-					}
-				})
-				.fail(function(jqXHR, textStatus, errorThrown)
-				{
-		    		bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
-					console.log( "error: " + textStatus + "; " + errorThrown + ";");
-					console.log( jqXHR.status + "; " + jqXHR.statusText);
-				});
-		}
-		
-		function set_button_display() {
-			if ($(this).children("input").prop('checked'))
-				$(this).addClass("btn-info");
-			else
-				$(this).removeClass("btn-info");
-		}
-		
-		function show_petition_votes(init_user_vote) {
-			deferredObject = $.get("{% url 'getPetitionVoteTotals' %}", { csrfmiddlewaretoken: storedcsrftoken, 
-														  "petition" : "{{petition.id}}"} 
-				)
-				.done(function(json, textStatus, jqXHR)
-				{
-					if (json['success']) {
-						supportVotes = 0;
-						opposeVotes = 0;
-						for (i=0; i < json['votes'].length; ++i) {
-							vc = json['votes'][i];
-							if (vc.vote == 0)
-								opposeVotes = vc.count;
-							else if (vc.vote == 1)
-								supportVotes = vc.count;
-						}
-						
-						if ('userVote' in json && json['userVote'] == 1) {
-							if (supportVotes == 1)
-								supportString = "You support this";
-							else if (supportVotes == 2)
-								supportString = "You and 1 other person support this";
-							else
-								supportString = "You and " + (supportVotes-1) + " other people support this";
-						}
-						else
-						{
-							if (supportVotes == 0)
-								supportString = "No one supports this";
-							else if (supportVotes == 1)
-								supportString = "1 person supports this";
-							else
-								supportString = "" + supportVotes + " people support this";
-						}
-						if ('userVote' in json && json['userVote'] == 0) {
-							if (opposeVotes == 1)
-								opposeString = "You oppose this";
-							else if (opposeVotes == 2)
-								opposeString = "You and 1 other person oppose this";
-							else
-								opposeString = "You and " + (opposeVotes-1) + " other people oppose this";
-						} else {
-							if (opposeVotes == 0)
-								opposeString = "No one opposes this";
-							else if (opposeVotes == 1)
-								opposeString = "1 person opposes this";
-							else
-								opposeString = "" + opposeVotes + " people oppose this";
-						}
-						
-						$("#id_support_span").text(supportString);
-						$("#id_oppose_span").text(opposeString);
-						if ('userVote' in json) {
-							if (init_user_vote) {
-								if (json['userVote'] == 1) {
-									$("#supportRadio").prop('checked', true);
-									$("#supportButton").button('toggle');
-								}
-								else if (json['userVote'] == 0) {
-									$('#opposeRadio').prop('checked', true);
-									$("#opposeButton").button('toggle');
-								}
-							}
-						}
-						else
-						{
-							if (init_user_vote) {
-								$('#noOpinionRadio').prop('checked', true);
-								$('#noOpinionButton').button('toggle');
-							}
-						}
-						
-						$("input[name=voteOptions]").parent().each(set_button_display);
-					}
-					else {
-						bootstrap_alert.warning(json['error']);
-					}
-				})
-				.fail(function(jqXHR, textStatus, errorThrown)
-				{
-		    		bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
-					console.log( "error: " + textStatus + "; " + errorThrown + ";");
-					console.log( jqXHR.status + "; " + jqXHR.statusText);
-				});
-		}
-		
-		function rate_argument(li, argument_id, rating) {
-			var deferredObject;
-			if (rating == -1)
-				deferredObject = $.post("{% url 'unrateArgument' %}", { csrfmiddlewaretoken: storedcsrftoken, 
-														  "argument" : argument_id});
-			else
-				deferredObject = $.post("{% url 'rateArgument' %}", { csrfmiddlewaretoken: storedcsrftoken, 
-														  "argument" : argument_id,
-														  "rating" : rating});
-
-			deferredObject.done(function(json, textStatus, jqXHR)
-				{
-					if (json['success']) {
-						set_rating_button(li, rating, argument_id);
-					}
-					else {
-						bootstrap_alert.warning(json['error']);
-					}
-				})
-				.fail(function(jqXHR, textStatus, errorThrown)
-				{
-					bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
-					console.log( "error: " + textStatus + "; " + errorThrown + ";");
-					console.log( jqXHR.status + "; " + jqXHR.statusText);
-				});
-		}
-		
-		function remove_petition() {
-		  $.post("{% url 'deletePetition' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : {{ petition.id }} }, function(json){
-		  	if (json['success']) {
-		  		window.location.href = "{{ backURL }}";
-			}
-			else
-				bootstrap_alert.warning(json['error']);
-		    });
-		}
-		
-	</script>
-
 	<div id='container' class="container-fluid">
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
@@ -574,9 +67,9 @@
 			</div>
 		</nav>
 
-		{% if user.is_authenticated %}
 		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
-			<div class="container-fluid">
+			{% if user.is_authenticated %}
+			<div id="id_debateNav" class="container-fluid">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="nav navbar-header pull-left">
@@ -590,110 +83,137 @@
 					</span>
 				</div>
 			</div>
-		</nav>
-		{% endif %}
-		
-	    <div id="myAlert"></div>
-		<div class="row">
-			<div class="col-xs-12 col-sm-8">
-				<h5 id='id_petition_title' class="toplabel">An Action for Congress:</h5>
-				<p class="lead"><strong>{{petition.description}}</strong></p>
-			</div>
-			<div class="col-xs-12 col-sm-4">
-				<div class="issue-column">
-					<div class="row">
-						<div class="col-xs-9">
-							<label for="id_petition_issues" class="toplabel">Related Issues</label>
-						</div>
-						<button class="btn btn-link btn-xs col-xs-3 pull-right"
-								onClick="add_issue()"}>
-								Add
-						</button>
-					</div>
-					<div id='id_petition_issues'> </div>
+			<div id="id_labelNav" class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav navbar-header pull-left">
+					<span class="navbar-text navbar-link pull-left dico-navbar-text" onClick="add_issue()"}>
+						Add Related Issue
+					</span>
 				</div>
 			</div>
-		</div>
-		<div class="row">
-			<div class="col-xs-12 col-sm-8 your-vote-column">
-				{% if user.is_authenticated %}
-				<label>Your Vote</label>
-				<div class="btn-group" data-toggle="buttons">
-					<label id="supportButton" class="btn btn-default">
-					  <input type="radio" name="voteOptions" id="supportRadio" value=1 />
-					  <span class="glyphicon glyphicon-thumbs-up"></span>&nbsp;Support
-					</label>
-					<label id="opposeButton" class="btn btn-default">
-					  <input type="radio" name="voteOptions" id="opposeRadio" value=0 />
-					  <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;Oppose
-					</label>			
-					<label id="noOpinionButton" class="btn btn-default">
-					  <input type="radio" name="voteOptions" id="noOpinionRadio" value=-1 />No Opinion
-					</label>
+			<div id="id_storyNav" class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav navbar-header pull-left">
+					<span class="navbar-text navbar-link pull-left dico-navbar-text" onClick="add_story()"}>
+						Share Your Story
+					</span>
+				</div>
+			</div>
+			{% endif %}
+			
+			<div class="container-fluid">
+						<!-- Brand and toggle get grouped for better mobile display -->
+						<!-- Collect the nav links, forms, and other content for toggling -->
+				<ul id="id_petitionNav" class="nav nav-tabs pull-left" role="navigation" aria-label="petitionButtons">
+					<li section="id_voteSection"><a id="id_voteButton" href="#">Vote</a></li>
+					<li section="id_debateSection"><a id="id_debateButton" href="#">Debate</a></li>
+					<li section="id_labelSection"><a id="id_labelButton" href="#">Label</a></li>
+					<li section="id_analyzeSection"><a id="id_analyzeButton" href="#">Analyze</a></li>
+					<li section="id_storySection"><a id="id_storyButton" href="#">Stories</a></li>
+				</ul>
+				{% if user.id == petition.constituent.user.id or user.is_superuser %}
+				<div class="btn-group pull-right" role="group" aria-label="deleteButton">
+					<span id="id_deleteActionButton" class="pull-right dico-navbar-text text-danger">Delete</span>
 				</div>
 				{% endif %}
 			</div>
-			<div class="col-xs-12 col-sm-4">
-				<div id="id_total_votes" class="bottom-padding">
-					<span class='text-muted'>
-						<span class="dico-span-link" onClick="show_petition_vote_details()">
-							<span class='glyphicon glyphicon-thumbs-up'></span>
-							<span id="id_support_span"></span><br>
-							<span class='glyphicon glyphicon-thumbs-down'></span>
-							<span id="id_oppose_span"></span>
-						</span>
-				</div>
+		</nav>
+
+	    <div id="myAlert"></div>
+		<div class="row">
+			<div class="col-xs-12">
+				<h5 id='id_petition_title' class="toplabel">An Action for Congress:</h5>
+				<p class="lead"><strong>{{petition.description}}</strong></p>
 			</div>
 		</div>
+		
 		<div class="row">
 				<hr class="simple-separator" />
 		</div>
-		<div class="row">
-			<div class="col-xs-12 col-md-6">
-				<table class="table table-striped table-condensed argument-container">
-					<thead>
-						<th>Supporting Arguments
-						</th>
-						<th>Your Rating 
-							<button class="btn btn-link btn-xs" onClick="doc_ratings()"}>
-								<span class="glyphicon glyphicon-question-sign"></span>
-							</button>
-						</th>
-						<th></th>
-					</thead>
-					<tbody id='id_supporting_arguments'>
-					</tbody>
-				</table>
-			</div>
-			<div class="col-xs-12 col-md-6">
-				<table class="table table-striped table-condensed argument-container">
-					<thead>
-						<th>Opposing Arguments
-						</th>
-						<th>Your Rating 
-							<button class="btn btn-link btn-xs" onClick="doc_ratings()"}>
-								<span class="glyphicon glyphicon-question-sign"></span>
-							</button>
-						</th>
-						<th></th>
-					</thead>
-					<tbody id='id_opposing_arguments'>
-					</tbody>
-				</table>
-			</div>
-		</div>
-		{% if user.id == petition.constituent.user.id or user.is_superuser %}
-		<div class="row">
-				<hr class="simple-separator no-top-padding" />
-		</div>
-		<div class="row delete-row-padding">
-			<div class="col-xs-12 col-md-6 col-md-offset-6">
-				<button id="id_deleteActionButton" class="btn btn-default btn-block">
-					<span class="text-danger">Delete Action</span>
-				</button>
-			</div>
-		</div>
-		{% endif %}
+
+		<section id="id_petitionSections">
+			<section id="id_labelSection" class="row">
+				<div class="col-xs-12">
+					<div class="row">
+						<div class="col-xs-12">
+							<label for="id_petition_issues" class="toplabel">Related Issues</label>
+						</div>
+					</div>
+					<div id='id_petition_issues'> </div>
+				</div>
+			</section>
+			{% if user.is_authenticated %}
+			<section id="id_voteSection" class="row">
+				<div class="col-xs-12 col-sm-8 your-vote-column">
+					<label>Your Vote</label>
+					<div class="btn-group" data-toggle="buttons">
+						<label id="opposeButton" class="btn btn-default">
+						  <input type="radio" name="voteOptions" id="opposeRadio" value=0 />
+						  <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;Oppose
+						</label>			
+						<label id="noOpinionButton" class="btn btn-default">
+						  <input type="radio" name="voteOptions" id="noOpinionRadio" value=-1 />No Opinion
+						</label>
+						<label id="supportButton" class="btn btn-default">
+						  <input type="radio" name="voteOptions" id="supportRadio" value=1 />
+						  <span class="glyphicon glyphicon-thumbs-up"></span>&nbsp;Support
+						</label>
+					</div>
+				</div>
+			</section>
+			{% endif %}
+			<section id="id_debateSection" class="row">
+				<div class="col-xs-12 col-md-6">
+					<table class="table table-striped table-condensed argument-container">
+						<thead>
+							<th>Supporting Arguments
+							</th>
+							<th>Your Rating 
+								<button class="btn btn-link btn-xs" onClick="doc_ratings()"}>
+									<span class="glyphicon glyphicon-question-sign"></span>
+								</button>
+							</th>
+							<th></th>
+						</thead>
+						<tbody id='id_supporting_arguments'>
+						</tbody>
+					</table>
+				</div>
+				<div class="col-xs-12 col-md-6">
+					<table class="table table-striped table-condensed argument-container">
+						<thead>
+							<th>Opposing Arguments
+							</th>
+							<th>Your Rating 
+								<button class="btn btn-link btn-xs" onClick="doc_ratings()"}>
+									<span class="glyphicon glyphicon-question-sign"></span>
+								</button>
+							</th>
+							<th></th>
+						</thead>
+						<tbody id='id_opposing_arguments'>
+						</tbody>
+					</table>
+				</div>
+			</section>
+			<section id="id_analyzeSection" class="row">
+				<div class="col-xs-12">
+					<div id="id_total_votes" class="bottom-padding">
+						<span class='text-muted'>
+							<span class="dico-span-link" onClick="show_petition_vote_details()">
+								<span class='glyphicon glyphicon-thumbs-up'></span>
+								<span id="id_support_span"></span><br>
+								<span class='glyphicon glyphicon-thumbs-down'></span>
+								<span id="id_oppose_span"></span>
+							</span>
+					</div>
+				</div>
+			</section>
+			<section id="id_storySection" class="row">
+			</section>
+		</section>
 	</div> <!-- container -->
 
 <!-- Modal HTML -->
@@ -702,6 +222,17 @@
 			<div class="modal-content">
 				<div class="modal-body">
 					<button id="id_confirmDeleteButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Argument</button>
+					<button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div id="id_deleteStoryDialog" class="modal fade">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-body">
+					<button id="id_confirmDeleteStoryButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Story</button>
 					<button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
 				</div>
 			</div>
@@ -720,3 +251,683 @@
 		</div>
 	</div>
 </body>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+<script src="{% static "d3/d3.v3.min.js" %}"></script>
+
+
+<!-- Scripts for this web page -->
+<script type="text/JavaScript">
+
+	var deferredObject;
+
+	function htmlDecode(input){
+	  var e = document.createElement('div');
+	  e.innerHTML = input;
+	  return e.childNodes[0].nodeValue;
+	}
+	
+	function htmlEncode(input){
+		return $('<div>').text(input).html();
+	}
+	
+	// Display all of the interests in the system.
+	var storedcsrftoken = "{{ csrf_token }}";
+	var elementToDelete = null;
+	
+	$(document).ready (function(e) {
+		<!-- Block of code for an alert area at the top of the window -->
+		$(".close").click(function(){
+			$(this).parent().alert();
+		});
+		
+		bootstrap_alert = function() {}
+		bootstrap_alert.show = function(parentDiv, message, alertClass) {
+			parentDiv.html('<div class="alert ' + alertClass + ' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+		}
+		bootstrap_alert.warning = function(message) {
+			bootstrap_alert.show($('#myAlert'), message, "alert-danger");
+		}
+		closealert = function() { 
+			$('.alert').parent().html('');
+		}
+		
+		encodedRef = encodeURIComponent(window.location.href);
+		$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
+		$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
+		$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
+
+		$("#id_confirmDeleteButton").click(function() {
+			remove_argument(elementToDelete, $("#id_deleteDialog").attr("argumentId"));
+		});
+
+		$("#id_confirmDeleteStoryButton").click(function() {
+			remove_story(elementToDelete, $("#id_deleteStoryDialog").attr("storyId"));
+		});
+
+		$("#id_confirmDeleteActionButton").click(function() {
+			remove_petition();
+		});
+		
+		$("#id_deleteActionButton").click(function() {
+			$("#id_deleteActionDialog").modal('show');
+		});
+		
+		var petitionVotesShown = false;	// Covers totals and current user's vote.
+		var labelShown = false;
+		var analyzeShown = false;
+		var debateShown = false;
+		var storiesShown = false;
+		
+		
+		// After showing the petition votes, set the change methods of the radio buttons
+		// for the current user's vote.
+		$("#supportRadio").change(function() {
+			cast_vote(1);
+		});
+		
+		$("#opposeRadio").change(function() {
+			cast_vote(0);
+		});
+		
+		$("#noOpinionRadio").change(function() {
+			vote_no_opinion();
+		});
+		
+		var a = $("#id_petitionNav");
+		var kids = a.children();
+		
+		kids.click(function() {
+			$(this).siblings().removeClass("active");
+			$(this).addClass("active");
+			$("section>section").css("display", "none");
+			$("#"+$(this).attr("section")).css("display", "block");
+			{% if user.is_authenticated %}
+				$("#id_debateNav").css("display", $("#id_debateSection").css("display"));
+				$("#id_labelNav").css("display", $("#id_labelSection").css("display"));
+				$("#id_storyNav").css("display", $("#id_storySection").css("display"));
+			{% endif %}
+		});
+		
+		$("#id_debateButton").click( function() {
+			if (!debateShown) {
+				// Display the arguments of the current petition.
+				show_petition_arguments();
+				debateShown = true;
+			}
+		});
+		
+		$("#id_labelButton").click( function() {
+			if (!labelShown) {
+				// Display the issues associated with the current petition.
+				show_petition_issues();
+				labelShown = true;
+			}
+		});
+		
+		$("#id_voteButton").click( function() {
+			if (!petitionVotesShown) {
+				// Show the votes for the current petition.
+				show_petition_votes(true);
+				petitionVotesShown = true;
+			}
+		});
+		
+		$("#id_analyzeButton").click( function() {
+			if (!petitionVotesShown) {
+				// Show the votes for the current petition.
+				show_petition_votes(true);
+				petitionVotesShown = true;
+			}
+		});
+		
+		$("#id_storyButton").click( function() {
+			if (!storiesShown) {
+				show_petition_stories();
+				storiesShown = true;
+			}
+		});
+		
+		$("{{initialButton}}").click();
+		
+	});
+
+	function show_petition_issues() {
+	  $.post("{% url 'getPetitionIssues' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
+		if (json['success']) {
+			issues = json['issues'];
+		
+			$("#id_petition_issues").empty();
+		
+			for (i = 0; i < issues.length; ++i) {
+				issue = issues[i];
+				li = document.createElement("div");
+				$(li).addClass("row");
+				$("#id_petition_issues").append(li);
+				newButton = document.createElement("a");
+				newDiv = document.createElement("div");
+				$(li).append(newDiv);
+				$(newDiv).addClass("col-xs-9")
+						 .append(newButton);
+				$(newButton).append(htmlEncode(issue['name']));
+				$(newButton).addClass("btn-xs text-muted");
+				$(newButton).attr("href", "{% url 'issue' %}?issue=" + issue['id']);
+
+				<!-- Add a button to delete the issue from the petition -->
+				newButton = document.createElement("button");
+				$(newButton).addClass("btn btn-link btn-xs col-xs-3 pull-right");
+				$(li).append(newButton);
+				if (issue['isEditable'] && issues.length > 1) {
+					newSpan = document.createElement("span");
+					$(newButton).append(newSpan);
+					$(newButton).attr("issueID", issue['id']);
+					$(newButton).click(function() {
+						closealert();
+						remove_issue($(this).parent(), $(this).attr("issueID"));
+					});
+					$(newSpan).addClass("glyphicon glyphicon-remove");
+				}
+			}
+		}
+		else
+			bootstrap_alert.warning(json['error']);
+	  });
+	}
+	
+	function add_issue() {
+		var backURL = encodeURIComponent("{{backURL}}");
+		var backName = encodeURIComponent("{{backName}}");
+		window.location.href = "/dico/{{petition.id}}/addpetitionissue/?backURL="+backURL+";backName="+backName;
+	}
+	
+	function remove_issue(li, issue_id) {
+	  $.post("{% url 'deletePetitionIssue' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : "{{petition.id}}", "issue_id" : issue_id }, function(json){
+		if (json['success']) {
+			$(li).remove();
+		}
+		else
+			bootstrap_alert.warning(json['error']);
+		});
+	}
+	
+	function add_story() {
+		var backURL = encodeURIComponent("{{backURL}}");
+		var backName = encodeURIComponent("{{backName}}");
+		window.location.href = "/dico/addstory/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+	}
+	
+	function show_petition_arguments() {
+	  $.post("{% url 'getPetitionArguments' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
+		if (json['success']) {
+			supportingArguments = json['supportingArguments'];
+			opposingArguments = json['opposingArguments'];
+		
+			$("#id_supporting_arguments").empty();
+			if (supportingArguments.length == 0) {
+				append_zero_arguments($("#id_supporting_arguments"));
+			} else {
+				for (i = 0; i < supportingArguments.length; ++i) {
+					append_argument(supportingArguments[i], $("#id_supporting_arguments"));
+				}
+			}
+			$("#id_opposing_arguments").empty();
+			if (opposingArguments.length == 0) {
+				append_zero_arguments($("#id_opposing_arguments"));
+			} else {
+				for (i = 0; i < opposingArguments.length; ++i) {
+					append_argument(opposingArguments[i], $("#id_opposing_arguments"));
+				}
+			}
+		}
+		else
+			bootstrap_alert.warning(json['error']);
+	  })
+	  .fail(function(jqXHR, textStatus, errorThrown)
+		{
+			bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+			console.log( "error: " + textStatus + "; " + errorThrown + ";");
+			console.log( jqXHR.status + "; " + jqXHR.statusText);
+		});
+	}
+	
+	function append_zero_arguments(containerObj) {
+		li = document.createElement("tr");
+		containerObj.append(li);
+		textdiv = document.createElement("td");
+		$(li).append(textdiv);
+		$(textdiv).html("None");
+		$(li).append(document.createElement("td"));
+		$(li).append(document.createElement("td"));
+	}
+	
+	ratingData = [ {'text' : 'Central', 'value' : 5},
+				   {'text' : 'Peripheral', 'value' : 4},
+				   {'text' : 'Irrelevent', 'value' : 3},
+				   {'text' : 'Opinion', 'value' : 2},
+				   {'text' : 'Misleading', 'value' : 1},
+				   {'text' : 'False', 'value' : 0},
+				  ];
+				  
+	function append_argument(arg, containerObj) {
+		li = document.createElement("tr");
+		newParagraph = document.createElement("td");
+		containerObj.append(li);
+		$(li).append(newParagraph);
+
+		$(newParagraph).append(htmlEncode(arg['description']));
+		
+		ratingCell = document.createElement("td");
+		$(li).append(ratingCell);
+		ratingGroupDiv = document.createElement("div");
+		$(ratingCell).append(ratingGroupDiv);
+		$(ratingGroupDiv).addClass("btn-group");
+		set_rating_button(ratingGroupDiv, arg['rating_vote'], arg['id']);
+						
+		newCell = document.createElement("td");
+		$(li).append(newCell);
+		if (arg['isEditable']) {
+			newButton = document.createElement("button");
+			newSpan = document.createElement("span");
+			$(newCell).append(newButton);
+			$(newButton).addClass("btn btn-link btn-xs");
+			$(newButton).attr("argumentId", arg['id']);
+			$(newButton).click(function() {
+				closealert();
+				$("#id_deleteDialog").attr("argumentId", $(this).attr("argumentId"));
+				elementToDelete = $(this).parent().parent();
+				$("#id_deleteDialog").modal('show');
+			});
+			$(newButton).append(newSpan);
+			$(newSpan).addClass("glyphicon glyphicon-remove");
+		}
+	}
+	
+	function set_rating_button(ratingGroupDiv, ratingVote, argumentID) {
+		$(ratingGroupDiv).empty();
+		var ratingButton = document.createElement("button");
+		ratingCaret = document.createElement("span");
+		ratingMenu = document.createElement("ul");
+		$(ratingGroupDiv).append(ratingButton)
+						 .append(ratingMenu);
+						 
+		if (ratingVote === null || ratingVote == -1)
+			ratingText = 'Rate Now';
+		else
+			ratingText = ratingData[ratingData.length - 1 - ratingVote].text;
+			
+		$(ratingButton).prop("type", "button")
+					   .addClass("btn btn-xs btn-link block-display dropdown-toggle")
+					   .attr("data-toggle", "dropdown")
+					   .html(ratingText + ' ')
+					   .append(ratingCaret);
+		$(ratingCaret).addClass("caret");
+		$(ratingMenu).addClass("dropdown-menu")
+					 .attr("role", "menu");
+		
+		for (var i = 0; i < ratingData.length; ++i) {
+			ratingItem = document.createElement("li");
+			ratingItemButton = document.createElement("button");
+			ratingItemSpan = document.createElement("span");
+			$(ratingMenu).append(ratingItem);
+			$(ratingItem).append(ratingItemButton);
+			$(ratingItemButton).append(ratingItemSpan)
+							   .append(ratingData[i].text);
+						 
+			$(ratingItemSpan).addClass("btn btn-xs btn-link glyphicon glyphicon-ok");
+			if (ratingVote != ratingData[i].value)
+				$(ratingItemSpan).addClass("invisible");
+				
+			$(ratingItemButton).val(ratingData[i].value)
+							   .addClass("btn btn-xs btn-link")
+							   .attr("argumentId", argumentID)
+							   .click(function() { 
+								 theDiv = $(this).parents(".btn-group")[0];
+								 rate_argument(theDiv, $(this).attr("argumentId"), $(this).val());
+								 });
+		}
+
+		if (ratingVote !== null) {
+			ratingItem = document.createElement("li");
+			$(ratingMenu).append(ratingItem);
+			$(ratingItem).addClass("divider");
+			ratingItem = document.createElement("li");
+			ratingItemButton = document.createElement("button");
+			$(ratingMenu).append(ratingItem);
+			$(ratingItem).append(ratingItemButton);
+			$(ratingItemButton).text("Remove this rating")
+							   .val(-1)
+							   .addClass("btn btn-xs btn-link")
+							   .attr("argumentId", argumentID)
+							   .click(function() { 
+								 theDiv = $(this).parents(".btn-group")[0];
+								 rate_argument(theDiv, $(this).attr("argumentId"), $(this).val());
+								 });
+		}
+	}
+	
+	function remove_argument(li, argument_id) {
+	  $.post("{% url 'deleteArgument' %}", { csrfmiddlewaretoken: storedcsrftoken, "argument" : argument_id }, function(json){
+		if (json['success']) {
+			$(li).remove();
+			if ($($("#id_supporting_arguments").children()[0]).children().length == 0)
+				append_zero_arguments($("#id_supporting_arguments"));
+
+			if ($($("#id_opposing_arguments").children()[0]).children().length == 0)
+				append_zero_arguments($("#id_opposing_arguments"));
+
+		}
+		else
+			bootstrap_alert.warning(json['error']);
+		})
+		.fail(function(jqXHR, textStatus, errorThrown)
+		{
+			bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+			console.log( "error: " + textStatus + "; " + errorThrown + ";");
+			console.log( jqXHR.status + "; " + jqXHR.statusText);
+		});
+	}
+	
+	function show_petition_vote_details() {
+		var backURL = encodeURIComponent("{{backURL}}");
+		var backName = encodeURIComponent("{{backName}}");
+		window.location = "{% url 'petitionVotes' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+	}
+	
+	function add_supporting_argument() {
+		var backURL = encodeURIComponent("{{backURL}}");
+		var backName = encodeURIComponent("{{backName}}");
+		window.location = "{% url 'addSupportingArgument' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+	}
+	
+	function add_opposing_argument() {
+		var backURL = encodeURIComponent("{{backURL}}");
+		var backName = encodeURIComponent("{{backName}}");
+		window.location = "{% url 'addOpposingArgument' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+	}
+	
+	function doc_ratings() {
+		var backURL = encodeURIComponent("{{backURL}}");
+		var backName = encodeURIComponent("{{backName}}");
+		window.location = "{% url 'docRatings' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+	}
+	
+	function cast_vote(vote) {
+		deferredObject = $.post("{% url 'newPetitionVote' %}", { csrfmiddlewaretoken: storedcsrftoken, 
+													  "petition" : "{{petition.id}}",
+													  "vote" : vote} 
+			)
+			.done(function(json, textStatus, jqXHR)
+			{
+				if (json['success']) {
+					show_petition_votes(false);
+				}
+				else {
+					bootstrap_alert.warning(json['error']);
+				}
+			})
+			.fail(function(jqXHR, textStatus, errorThrown)
+			{
+				bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+				console.log( "error: " + textStatus + "; " + errorThrown + ";");
+				console.log( jqXHR.status + "; " + jqXHR.statusText);
+			});
+	}
+	
+	function cast_support_vote(e, inputObj) {
+		cast_vote(inputObj.value);
+		e.stopPropagation();
+	}
+	
+	function cast_oppose_vote(e, inputObj) {
+		cast_vote(inputObj.value);
+		e.stopPropagation();
+	}
+	
+	function vote_no_opinion() {
+		deferredObject = $.post("{% url 'deletePetitionVote' %}", { csrfmiddlewaretoken: storedcsrftoken, 
+													  "petition" : "{{petition.id}}"} 
+			)
+			.done(function(json, textStatus, jqXHR)
+			{
+				if (json['success']) {
+					show_petition_votes(false);
+				}
+				else {
+					bootstrap_alert.warning(json['error']);
+				}
+			})
+			.fail(function(jqXHR, textStatus, errorThrown)
+			{
+				bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+				console.log( "error: " + textStatus + "; " + errorThrown + ";");
+				console.log( jqXHR.status + "; " + jqXHR.statusText);
+			});
+	}
+	
+	function set_button_display() {
+		if ($(this).children("input").prop('checked'))
+			$(this).addClass("btn-info");
+		else
+			$(this).removeClass("btn-info");
+	}
+	
+	function show_petition_votes(init_user_vote) {
+		deferredObject = $.get("{% url 'getPetitionVoteTotals' %}", { csrfmiddlewaretoken: storedcsrftoken, 
+													  "petition" : "{{petition.id}}"} 
+			)
+			.done(function(json, textStatus, jqXHR)
+			{
+				if (json['success']) {
+					supportVotes = 0;
+					opposeVotes = 0;
+					for (i=0; i < json['votes'].length; ++i) {
+						vc = json['votes'][i];
+						if (vc.vote == 0)
+							opposeVotes = vc.count;
+						else if (vc.vote == 1)
+							supportVotes = vc.count;
+					}
+					
+					if ('userVote' in json && json['userVote'] == 1) {
+						if (supportVotes == 1)
+							supportString = "You support this";
+						else if (supportVotes == 2)
+							supportString = "You and 1 other person support this";
+						else
+							supportString = "You and " + (supportVotes-1) + " other people support this";
+					}
+					else
+					{
+						if (supportVotes == 0)
+							supportString = "No one supports this";
+						else if (supportVotes == 1)
+							supportString = "1 person supports this";
+						else
+							supportString = "" + supportVotes + " people support this";
+					}
+					if ('userVote' in json && json['userVote'] == 0) {
+						if (opposeVotes == 1)
+							opposeString = "You oppose this";
+						else if (opposeVotes == 2)
+							opposeString = "You and 1 other person oppose this";
+						else
+							opposeString = "You and " + (opposeVotes-1) + " other people oppose this";
+					} else {
+						if (opposeVotes == 0)
+							opposeString = "No one opposes this";
+						else if (opposeVotes == 1)
+							opposeString = "1 person opposes this";
+						else
+							opposeString = "" + opposeVotes + " people oppose this";
+					}
+					
+					$("#id_support_span").text(supportString);
+					$("#id_oppose_span").text(opposeString);
+					if ('userVote' in json) {
+						if (init_user_vote) {
+							if (json['userVote'] == 1) {
+								$("#supportRadio").prop('checked', true);
+								$("#supportButton").button('toggle');
+							}
+							else if (json['userVote'] == 0) {
+								$('#opposeRadio').prop('checked', true);
+								$("#opposeButton").button('toggle');
+							}
+						}
+					}
+					else
+					{
+						if (init_user_vote) {
+							$('#noOpinionRadio').prop('checked', true);
+							$('#noOpinionButton').button('toggle');
+						}
+					}
+					
+					$("input[name=voteOptions]").parent().each(set_button_display);
+				}
+				else {
+					bootstrap_alert.warning(json['error']);
+				}
+			})
+			.fail(function(jqXHR, textStatus, errorThrown)
+			{
+				bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+				console.log( "error: " + textStatus + "; " + errorThrown + ";");
+				console.log( jqXHR.status + "; " + jqXHR.statusText);
+			});
+	}
+	
+	function rate_argument(li, argument_id, rating) {
+		var deferredObject;
+		if (rating == -1)
+			deferredObject = $.post("{% url 'unrateArgument' %}", { csrfmiddlewaretoken: storedcsrftoken, 
+													  "argument" : argument_id});
+		else
+			deferredObject = $.post("{% url 'rateArgument' %}", { csrfmiddlewaretoken: storedcsrftoken, 
+													  "argument" : argument_id,
+													  "rating" : rating});
+
+		deferredObject.done(function(json, textStatus, jqXHR)
+			{
+				if (json['success']) {
+					set_rating_button(li, rating, argument_id);
+				}
+				else {
+					bootstrap_alert.warning(json['error']);
+				}
+			})
+			.fail(function(jqXHR, textStatus, errorThrown)
+			{
+				bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+				console.log( "error: " + textStatus + "; " + errorThrown + ";");
+				console.log( jqXHR.status + "; " + jqXHR.statusText);
+			});
+	}
+
+	function show_petition_stories() {
+	  $.post("{% url 'getPetitionStories' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
+		if (json['success']) {
+			stories = json['stories'];
+			
+			$("#id_storySection").empty();
+			
+			divs = d3.select("#id_storySection").selectAll("div")
+				.data(stories)
+				.enter()
+				.append("div")
+				.classed("row", true)
+				.append("div")
+				.classed("col-xs-12", true)
+				.append("div")
+				.classed("media", "true");
+			
+			divs.append("div")
+				.classed("media-left", true)
+				.append("a")
+				.attr("href", function(story) { return story['link']; })
+				.attr("target", "_blank")
+				.append("img")
+				.classed("media-object", true)
+				.attr("src", function(story) { return story['link']; })
+				.attr("height", 60)
+				.attr("width", 60);
+				
+			mediaBodies = divs.append("div")
+							  .classed("media-body", true);
+							  
+			mediaBodies.append("h5")
+					   .classed("media-heading", true)
+					   .text(function(story) { return story['heading']; });
+			paragraphs = mediaBodies.append("p")
+					   .text(function(story) { return story['description']; });
+					   
+			paragraphs.append("br");
+			paragraphs.append("a")
+					   .attr("href", function(story) { return story['link']; })
+					   .attr("target", "_blank")
+					   .style("word-wrap", "break-word")
+					   .text("More Info");
+					   
+			buttons = divs.append("div")
+				.classed("media-right", true)
+				.append("button")
+				.classed("btn btn-link btn-xs", true)
+				.attr("storyId", function(story) { return story['id']; })
+				.on("click", function() {
+					closealert();
+					$("#id_deleteStoryDialog").attr("storyId", $(this).attr("storyId"));
+					elementToDelete = $(this).parent().parent();
+					$("#id_deleteStoryDialog").modal('show');
+				})
+				.style("display", function(d) {
+					if (d['isEditable'])
+						return "inline-block";
+					else
+						return "none";
+				});
+				
+			buttons
+				.append("span")
+				.classed("glyphicon glyphicon-remove", true);
+		}
+		else
+			bootstrap_alert.warning(json['error']);
+	  })
+	  .fail(function(jqXHR, textStatus, errorThrown)
+		{
+			bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+			console.log( "error: " + textStatus + "; " + errorThrown + ";");
+			console.log( jqXHR.status + "; " + jqXHR.statusText);
+		});
+	}
+	
+	function remove_story(li, story_id) {
+	  $.post("{% url 'deleteStory' %}", { csrfmiddlewaretoken: storedcsrftoken, "story" : story_id }, function(json){
+		if (json['success']) {
+			$(li).remove();
+		}
+		else
+			bootstrap_alert.warning(json['error']);
+		})
+		.fail(function(jqXHR, textStatus, errorThrown)
+		{
+			bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+			console.log( "error: " + textStatus + "; " + errorThrown + ";");
+			console.log( jqXHR.status + "; " + jqXHR.statusText);
+		});
+	}
+	
+	function remove_petition() {
+	  $.post("{% url 'deletePetition' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition_id" : {{ petition.id }} }, function(json){
+		if (json['success']) {
+			window.location.href = "{{ backURL }}";
+		}
+		else
+			bootstrap_alert.warning(json['error']);
+		});
+	}
+</script>
+

@@ -127,7 +127,10 @@
 					vote = 'oppose_count';
 				mapdatapoints("#mapFrame", 
 							  "#id_constituent_area_label", 
-							  "#id_constituent_table_body", 
+							  newScope, 
+							  json['votes'],
+							  vote);
+				show_table_data("#id_constituent_table_body", 
 							  newScope, 
 							  json['votes'],
 							  vote);

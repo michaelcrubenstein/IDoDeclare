@@ -1,7 +1,5 @@
 body {
   padding-top: 40px;
-  padding-bottom: 40px;
-  background-color: #eee;
 }
 
 .errorAlert {
@@ -9,9 +7,7 @@ body {
 }
 
 .form-createpetition {
-  max-width: 330px;
   padding: 15px;
-  margin: 0 auto;
 }
 .form-createpetition .form-createpetition-heading,
 {

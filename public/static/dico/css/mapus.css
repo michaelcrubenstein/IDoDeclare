@@ -5,6 +5,7 @@ path {
 
 .land {
   fill: #81BFC0;
+  fill-opacity: 0.30;
 }
 
 .land :hover {

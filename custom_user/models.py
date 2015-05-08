@@ -65,6 +65,9 @@ class AuthUser(AbstractBaseUser, PermissionsMixin):
         else:
             fullname = self.first_name+" "+self.last_name
         return fullname
+        
+    def get_initials(self):
+    	return self.first_name[0]+"."+self.last_name[0]+"."
 
     def get_short_name(self):
         return self.username

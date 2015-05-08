@@ -13,9 +13,10 @@ function initmap(mapFrameID, mapFile) {
 	// Initialize the map.
 	var width = $(mapFrameID).width();
 	var height = width / 8 * 5;
-	if (height > window.innerHeight - 110) {
-		height = window.innerHeight - 110;
+	if (height > window.innerHeight - 30) {
+		height = window.innerHeight - 30;
 		width = height / 5 * 8;
+		$(mapFrameID).width(width);
 	}
 	
 
@@ -55,7 +56,7 @@ function initmap(mapFrameID, mapFile) {
 		.await(ready);
 }
 
-function mapdatapoints(mapFrameID, constituentAreaLabelID, constituentTableBodyID, newScope, dataPoints, countKey)
+function mapdatapoints(mapFrameID, constituentAreaLabelID, newScope, dataPoints, countKey)
 {
 	var countMax;
 	countMax = d3.max(dataPoints, function(d) {return d[countKey]; })
@@ -76,18 +77,12 @@ function mapdatapoints(mapFrameID, constituentAreaLabelID, constituentTableBodyI
 		$(constituentAreaLabelID).text('District');
 	else
 		$(constituentAreaLabelID).text('State');
-	$(constituentTableBodyID).empty();
 	
 	for (i = 0; i < dataPoints.length; ++i) {
 		var dataPoint = dataPoints[i];
 		var dataPointID;
 		
-		tr = document.createElement("tr");
-		$(constituentTableBodyID).append(tr);
-		td = document.createElement("td");
-		$(tr).append(td);
 		if (newScope == districtScope) {
-			$(td).text(dataPoint['state'] + "-" + dataPoint['district']);
 			// Handle the special case for 'DC' here. The case for states with only one district
 			// is handled elsewhere.
 			if (dataPoint['state'] == 'DC') {
@@ -97,12 +92,8 @@ function mapdatapoints(mapFrameID, constituentAreaLabelID, constituentTableBodyI
 			}
 		}
 		else {
-			$(td).text(dataPoint['state']);
 			dataPointID=stateCodes.indexOf(dataPoint['state']);
 		}
-		td = document.createElement("td");
-		$(tr).append(td);
-		$(td).text(dataPoint[countKey]);
 
 		var ba = circles.filter(function() { return (this.getAttribute("id")==dataPointID);})
 		if (ba.size() == 0 && newScope == districtScope && dataPoint['district'] == 1) {
@@ -113,6 +104,28 @@ function mapdatapoints(mapFrameID, constituentAreaLabelID, constituentTableBodyI
 			ba[0][0].setAttribute("r", newRadius);
 		}
 	}
+}
+
+function show_table_data(constituentTableBodyID, newScope, dataPoints, countKey)
+{
+	$(constituentTableBodyID).empty();
+	
+	tr = d3.select(constituentTableBodyID).selectAll("tr")
+			.data(dataPoints)
+			.enter()
+			.append("tr");
+	
+	td = tr.selectAll("td")
+			.data(function(d) { 
+				if (newScope == districtScope)
+					area =  d['state'] + "-" + d['district'];
+				else
+					area =  d['state'];
+				return [area, d[countKey]];
+			})
+			.enter()
+			.append("td")
+			.text(function(d) { return d; });
 }
 
 function show_map(mapFrameID, districtLabel, districtSpan, usjsonfile, congressjsonfile, showDataFunc, newScope) {
@@ -178,8 +191,8 @@ function show_map(mapFrameID, districtLabel, districtSpan, usjsonfile, congressj
 
 		var width = $(mapFrameID).width(),
 			height = width / 8 * 5;
-		if (height > window.innerHeight - 110) {
-			height = window.innerHeight - 110;
+		if (height > window.innerHeight - 30) {
+			height = window.innerHeight - 30;
 			width = height / 5 * 8;
 		}
 
@@ -289,9 +302,10 @@ function show_map(mapFrameID, districtLabel, districtSpan, usjsonfile, congressj
 function resizemap(mapFrameID) {
 	var width = $(mapFrameID).width();
 	var height = width / 8 * 5;
-	if (height > window.innerHeight - 110) {
-		height = window.innerHeight - 110;
+	if (height > window.innerHeight - 30) {
+		height = window.innerHeight - 30;
 		width = height / 5 * 8;
+		$(mapFrameID).width(width)
 	}
 
 	var projection = d3.geo.albersUsa()

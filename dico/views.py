@@ -20,25 +20,33 @@ import uuid
 from custom_user.models import AuthUser, PasswordReset
 from dico.models import Issue, Constituent, ConstituentInterest, ContactMethod, \
     Petition, PetitionManager, PetitionIssue, PetitionVote, \
-    Argument, ArgumentManager, ArgumentRating, MC
+    Argument, ArgumentManager, ArgumentRating, Story, StoryManager, MC
 from dico.titlecase import titlecase
 
 # Create your views here.
 
 def index(request):
-    template = loader.get_template('dico/index.html')
-    issue_list = Issue.objects.order_by('name')
-    il = []
-    for i in issue_list:
-        il = il + [{'name': i.name, 'id': i.id}]
+    if request.user.is_authenticated():
+        template = loader.get_template('dico/home.html')
+        issue_list = Issue.objects.order_by('name')
+        il = []
+        for i in issue_list:
+            il = il + [{'name': i.name, 'id': i.id}]
+        context = RequestContext(request, {
+            'user': request.user,
+            'issue_list': json.dumps(il),
+            'my_issue_list' : Constituent.get_interests(request.user),
+            'member_list': Constituent.get_members(request.user),
+            'news_list': Constituent.get_news(request.user),
+            'template': request.user.is_authenticated(),
+        })
+    else:
+        template = loader.get_template('dico/index.html')
         
-    context = RequestContext(request, {
-        'user': request.user,
-        'issue_list': json.dumps(il),
-        'my_issue_list' : Constituent.get_interests(request.user),
-        'member_list': Constituent.get_members(request.user),
-        'news_list': Constituent.get_news(request.user)
-    })
+        context = RequestContext(request, {
+            'template', 'dico/index.html',
+        })
+        
     return HttpResponse(template.render(context))
 
 @requires_csrf_token
@@ -498,24 +506,20 @@ def newPetition(request):
         if constituent is None:
             raise Exception('The current login is not a constituent');
         
+        issues = request.POST.getlist('issue[]');
+        
         # Do the model operation
-        petition = Petition.objects.create_petition(constituent, description)
-        issueName = request.POST.get('issue', '')
-        if len(issueName) != 0:
-            query_set = Issue.objects.filter(name=issueName)
-            if query_set.count() == 0:
-                raise ValueError('the issue "{}" is not recognized'.format(issueName))
-            else:
-                issue = query_set.get()
-            pi = PetitionIssue(petition=petition, issue=issue, constituent=constituent)
-            pi.save()
+        with transaction.atomic():
+            petition = Petition.objects.create_petition(constituent, description)
+            for s in issues:
+                petition.add_issue_by_name(s, constituent)
         
         # Return the results.
         results = {'success':True, 'petition':petition.id}
     except Exception as e:
-        log = open('exception.log', 'a')
-        log.write("%s\n" % traceback.format_exc())
-        log.flush()
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
         results = {'success':False, 'error': str(e)}
     
     return JsonResponse(results)
@@ -753,6 +757,26 @@ def addOpposingArgument(request):
     })
     return HttpResponse(template.render(context))
 
+# Displays a web page for adding a story to a petition.
+def addStory(request):
+    if not request.user.is_authenticated:
+        return signin(request)
+    
+    template = loader.get_template('dico/addstory.html')
+        
+    petition_id = request.GET.get('petition', 0)
+    petition = Petition.objects.filter(pk=petition_id).select_related().get()
+    backURL = request.GET.get(u'backURL', '/dico/')
+    backName = request.GET.get('backName', 'Home')
+    
+    context = RequestContext(request, {
+        'user': request.user,
+        'petition': petition,
+        'backURL': urllib.parse.unquote_plus(backURL),
+        'backName': urllib.parse.unquote_plus(backName),
+    })
+    return HttpResponse(template.render(context))
+
 # Displays a web page for adding a supporting argument to a petition.
 def docRatings(request):
     if not request.user.is_authenticated:
@@ -916,12 +940,121 @@ def unrateArgument(request):
     
     return JsonResponse(results)
 
-def issue(request, issue_id):
+def newStory(request):
+    results = {'success':False, 'error': 'newStory failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("newStory only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            raise Exception('The current login is not a constituent');
+
+        # Get the petition info.
+        petition_id = request.POST['petition']
+        description = request.POST['description']
+        link = request.POST['link']
+        
+        # Do the model operation
+        story = Story.objects.create(petition_id=petition_id, \
+                                               constituent_id=constituent.user.id, \
+                                               description=description,
+                                               link=link)
+        
+        # Return the results.
+        results = {'success':True, 'story': {'creationTime': story.creationTime}}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def deleteStory(request):
+    results = {'success':False, 'error': 'deleteStory failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("deleteStory only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        story_id = request.POST['story']
+        
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            raise Exception('The current login is not a constituent');
+
+        # Do the model operation
+        Story.objects.filter(pk=story_id).delete()
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def issues(request):
+    template = loader.get_template('dico/issues.html')
+    backURL = request.GET.get(u'backURL', '/dico/')
+    backName = request.GET.get('backName', 'Home')
+    if request.user.is_authenticated:
+        defaultPanel = 'vote'
+    else:
+        defaultPanel = 'debate'
+    actionPanel = request.GET.get('actionPanel', defaultPanel);
+    
+    helpTexts = { 'vote': 'Select an issue that is related to the action you want to vote on.', \
+                  'debate': 'Select an issue that is related to the action you want to learn about.', \
+                  'label': 'Select an issue that is related to the action you want to label.', \
+                  'analyze': 'Select an issue that is related to the action you want to analyze.', \
+                  'story': 'Select an issue that is related to the action you want to create a story for.' }
+    if actionPanel in helpTexts:
+        helpText = helpTexts[actionPanel]
+    else:
+        helpText = 'Select an issue that is related to the action you want.'
+        
+    context = RequestContext(request, {
+        'user': request.user,
+        'backURL': urllib.parse.unquote_plus(backURL),
+        'backName': urllib.parse.unquote_plus(backName),
+        'actionPanel': actionPanel,
+        'helpText': helpText,
+    })
+    return HttpResponse(template.render(context))
+
+def issue(request):
     template = loader.get_template('dico/issuePetitions.html')
+    issue_id = int(request.GET.get('issue', 0));
     filter = Issue.objects.filter(id=issue_id)
+    if request.user.is_authenticated:
+        defaultPanel = 'vote'
+    else:
+        defaultPanel = 'debate'
+    actionPanel = request.GET.get('actionPanel', defaultPanel);
+    
+    helpTexts = { 'vote': 'Select the action you want to vote on.', \
+                  'debate': 'Select the action you want to learn about.', \
+                  'label': 'Select the action you want to label.', \
+                  'analyze': 'Select the action you want to analyze.', \
+                  'story': 'Select the action you want to create a story for.' }
+    if actionPanel in helpTexts:
+        helpText = helpTexts[actionPanel]
+    else:
+        helpText = 'Select the action you want.'
+        
     context = RequestContext(request, {
         'user': request.user,
         'issue': filter.get(),
+        'actionPanel': actionPanel,
+        'helpText': helpText,
     })
     return HttpResponse(template.render(context))
 
@@ -931,6 +1064,19 @@ def petition(request, petition_id):
     
     backURL = request.GET.get(u'backURL', '/dico/')
     backName = request.GET.get('backName', 'Home')
+    
+    if 'debate' in request.GET:
+        initialButton = "#id_debateButton"
+    elif 'label' in request.GET:
+        initialButton = "#id_labelButton"
+    elif 'analyze' in request.GET:
+        initialButton = "#id_analyzeButton"
+    elif 'story' in request.GET:
+        initialButton = "#id_storyButton"
+    elif request.user.is_authenticated:
+        initialButton = "#id_voteButton"
+    else:
+        initialButton = "#id_debateButton"
         
     filter = Petition.objects.filter(id=petition_id)
     context = RequestContext(request, {
@@ -938,6 +1084,7 @@ def petition(request, petition_id):
         'petition': filter.get(),
         'backURL' : urllib.parse.unquote_plus(backURL),
         'backName': urllib.parse.unquote_plus(backName),
+        'initialButton': initialButton,
     })
     return HttpResponse(template.render(context))
 
@@ -1192,6 +1339,42 @@ def getPetitionVoteTotals(request):
     
     return JsonResponse(results)
         
+# Returns a json response containing the stories associated with the specified petition. 
+def getPetitionStories(request):
+    results = {'success':False, 'error': 'getPetitionStories failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("getPetitionStories only responds to POST requests")
+            
+        if request.user.is_authenticated:
+            request_user_id = request.user.id
+        else:
+            request_user_id = None
+
+        # Get the petition info.
+        petition_id = request.POST['petition']
+
+        # Do the model operation
+        stories = StoryManager.get_stories(petition_id)
+        
+        for a in stories:
+            constituentID = a['constituent_id']
+            a['isEditable'] = (constituentID == request_user_id or \
+                               request.user.is_superuser)
+            creator = AuthUser.objects.get(pk=constituentID)
+            creatorConstituent = Constituent.objects.filter(pk=constituentID).select_related().get()
+            a['heading'] = 'From ' + creatorConstituent.user.get_initials() + " in " + creatorConstituent.state + "-" + ("%d" % creatorConstituent.district) 
+        
+        # Return the results.
+        results = {'success':True, 'stories' : stories}
+    except Exception as e:
+        log = open('exception.log', 'a')
+        log.write("%s\n" % traceback.format_exc())
+        log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
 # Handles a GET request to get the votes based on specific petition.
 # Request GET element pk: the primary key of the petition
 # Request GET element scope: 'district' for the counts at the district level or 'state' for counts

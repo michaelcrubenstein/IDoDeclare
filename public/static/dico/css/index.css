@@ -26,15 +26,6 @@
 .issue-chevron {
   color: red;
 }
-.new-issue-glyphicon {
-	color: #888;
-}
-
-@media (max-width: 767px) {
-	.new-issue-glyphicon {
-		visibility: hidden;
-	}
-}
 .btn-issue {
 	padding-top: 3px;
 	padding-bottom: 3px;

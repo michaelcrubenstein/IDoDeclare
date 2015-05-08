@@ -23,7 +23,12 @@
 
 	<!-- Styles for this web page -->
 	<style>
-
+		body {
+		  padding-top: 55px;
+		}
+		.lead {
+			padding-top: 10px;
+		}
 	</style>
 
 
@@ -57,7 +62,7 @@
 		$(document).ready (function(e) {
 			var backURL = encodeURIComponent("{{backURL}}");
 			var backName = encodeURIComponent("{{backName}}");
-			$("#id_done_anchor").attr("href", "/dico/{{petition.id}}/petition/?backURL="+backURL+";backName="+backName);
+			$("#id_done_anchor").attr("href", "/dico/{{petition.id}}/petition/?label;backURL="+backURL+";backName="+backName);
 		});
 
 		$(document).ready (function(e) {
@@ -90,7 +95,7 @@
 					closealert();
 					var backURL = encodeURIComponent("{{backURL}}");
 					var backName = encodeURIComponent("{{backName}}");
-					window.location.href = "/dico/{{petition.id}}/petition/?backURL="+backURL+";backName="+backName;
+					window.location.href = "/dico/{{petition.id}}/petition/?label;backURL="+backURL+";backName="+backName;
 				}
 				else {
 					bootstrap_alert.warning("Sorry, " + json['error']);

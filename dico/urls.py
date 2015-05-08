@@ -25,8 +25,10 @@ urlpatterns = patterns(
     url(r'^passwordreset/', views.passwordReset, name='passwordReset'),
     # ex: /dico/passwordreset/
     url(r'^setresetpassword/', views.setResetPassword, name='setResetPassword'),
-	# ex: /dico/issue/5/
-	url(r'^(?P<issue_id>\d+)/issue/', views.issue, name='issue'),
+	# ex: /dico/issues/
+	url(r'^issues/', views.issues, name='issues'),
+	# ex: /dico/issue/issue=5
+	url(r'^issue/', views.issue, name='issue'),
 	# ex: /dico/petition/5/
 	url(r'^(?P<petition_id>\d+)/petition/', views.petition, name='petition'),
 	# ex: /dico/createPetition/
@@ -71,6 +73,10 @@ urlpatterns = patterns(
     url(r'^newargument/', views.newArgument, name='newArgument'),
     # ex: /dico/deleteargument/
     url(r'^deleteargument/', views.deleteArgument, name='deleteArgument'),
+    # ex: /dico/newstory/
+    url(r'^newstory/', views.newStory, name='newStory'),
+    # ex: /dico/deletestory/
+    url(r'^deletestory/', views.deleteStory, name='deleteStory'),
 	# ex: /dico/5/
 	url(r'^(?P<constituent_id>\d+)/$', views.dashboard, name='dashboard'),
 	# ex: /dico/5/addissue/
@@ -97,6 +103,8 @@ urlpatterns = patterns(
     url(r'^getpetitionvotetotals/', views.getPetitionVoteTotals, name='getPetitionVoteTotals'),
 	# ex: dico/5/getpetitionvotes/
 	url(r'^getpetitionvotesbyscope/', views.getPetitionVotesByScope, name='getPetitionVotesByScope'),
+    # ex: /dico/getpetitionstories/
+    url(r'^getpetitionstories/', views.getPetitionStories, name='getPetitionStories'),
     # ex: /dico/rateargument/
     url(r'^rateargument/', views.rateArgument, name='rateArgument'),
     # ex: /dico/unrateargument/
@@ -105,6 +113,8 @@ urlpatterns = patterns(
 	url(r'^addsupportingargument/', views.addSupportingArgument, name='addSupportingArgument'),
 	# ex: /dico/addopposingargument/5/
 	url(r'^addopposingargument/', views.addOpposingArgument, name='addOpposingArgument'),
+	# ex: /dico/addstory/
+	url(r'^addstory/', views.addStory, name='addStory'),
 	#
 	# documentation urls.
 	# ex: /dico/doctermsofuse

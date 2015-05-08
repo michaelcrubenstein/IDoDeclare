@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>I Do Declare</title>
+
+    <!-- Bootstrap -->
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
+    <link href="{% static "dico/css/mapus.css" %}" rel="stylesheet">
+    <link href="{% static "dico/css/index.css" %}" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+	<!-- Styles for this web page -->
+	<style>
+	</style>
+  </head>
+  <body class="container-fluid">
+  	<style>
+  		#mapFrame {
+  			position: absolute;
+  			left: 15px;
+  			top: 15px;
+  			width: calc(100% - 30px);
+  			height: calc((100% - 30px) * 5 / 8);
+  			z-index: -1;
+  		}
+  	</style>
+	<figure id="mapFrame" class="mapFrame"> </figure>
+	<section>
+		<style>
+			h2 {
+				text-align: center;
+			}
+			h4 {
+				width: 100%;
+				text-align: center;
+			}
+			p {
+				width: 100%;
+				text-align: center;
+			}
+			article {
+				position: relative;
+			}
+			.action {
+				position: absolute;
+				display: none;
+				left: 20px;
+			}
+			.pane1 { top:  20px }
+			.pane2 { top:  40px }
+			.pane3 { top:  60px }
+			.pane4 { top:  80px }
+			.pane5 { top: 100px }
+			.pane6 { top: 120px }
+		</style>
+		<header>
+		<h2>I Do Declare</h2>
+		{{ template }} <br>
+		<p id="descriptionParagraph">
+			I Do Declare is dedicated to helping all of us understand important issues, 
+		voice our opinions and share our stories on the matters before the legislators 
+		who are responsible for representing us in the U.S. Congress.
+		</p>
+		</header>
+		<article id="actions">
+			<p class="action pane1">Describe actions that Congress should take</p>
+			<p class="action pane2">Discover actions others have proposed</p>
+			<p class="action pane3">Support or oppose an action</p>
+			<p class="action pane4">Share why you support or oppose an action</p>
+			<p class="action pane5">Rate the reasons that other people give</p>
+			<p class="action pane6">Share your story about how an action would impact you or those
+				you care about</li>
+		</article>
+		<footer>
+			<h4>Let's Get Started!</h4>
+			<p id="signUpParagraph">
+				<a href="{% url 'createConstituent' %}?back={% url 'home' %}">Sign Up With Your Email Address</a> 
+			</p>
+			<p id="loginParagraph">
+				Already have an account? <a href="{% url 'signin' %}">Log in</a>
+			</p>
+			<p id="feedbackParagraph">
+				Send feedback to <a href="mailto:feedback@idodeclare.org">feedback@idodeclare.org</a>. 
+			</p>
+		</footer>
+	</section>
+</body>
+
+<!-- Scripts for data mapping --!>
+<script src="{% static "d3/d3.v3.min.js" %}"></script>
+<script src="{% static "d3/queue.v1.min.js" %}"></script>
+<script src="{% static "d3/topojson.v1.min.js" %}"></script>
+
+<!-- jQuery  -->
+<script src="{% static "jquery/js/jquery.min.js" %}"></script>
+<script src="{% static "jquery/js/spin.min.js" %}"></script>
+
+<script src="{% static "dico/js/mapus.js" %}"></script>
+
+<!-- Scripts for this web page -->
+<script type="text/JavaScript">				
+	$(document).ready (function() {
+		
+		set_action_height();
+		
+		$("#mapFrame").width($("#mapFrame").parent().width() - 30);
+		initmap("#mapFrame", "{% static "dico/us.json" %}");
+		set_map_left();
+		
+		show_interest_map(districtScope);
+		
+		crossfade($(".pane1"));
+	});
+	
+	function crossfade(pane)
+	{
+		pane.fadeIn(3000)
+				 .queue(function() {
+					$(this).fadeOut(3000);
+					if ($(this).next().length > 0)
+						crossfade($(this).next());
+					else
+						crossfade($(this).parent().children().eq(0));
+					$(this).dequeue();
+				 });
+	}
+
+	$(window).resize(function() {
+		resize_interest_map();
+		set_action_height();
+	});
+	
+	function set_action_height() {
+		$("#actions").height(
+			window.innerHeight - 
+				$("header").height() - 
+				$("footer").height() - 
+				parseInt($("h2").css("margin-top")) - 
+				parseInt($("#descriptionParagraph").css("margin-bottom")) - 
+				parseInt($("h4").css("margin-top")) - 
+				parseInt($("#feedbackParagraph").css("margin-bottom")) - 
+				15);
+	}
+	
+	function set_map_left() {
+		mapFrame = $("#mapFrame");
+		newLeft = (mapFrame.parent().width() - 
+			 mapFrame.width()) / 2;
+		if (newLeft < 15)
+			newLeft = 15;
+		mapFrame.css("margin-left", newLeft);
+	}
+	
+
+	function resize_interest_map() {
+		$("#mapFrame").width($("#mapFrame").parent().width() - 30);
+		resizemap("#mapFrame");	
+		set_map_left();		
+		show_interest_map(districtScope);
+	}
+	
+	function show_interest_map(newScope)
+	{
+		show_map("#mapFrame", $("#district_label"), $("#district_span"), 
+				 "{% static "dico/us.json" %}",
+				 "{% static "dico/us-congress-113.json" %}",
+				 function() { }, 
+				 districtScope);
+	}
+</script>
+

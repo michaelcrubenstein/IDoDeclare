@@ -40,6 +40,17 @@
 			margin-left: 10px;
 			margin-right: 10px;
 		}
+		.well {
+			margin-top: 10px;
+			padding: 0px;
+			width: 330px;
+		}
+		#id_voteSection>div>div>label {
+			width: 110px;
+		}
+		#yourVoteButton {
+			left: 0px;
+		}
 	</style>
   </head>
   
@@ -163,19 +174,28 @@
 			</section>
 			{% if user.is_authenticated %}
 			<section id="id_voteSection" class="row">
-				<div class="col-xs-12 col-sm-8 your-vote-column">
-					<label>Your Vote</label>
+				<div class="col-xs-12">
 					<div class="btn-group" data-toggle="buttons">
-						<label id="opposeButton" class="btn btn-default">
+						<label id="opposeButton" class="btn btn-default" 
+								checkedclass="btn-danger" voteButtonLeft="0">
 						  <input type="radio" name="voteOptions" id="opposeRadio" value=0 />
 						  <span class="glyphicon glyphicon-thumbs-down"></span>&nbsp;Oppose
 						</label>			
-						<label id="noOpinionButton" class="btn btn-default">
+						<label id="noOpinionButton" class="btn btn-default" 
+								checkedclass="btn-warning"  voteButtonLeft="108">
 						  <input type="radio" name="voteOptions" id="noOpinionRadio" value=-1 />No Opinion
 						</label>
-						<label id="supportButton" class="btn btn-default">
+						<label id="supportButton" class="btn btn-default" 
+								checkedclass="btn-success" voteButtonLeft="216">
 						  <input type="radio" name="voteOptions" id="supportRadio" value=1 />
 						  <span class="glyphicon glyphicon-thumbs-up"></span>&nbsp;Support
+						</label>
+					</div>
+				</div>
+				<div class="col-xs-12">
+					<div class="well">
+						<label id="yourVoteButton" class="btn btn-default">
+						    Your Vote
 						</label>
 					</div>
 				</div>
@@ -310,7 +330,8 @@
 </body>
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="{% static "jquery/js/jquery.min.js" %}"></script>
+<script src="{% static "jqueryui/js/jquery-ui.min.js" %}"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
 <script src="{% static "d3/d3.v3.min.js" %}"></script>
@@ -396,6 +417,54 @@
 		$("#noOpinionRadio").change(function() {
 			vote_no_opinion();
 		});
+		
+		var oldButton;
+		$('#yourVoteButton').draggable( {
+			containment: 'parent',
+			start: function(event, ui )
+				{ start_vote_drag() },
+			drag: function( event, ui ) 
+				{ check_vote_drag(event, ui) },
+			stop: function( event, ui )
+				{ stop_vote_drag() },
+		}
+		);
+		
+		function get_new_button(newLeft)
+		{
+			center = newLeft + ($('#yourVoteButton').width() / 2) + 
+				parseInt($('#yourVoteButton').css("padding-left"));
+			if (center < parseInt($('#noOpinionButton').attr('voteButtonLeft')))
+				return $('#opposeButton');
+			else if (center < parseInt($('#supportButton').attr('voteButtonLeft')))
+				return $('#noOpinionButton');
+			else
+				return $('#supportButton');
+		}
+		
+		function start_vote_drag()
+		{
+			oldButton = $('input[name="voteOptions"]:checked');
+		}
+		
+		function check_vote_drag(event, ui)
+		{
+			newButton = get_new_button(ui.position.left);
+			if (oldButton.attr('checkedClass') != newButton.attr('checkedClass'))
+			{
+				$('#yourVoteButton').addClass(newButton.attr('checkedClass'));
+				$('#yourVoteButton').removeClass(oldButton.attr('checkedClass'));
+				oldButton = newButton;
+			}
+		}
+		
+		function stop_vote_drag()
+		{
+			if (oldButton.val() != $('input[name="voteOptions"]:checked').val())
+			{
+				oldButton.click();
+			}
+		}
 		
 		var a = $("#id_petitionNav");
 		var kids = a.children();
@@ -786,10 +855,23 @@
 	}
 	
 	function set_button_display() {
-		if ($(this).children("input").prop('checked'))
-			$(this).addClass("btn-info");
-		else
-			$(this).removeClass("btn-info");
+		testClass = $(this).attr('checkedclass');
+		if ($(this).children("input").prop('checked')) {
+			$(this).addClass(testClass);
+			if (!$("#yourVoteButton").hasClass(testClass))
+				$("#yourVoteButton").addClass(testClass);
+			$("#yourVoteButton").stop();
+			marginDiff = parseInt($(this).attr('voteButtonLeft')) - parseInt($("#yourVoteButton").css("left"));
+			if (marginDiff < 0)
+				$("#yourVoteButton").animate({left: "-="+(-marginDiff)+"px"}, 500);
+			else
+				$("#yourVoteButton").animate({left: "+="+marginDiff+"px"}, 500);
+		}
+		else {
+			$("#yourVoteButton").removeClass(testClass);
+			$(this).removeClass(testClass);
+		}
+		
 	}
 	
 	function show_petition_votes(init_user_vote) {

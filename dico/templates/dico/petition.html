@@ -332,6 +332,7 @@
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="{% static "jquery/js/jquery.min.js" %}"></script>
 <script src="{% static "jqueryui/js/jquery-ui.min.js" %}"></script>
+<script src="{% static "jqueryui/js/jquery.ui.touch-punch.min.js" %}"></script>
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
 <script src="{% static "d3/d3.v3.min.js" %}"></script>
@@ -444,7 +445,7 @@
 		
 		function start_vote_drag()
 		{
-			oldButton = $('input[name="voteOptions"]:checked');
+			oldButton = $('input[name="voteOptions"]:checked').parent();
 		}
 		
 		function check_vote_drag(event, ui)
@@ -460,9 +461,13 @@
 		
 		function stop_vote_drag()
 		{
-			if (oldButton.val() != $('input[name="voteOptions"]:checked').val())
+			if (oldButton.attr('checkedClass') != $('input[name="voteOptions"]:checked').parent().attr('checkedClass'))
 			{
 				oldButton.click();
+			}
+			else
+			{
+				align_button(oldButton, $("#yourVoteButton"));
 			}
 		}
 		
@@ -854,18 +859,23 @@
 			});
 	}
 	
+	function align_button(source, target)
+	{
+		target.stop();
+		marginDiff = parseInt(source.attr('voteButtonLeft')) - parseInt(target.css("left"));
+		if (marginDiff < 0)
+			target.animate({left: "-="+(-marginDiff)+"px"}, 500);
+		else
+			target.animate({left: "+="+marginDiff+"px"}, 500);
+	}
+	
 	function set_button_display() {
 		testClass = $(this).attr('checkedclass');
 		if ($(this).children("input").prop('checked')) {
 			$(this).addClass(testClass);
 			if (!$("#yourVoteButton").hasClass(testClass))
 				$("#yourVoteButton").addClass(testClass);
-			$("#yourVoteButton").stop();
-			marginDiff = parseInt($(this).attr('voteButtonLeft')) - parseInt($("#yourVoteButton").css("left"));
-			if (marginDiff < 0)
-				$("#yourVoteButton").animate({left: "-="+(-marginDiff)+"px"}, 500);
-			else
-				$("#yourVoteButton").animate({left: "+="+marginDiff+"px"}, 500);
+			align_button($(this), $("#yourVoteButton"));
 		}
 		else {
 			$("#yourVoteButton").removeClass(testClass);

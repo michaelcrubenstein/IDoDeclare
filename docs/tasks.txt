@@ -93,18 +93,33 @@ DONE 2 - Support creating an action from the home page, setting the issue after.
 DONE 2 - Add About page.
 DONE 2 - Put the tabular data for the map in table format.
 
-Move the Edit Interests button in the home page to a navigation bar, or just remove it.
+DONE 2 - Move the Edit Interests button in the home page to a navigation bar, or just remove it.
+DONE 2 - Add maps to action pages showing support and opposition for the issue 
+DONE 2 - Set up email address to which to send autovotes. 
+DONE 2 - Fix bug in editInterests return from index page and other pages.
+DONE 2 - Set up email address to send autovotes for development
 
-BUG: When removing a rating in the opposition panel, a checkbox appears.
-Move Delete Action button to a navigation bar.
-Move Add Related Issue button to the navigation bar.
+FIXED 2 - BUG: When removing a rating in the opposition panel, a checkbox appears.
+
+DONE 3 - Fix bugs in creating a new action.
+DONE 3 - Add Cancel button to signin page.
+DONE 3 - Add feedback after clicking the sign-in button.
+DONE 3 - Implement new landing page, home page
+DONE 3 - Implement stories with related links for actions
+DONE 3 - Move Add Related Issue button to the navigation bar.
+DONE 3 - Move Delete Action button to a navigation bar.
+DONE 3 - Reorder vote choices to Oppose/No Opinion/Support
+DONE 3 - Don't show More Info button if link is blank.
+DONE 3 - Incorporate vote maps into petition page.
+DONE 3 - Add Browse capability for votes by issue.
+DONE 3 - Fix bug in centering of text in landing page. Also, make text different sizes.
+
+Move buttons in Reset Password dialog box to navigation bar.
 Move Cancel and Update Account buttons to navigation bar.
 Move Cancel and Change Password buttons to navigation bar.
-Move buttons in Reset Password dialog box to navigation bar.
 Tips on the create Action page expand to past the right side of the window on a phone.
-Add Browse capability for votes by issue and all my votes.
+Add Browse capability for all my votes.
 
-Have a set of links associated with an action.
 Have a set of news items associated with an action.
 Have a set of representative comments associated with an action. (with ratings like arguments)
 Add a deadline time for actions

@@ -299,7 +299,7 @@ function show_map(mapFrameID, districtLabel, districtSpan, usjsonfile, congressj
 		.await(ready);
 }
 
-function resizemap(mapFrameID) {
+function resize_map(mapFrameID) {
 	var width = $(mapFrameID).width();
 	var height = width / 8 * 5;
 	if (height > window.innerHeight - 30) {

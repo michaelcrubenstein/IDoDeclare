@@ -12,6 +12,7 @@
 
     <!-- Custom styles for this template -->
     <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
+    <link href="{% static "dico/css/mapus.css" %}" rel="stylesheet">
     <link href="{% static "dico/css/petition.css" %}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -30,6 +31,14 @@
 		}
 		section>section {
 			padding-top: 10px;
+		}
+		#id_petitionNav>li>a {
+			padding-left: 10px;
+			padding-right: 10px;
+		}
+		#id_deleteActionButton {
+			margin-left: 10px;
+			margin-right: 10px;
 		}
 	</style>
   </head>
@@ -68,6 +77,17 @@
 		</nav>
 
 		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
+			{% if user.id == petition.constituent.user.id or user.is_superuser %}
+			<div id="id_voteNav" class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav navbar-header pull-right">
+					<span id="id_deleteActionButton" class="pull-right dico-navbar-text text-danger"}>
+						Delete Action
+					</span>
+				</div>
+			</div>
+			{% endif %}
 			{% if user.is_authenticated %}
 			<div id="id_debateNav" class="container-fluid">
 				<!-- Brand and toggle get grouped for better mobile display -->
@@ -109,19 +129,16 @@
 				<ul id="id_petitionNav" class="nav nav-tabs pull-left" role="navigation" aria-label="petitionButtons">
 					<li section="id_voteSection"><a id="id_voteButton" href="#">Vote</a></li>
 					<li section="id_debateSection"><a id="id_debateButton" href="#">Debate</a></li>
-					<li section="id_labelSection"><a id="id_labelButton" href="#">Label</a></li>
-					<li section="id_analyzeSection"><a id="id_analyzeButton" href="#">Analyze</a></li>
+					<li section="id_issuesSection"><a id="id_issuesButton" href="#">Issues</a></li>
+					<li section="id_analyzeSection"><a id="id_mapsButton" href="#">Maps</a></li>
 					<li section="id_storySection"><a id="id_storyButton" href="#">Stories</a></li>
 				</ul>
-				{% if user.id == petition.constituent.user.id or user.is_superuser %}
-				<div class="btn-group pull-right" role="group" aria-label="deleteButton">
-					<span id="id_deleteActionButton" class="pull-right dico-navbar-text text-danger">Delete</span>
-				</div>
-				{% endif %}
 			</div>
 		</nav>
 
-	    <div id="myAlert"></div>
+		<div class="row">
+	    	<div id="myAlert col-xs-12"></div>
+		</div>
 		<div class="row">
 			<div class="col-xs-12">
 				<h5 id='id_petition_title' class="toplabel">An Action for Congress:</h5>
@@ -134,7 +151,7 @@
 		</div>
 
 		<section id="id_petitionSections">
-			<section id="id_labelSection" class="row">
+			<section id="id_issuesSection" class="row">
 				<div class="col-xs-12">
 					<div class="row">
 						<div class="col-xs-12">
@@ -198,20 +215,60 @@
 					</table>
 				</div>
 			</section>
-			<section id="id_analyzeSection" class="row">
-				<div class="col-xs-12">
-					<div id="id_total_votes" class="bottom-padding">
-						<span class='text-muted'>
-							<span class="dico-span-link" onClick="show_petition_vote_details()">
-								<span class='glyphicon glyphicon-thumbs-up'></span>
-								<span id="id_support_span"></span><br>
-								<span class='glyphicon glyphicon-thumbs-down'></span>
-								<span id="id_oppose_span"></span>
-							</span>
+			<section id="id_analyzeSection">
+				<div class="row">
+					<div class="col-xs-12">
+						<div id="id_total_votes" class="bottom-padding">
+							<span class='text-muted'>
+								<span class="dico-span-link">
+									<span class='glyphicon glyphicon-thumbs-up'></span>
+									<span id="id_support_span"></span><br>
+									<span class='glyphicon glyphicon-thumbs-down'></span>
+									<span id="id_oppose_span"></span>
+								</span>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-6 map-options-column">
+						<label class="radio-inline">
+						  <input type="radio" name="mapVoteOptions" id="id_supportRadio" value=1 checked /> in Support
+						</label>
+						<label class="radio-inline">
+						  <input type="radio" name="mapVoteOptions" id="id_opposeRadio" value=0 /> in Opposition
+						</label>			
+					</div>
+					<div class="col-xs-6 map-options-column">
+						<label class="radio-inline">
+						  <input type="radio" name="mapScopeOptions" id="byDistrictRadio" value=districtScope checked /> by District
+						</label>
+						<label class="radio-inline">
+						  <input type="radio" name="mapScopeOptions" id="byStateRadio" value=stateScope /> by State
+						</label>			
+					</div>
+				</div>
+				<div class="row">
+					<div id="mapFrame" class="col-xs-12"> </div>
+					<div class="col-xs-12">
+						<label id="district_label" for="district_span" class="control-label">District: </label> 
+						<span id="district_span"></span><br>
+						<label for="id_constituent_table" id="my_label" class="control-label">By the numbers</label>
+						<table id='id_constituent_table' class="table table-striped table-condensed">
+							<thead>
+								<th id="id_constituent_area_label">District
+								</th>
+								<th>Supporting
+								</th>
+								<th>Opposing
+								</th>
+							</thead>
+							<tbody id='id_constituent_table_body'>
+							</tbody>
+						</table>
 					</div>
 				</div>
 			</section>
-			<section id="id_storySection" class="row">
+			<section id="id_storySection">
 			</section>
 		</section>
 	</div> <!-- container -->
@@ -257,7 +314,10 @@
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
 <script src="{% static "d3/d3.v3.min.js" %}"></script>
-
+<script src="{% static "d3/queue.v1.min.js" %}"></script>
+<script src="{% static "d3/topojson.v1.min.js" %}"></script>
+<script src="{% static "jquery/js/spin.min.js" %}"></script>
+<script src="{% static "dico/js/mapus.js" %}"></script>
 
 <!-- Scripts for this web page -->
 <script type="text/JavaScript">
@@ -277,6 +337,13 @@
 	// Display all of the interests in the system.
 	var storedcsrftoken = "{{ csrf_token }}";
 	var elementToDelete = null;
+	
+	var petitionVotesShown = false;	// Covers totals and current user's vote.
+	var labelShown = false;
+	var mapsShown = false;
+	var debateShown = false;
+	var storiesShown = false;
+	var choicesInitialized = false;
 	
 	$(document).ready (function(e) {
 		<!-- Block of code for an alert area at the top of the window -->
@@ -314,14 +381,7 @@
 		
 		$("#id_deleteActionButton").click(function() {
 			$("#id_deleteActionDialog").modal('show');
-		});
-		
-		var petitionVotesShown = false;	// Covers totals and current user's vote.
-		var labelShown = false;
-		var analyzeShown = false;
-		var debateShown = false;
-		var storiesShown = false;
-		
+		});		
 		
 		// After showing the petition votes, set the change methods of the radio buttons
 		// for the current user's vote.
@@ -346,10 +406,50 @@
 			$("section>section").css("display", "none");
 			$("#"+$(this).attr("section")).css("display", "block");
 			{% if user.is_authenticated %}
+				$("#id_voteNav").css("display", $("#id_voteSection").css("display"));
 				$("#id_debateNav").css("display", $("#id_debateSection").css("display"));
-				$("#id_labelNav").css("display", $("#id_labelSection").css("display"));
+				$("#id_labelNav").css("display", $("#id_issuesSection").css("display"));
 				$("#id_storyNav").css("display", $("#id_storySection").css("display"));
 			{% endif %}
+		});
+		
+		$("#id_mapsButton").click(
+			function() {
+				if (!petitionVotesShown) {
+					// Show the votes for the current petition.
+					show_petition_votes(true);
+					petitionVotesShown = true;
+				}
+				if (!choicesInitialized) {
+					$("#id_supportRadio").change( function() {
+						change_vote($(this).val(), getscope());
+					});
+					$("#id_opposeRadio").change( function() {
+						change_vote($(this).val(), getscope());
+					});
+					$("#byDistrictRadio").change( function() {
+						show_vote_map(districtScope);
+					});
+					$("#byStateRadio").change( function() { 
+						show_vote_map(stateScope);
+					});
+					choicesInitialized = true;
+				}
+				if (!mapsShown) {
+					initmapheight("#mapFrame");
+					init_map_width();
+					show_petition_maps();
+					mapsShown = true;
+				}
+			});
+			
+		
+		$("#id_voteButton").click( function() {
+			if (!petitionVotesShown) {
+				// Show the votes for the current petition.
+				show_petition_votes(true);
+				petitionVotesShown = true;
+			}
 		});
 		
 		$("#id_debateButton").click( function() {
@@ -360,27 +460,11 @@
 			}
 		});
 		
-		$("#id_labelButton").click( function() {
+		$("#id_issuesButton").click( function() {
 			if (!labelShown) {
 				// Display the issues associated with the current petition.
 				show_petition_issues();
 				labelShown = true;
-			}
-		});
-		
-		$("#id_voteButton").click( function() {
-			if (!petitionVotesShown) {
-				// Show the votes for the current petition.
-				show_petition_votes(true);
-				petitionVotesShown = true;
-			}
-		});
-		
-		$("#id_analyzeButton").click( function() {
-			if (!petitionVotesShown) {
-				// Show the votes for the current petition.
-				show_petition_votes(true);
-				petitionVotesShown = true;
 			}
 		});
 		
@@ -630,12 +714,6 @@
 		});
 	}
 	
-	function show_petition_vote_details() {
-		var backURL = encodeURIComponent("{{backURL}}");
-		var backName = encodeURIComponent("{{backName}}");
-		window.location = "{% url 'petitionVotes' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
-	}
-	
 	function add_supporting_argument() {
 		var backURL = encodeURIComponent("{{backURL}}");
 		var backName = encodeURIComponent("{{backName}}");
@@ -787,6 +865,7 @@
 					}
 					
 					$("input[name=voteOptions]").parent().each(set_button_display);
+					mapsShown = false;
 				}
 				else {
 					bootstrap_alert.warning(json['error']);
@@ -826,6 +905,16 @@
 				console.log( jqXHR.status + "; " + jqXHR.statusText);
 			});
 	}
+	
+	// Ensure that the space for the map extends across the entire frame if possible.
+	function init_map_width() {
+		$("#mapFrame").width(window.innerWidth - 30);
+	}
+	
+	function show_petition_maps() {
+		initmap("#mapFrame", "{% static "dico/us.json" %}");
+		show_vote_map(getscope());
+	}
 
 	function show_petition_stories() {
 	  $.post("{% url 'getPetitionStories' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
@@ -834,64 +923,73 @@
 			
 			$("#id_storySection").empty();
 			
-			divs = d3.select("#id_storySection").selectAll("div")
-				.data(stories)
-				.enter()
-				.append("div")
-				.classed("row", true)
-				.append("div")
-				.classed("col-xs-12", true)
-				.append("div")
-				.classed("media", "true");
+			if (stories.length == 0)
+			{
+				d3.select("#id_storySection")
+				  .append("div")
+				  .classed("row", true)
+				  .append("div")
+				  .classed("col-xs-12", true)
+				  .text("No stories related to this action.");
+			}
+			else
+			{
+				divs = d3.select("#id_storySection").selectAll("div")
+					.data(stories)
+					.enter()
+					.append("div")
+					.classed("row", true)
+					.append("div")
+					.classed("col-xs-12", true)
+					.append("div")
+					.classed("media", "true");
 			
-			divs.append("div")
-				.classed("media-left", true)
-				.append("a")
-				.attr("href", function(story) { return story['link']; })
-				.attr("target", "_blank")
-				.append("img")
-				.classed("media-object", true)
-				.attr("src", function(story) { return story['link']; })
-				.attr("height", 60)
-				.attr("width", 60);
+				divs.append("div")
+					.classed("media-left", true)
+					.append("a")
+					.attr("href", function(story) { return story['link']; })
+					.attr("target", "_blank")
+					.append("img")
+					.classed("media-object", true)
+					.attr("src", function(story) { return story['link']; })
+					.attr("height", 60)
+					.attr("width", 60);
 				
-			mediaBodies = divs.append("div")
-							  .classed("media-body", true);
+				mediaBodies = divs.append("div")
+								  .classed("media-body", true);
 							  
-			mediaBodies.append("h5")
-					   .classed("media-heading", true)
-					   .text(function(story) { return story['heading']; });
-			paragraphs = mediaBodies.append("p")
-					   .text(function(story) { return story['description']; });
+				mediaBodies.append("h5")
+						   .classed("media-heading", true)
+						   .text(function(story) { return story['heading']; });
 					   
-			paragraphs.append("br");
-			paragraphs.append("a")
-					   .attr("href", function(story) { return story['link']; })
-					   .attr("target", "_blank")
-					   .style("word-wrap", "break-word")
-					   .text("More Info");
-					   
-			buttons = divs.append("div")
-				.classed("media-right", true)
-				.append("button")
-				.classed("btn btn-link btn-xs", true)
-				.attr("storyId", function(story) { return story['id']; })
-				.on("click", function() {
-					closealert();
-					$("#id_deleteStoryDialog").attr("storyId", $(this).attr("storyId"));
-					elementToDelete = $(this).parent().parent();
-					$("#id_deleteStoryDialog").modal('show');
-				})
-				.style("display", function(d) {
-					if (d['isEditable'])
-						return "inline-block";
-					else
-						return "none";
-				});
+				paragraphs = mediaBodies.append("p")
+						   .text(function(story) { return story['description']; })
+						   .filter(function(story) { return story['link'].length > 0; } );
 				
-			buttons
-				.append("span")
-				.classed("glyphicon glyphicon-remove", true);
+				paragraphs.append("br");
+				paragraphs.append("a")
+						   .attr("href", function(story) { return story['link']; })
+						   .attr("target", "_blank")
+						   .style("word-wrap", "break-word")
+						   .text("More Info");
+				
+				// Add buttons to each media item that is editable.	   
+				divs.filter(function(story) { return story['isEditable']; })
+					.append("div")
+					.classed("media-right", true)
+					.append("button")
+					.classed("btn btn-link btn-xs", true)
+					.attr("storyId", function(story) { return story['id']; })
+					.on("click", function() {
+						closealert();
+						$("#id_deleteStoryDialog").attr("storyId", $(this).attr("storyId"));
+						elementToDelete = $(this).parent().parent();
+						$("#id_deleteStoryDialog").modal('show');
+					})
+					.style("display", "inline-block")
+					.append("span")
+					.classed("glyphicon glyphicon-remove", true);
+			}
 		}
 		else
 			bootstrap_alert.warning(json['error']);
@@ -929,5 +1027,60 @@
 			bootstrap_alert.warning(json['error']);
 		});
 	}
+
+	$(window).resize(function() {
+		resize_vote_map();
+	});
+	
+	function change_vote(newVote, newScope) {
+	  $.getJSON("{% url 'getPetitionVotesByScope' %}", { petition: {{ petition.id }}, scope : newScope}, function(json){
+		var s = "";
+		if (json['error']) {
+			s = json['error'];
+			console.log(s);
+			alert(s);
+		} else {
+			var vote;
+			if (newVote == $("#id_supportRadio").val())
+				vote = 'support_count';
+			else
+				vote = 'oppose_count';
+			mapdatapoints("#mapFrame", 
+						  "#id_constituent_area_label", 
+						  newScope, 
+						  json['votes'],
+						  vote);
+			show_table_data("#id_constituent_table_body", 
+						  newScope, 
+						  json['votes'],
+						  vote);
+		}
+	  });
+	}
+
+	function resize_vote_map() {
+		init_map_width();
+		resize_map("#mapFrame");			
+		show_vote_map(getscope());
+	}
+	
+	function getscope() {
+		if ($("#byDistrictRadio").prop("checked")) { 
+			return districtScope;
+		} else {
+			return stateScope;
+		}
+		
+	}
+	
+	function show_vote_map(newScope)
+	{
+		show_map("#mapFrame", $("#district_label"), $("#district_span"), 
+				 "{% static "dico/us.json" %}",
+				 "{% static "dico/us-congress-113.json" %}",
+				 function() {change_vote($('input[name="mapVoteOptions"]:checked').val(), newScope); }, 
+				 newScope);
+	}
+	
 </script>
 

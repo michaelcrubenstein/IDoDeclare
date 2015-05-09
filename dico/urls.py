@@ -35,8 +35,6 @@ urlpatterns = patterns(
 	url(r'^createpetition/', views.createPetition, name='createPetition'),
 	# ex: /dico/addpetitionissue/5/
 	url(r'^(?P<petition_id>\d+)/addpetitionissue/', views.addPetitionIssue, name='addPetitionIssue'),
-	# ex: /dico/petitionvotes/
-	url(r'^petitionvotes/', views.petitionVotes, name='petitionVotes'),
     # ex: /dico/newinterest/
     url(r'^newinterest/', views.newInterest, name='newInterest'),
     # ex: /dico/submitdeleteinterest/
@@ -101,7 +99,7 @@ urlpatterns = patterns(
 	# from the petition.html page
     # ex: /dico/getpetitionvotetotals/
     url(r'^getpetitionvotetotals/', views.getPetitionVoteTotals, name='getPetitionVoteTotals'),
-	# ex: dico/5/getpetitionvotes/
+	# ex: dico/5/getpetitionvotesbyscope/
 	url(r'^getpetitionvotesbyscope/', views.getPetitionVotesByScope, name='getPetitionVotesByScope'),
     # ex: /dico/getpetitionstories/
     url(r'^getpetitionstories/', views.getPetitionStories, name='getPetitionStories'),

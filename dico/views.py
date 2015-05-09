@@ -692,27 +692,6 @@ def deletePetitionVote(request):
     
     return JsonResponse(results)
 
-# Displays a web page for the vote analytics of the specified petition.
-def petitionVotes(request):
-    if not request.user.is_authenticated:
-        return signin(request)
-    
-    petition_id = request.GET['petition']
-    backURL = request.GET.get('backURL', '/dico/')
-    backName = request.GET.get('backName', 'Home')
-    
-    template = loader.get_template('dico/petitionvotes.html')
-        
-    petition = Petition.objects.filter(pk=petition_id).select_related().get()
-    
-    context = RequestContext(request, {
-        'user': request.user,
-        'petition': petition,
-        'backURL': urllib.parse.unquote_plus(backURL),
-        'backName': urllib.parse.unquote_plus(backName),
-    })
-    return HttpResponse(template.render(context))
-
 # Displays a web page for adding a supporting argument to a petition.
 def addSupportingArgument(request):
     if not request.user.is_authenticated:
@@ -1014,7 +993,7 @@ def issues(request):
     helpTexts = { 'vote': 'Select an issue that is related to the action you want to vote on.', \
                   'debate': 'Select an issue that is related to the action you want to learn about.', \
                   'label': 'Select an issue that is related to the action you want to label.', \
-                  'analyze': 'Select an issue that is related to the action you want to analyze.', \
+                  'maps': 'Select an issue that is related to the action you want to analyze.', \
                   'story': 'Select an issue that is related to the action you want to create a story for.' }
     if actionPanel in helpTexts:
         helpText = helpTexts[actionPanel]
@@ -1043,7 +1022,7 @@ def issue(request):
     helpTexts = { 'vote': 'Select the action you want to vote on.', \
                   'debate': 'Select the action you want to learn about.', \
                   'label': 'Select the action you want to label.', \
-                  'analyze': 'Select the action you want to analyze.', \
+                  'maps': 'Select the action you want to analyze.', \
                   'story': 'Select the action you want to create a story for.' }
     if actionPanel in helpTexts:
         helpText = helpTexts[actionPanel]
@@ -1069,8 +1048,8 @@ def petition(request, petition_id):
         initialButton = "#id_debateButton"
     elif 'label' in request.GET:
         initialButton = "#id_labelButton"
-    elif 'analyze' in request.GET:
-        initialButton = "#id_analyzeButton"
+    elif 'maps' in request.GET:
+        initialButton = "#id_mapsButton"
     elif 'story' in request.GET:
         initialButton = "#id_storyButton"
     elif request.user.is_authenticated:

@@ -43,10 +43,14 @@
 		.well {
 			margin-top: 10px;
 			padding: 0px;
-			width: 330px;
 		}
 		#id_voteSection>div>div>label {
 			width: 110px;
+		}
+		#id_voteSection>div>div {
+			display: block;
+			margin: 0 auto;
+			width: 328px;
 		}
 		#yourVoteButton {
 			left: 0px;
@@ -63,27 +67,6 @@
 						<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}
 					</a>
 				</ul>
-
-				<!-- Collect the nav links, forms, and other content for toggling -->
-				{% if user.is_authenticated %}
-					<ul class="nav navbar-nav navbar-header pull-right">
-						<li class="dropdown">
-						  <a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
-						  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-							<li><a id="id_accountSettingsLink">Account Settings</a></li>
-							<li><a id="id_changePasswordLink">Change Password</a></li>
-							<li class="divider"></li>
-							<li><a id="id_editInterestsLink">Edit Interests</a></li>
-							<li class="divider"></li>
-							<li><a href="{% url 'signout' %}">Sign out</a></li>
-						  </ul>
-						</li>
-					</ul>
-				{% else %}
-					<ul class="nav navbar-header pull-right">
-						<a class="navbar-text navbar-link pull-right dico-navbar-text" href="{% url 'signin' %}">Sign in</a>
-					</ul>
-				{% endif %}
 			</div>
 		</nav>
 
@@ -384,11 +367,6 @@
 			$('.alert').parent().html('');
 		}
 		
-		encodedRef = encodeURIComponent(window.location.href);
-		$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
-		$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
-		$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
-
 		$("#id_confirmDeleteButton").click(function() {
 			remove_argument(elementToDelete, $("#id_deleteDialog").attr("argumentId"));
 		});
@@ -803,7 +781,7 @@
 	function doc_ratings() {
 		var backURL = encodeURIComponent("{{backURL}}");
 		var backName = encodeURIComponent("{{backName}}");
-		window.location = "{% url 'docRatings' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+		window.location = "{% url 'docRatings' %}?petition={{petition.id}};backURL="+backURL+";backName="+backName;
 	}
 	
 	function cast_vote(vote) {

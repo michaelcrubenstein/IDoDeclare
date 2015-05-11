@@ -992,7 +992,7 @@ def issues(request):
     
     helpTexts = { 'vote': 'Select an issue that is related to the action you want to vote on.', \
                   'debate': 'Select an issue that is related to the action you want to learn about.', \
-                  'label': 'Select an issue that is related to the action you want to label.', \
+                  'issues': 'Select an issue that is related to the action you want to label.', \
                   'maps': 'Select an issue that is related to the action you want to analyze.', \
                   'story': 'Select an issue that is related to the action you want to create a story for.' }
     if actionPanel in helpTexts:
@@ -1021,7 +1021,7 @@ def issue(request):
     
     helpTexts = { 'vote': 'Select the action you want to vote on.', \
                   'debate': 'Select the action you want to learn about.', \
-                  'label': 'Select the action you want to label.', \
+                  'issues': 'Select the action you want to label.', \
                   'maps': 'Select the action you want to analyze.', \
                   'story': 'Select the action you want to create a story for.' }
     if actionPanel in helpTexts:
@@ -1046,8 +1046,8 @@ def petition(request, petition_id):
     
     if 'debate' in request.GET:
         initialButton = "#id_debateButton"
-    elif 'label' in request.GET:
-        initialButton = "#id_labelButton"
+    elif 'issues' in request.GET:
+        initialButton = "#id_issuesButton"
     elif 'maps' in request.GET:
         initialButton = "#id_mapsButton"
     elif 'story' in request.GET:

@@ -82,17 +82,8 @@
         	closealert = function() { 
         		$('.alert').parent().html('');
         	}
-			
-			var encodedRef = encodeURIComponent(window.location.href);
-			var backName = encodeURIComponent("{{issue.name}}");
-			$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
-			$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
-			$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
-			$("#id_createActionLink").click (function(e) {
-				window.location.href = "{% url 'createPetition' %}?issue={{issue.id}};backURL="+encodedRef+";backName="+backName;
-			});
-			
-			// Display the interests of the currently logged-in user.
+						
+			// Display the petitions associated with the specified issue.
 			show_issue_petitions();
 		});
 
@@ -163,31 +154,12 @@
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
 				<!-- Brand and toggle get grouped for better mobile display -->
-				<ul class="nav navbar-nav navbar-header pull-left">
+				<ul class="nav navbar-header pull-left">
 					<li>
 					<a class="navbar-link" href="{% url 'home' %}">
 						<span class="glyphicon glyphicon-chevron-left"></span>Home
 					</a>
 					</li>
-				</ul>
-
-				<!-- Collect the nav links, forms, and other content for toggling -->
-				<ul class="nav navbar-nav navbar-header pull-right">
-					{% if user.is_authenticated %}
-					<li class="dropdown">
-					  <a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
-					  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-						<li><a id="id_accountSettingsLink">Account Settings</a></li>
-						<li><a id="id_changePasswordLink">Change Password</a></li>
-						<li class="divider"></li>
-						<li><a id="id_editInterestsLink">Edit Interests</a></li>
-						<li class="divider"></li>
-						<li><a href="{% url 'signout' %}">Sign out</a></li>
-					  </ul>
-					</li>
-					{% else %}
-						<a class="navbar-text navbar-link dico-nav-edge-link" href="{% url 'signin' %}">Sign in</a>
-					{% endif %}
 				</ul>
 			</div>
 		</nav>

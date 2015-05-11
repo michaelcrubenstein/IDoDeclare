@@ -62,7 +62,7 @@
 		$(document).ready (function(e) {
 			var backURL = encodeURIComponent("{{backURL}}");
 			var backName = encodeURIComponent("{{backName}}");
-			$("#id_done_anchor").attr("href", "/dico/{{petition.id}}/petition/?label;backURL="+backURL+";backName="+backName);
+			$("#id_done_anchor").attr("href", "/dico/{{petition.id}}/petition/?issues;backURL="+backURL+";backName="+backName);
 		});
 
 		$(document).ready (function(e) {
@@ -95,7 +95,7 @@
 					closealert();
 					var backURL = encodeURIComponent("{{backURL}}");
 					var backName = encodeURIComponent("{{backName}}");
-					window.location.href = "/dico/{{petition.id}}/petition/?label;backURL="+backURL+";backName="+backName;
+					window.location.href = "/dico/{{petition.id}}/petition/?issues;backURL="+backURL+";backName="+backName;
 				}
 				else {
 					bootstrap_alert.warning("Sorry, " + json['error']);
@@ -122,7 +122,7 @@
 	<div id='container' class="container-fluid">
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
-				<div class="nav navbar-nav navbar-header pull-left">
+				<div class="nav navbar-header pull-left">
 					<li>
 						<a id="id_done_anchor" class="navbar-link dico-nav-edge-link">
 			  				Done

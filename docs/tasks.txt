@@ -114,6 +114,13 @@ DONE 3 - Incorporate vote maps into petition page.
 DONE 3 - Add Browse capability for votes by issue.
 DONE 3 - Fix bug in centering of text in landing page. Also, make text different sizes.
 
+DONE 3 - Implement drag of button option for voting.
+DONE 3 - Use colors for different positions.
+
+DONE 3 - Add a next button when flipping through votes from the News
+FIXED 3 - Fix the positions of radio buttons used to select the maps
+FIXED 3 - Display both supporting and opposing votes in the Maps table.
+
 Move buttons in Reset Password dialog box to navigation bar.
 Move Cancel and Update Account buttons to navigation bar.
 Move Cancel and Change Password buttons to navigation bar.

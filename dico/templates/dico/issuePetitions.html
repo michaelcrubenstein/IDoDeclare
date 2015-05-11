@@ -113,7 +113,7 @@
 						$(newButton).addClass("btn btn-link btn-xs")
 									.attr("href", "/dico/" + petition['id'] + "/petition/?{{actionPanel}};backURL="+backURL+";backName="+backName)
 									.append(newSpan);
-						$(newSpan).addClass("label label-info")
+						$(newSpan).addClass("label label-danger")
 								  .append("Oppose");
 						td = document.createElement("td");
 						$(li).append(td);
@@ -123,7 +123,7 @@
 						$(newButton).addClass("btn btn-link btn-xs")
 									.attr("href", "/dico/" + petition['id'] + "/petition/?{{actionPanel}};backURL="+backURL+";backName="+backName)
 									.append(newSpan);
-						$(newSpan).addClass("label label-info")
+						$(newSpan).addClass("label label-success")
 								  .append("Support");
 						td = document.createElement("td");
 						$(li).append(td);

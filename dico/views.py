@@ -1057,6 +1057,11 @@ def petition(request, petition_id):
     else:
         initialButton = "#id_debateButton"
         
+    if 'showNext' in request.GET:
+    	nextPetition = Petition.objects.get_next_petition(petition_id=petition_id, user=request.user)
+    else:
+    	nextPetition = None
+        
     filter = Petition.objects.filter(id=petition_id)
     context = RequestContext(request, {
         'user': request.user,
@@ -1064,9 +1069,10 @@ def petition(request, petition_id):
         'backURL' : urllib.parse.unquote_plus(backURL),
         'backName': urllib.parse.unquote_plus(backName),
         'initialButton': initialButton,
+        'nextPetition': nextPetition
     })
     return HttpResponse(template.render(context))
-
+    
 def dashboard(request, constituent_id):
     return HttpResponse("You're looking at the dashboard for constituent %s." % constituent_id)
 

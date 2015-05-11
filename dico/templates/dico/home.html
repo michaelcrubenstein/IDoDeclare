@@ -253,7 +253,7 @@
 		$("#id_signOutLink").attr("href", "{% url 'signout' %}");
 		
 		$(".petition-news-item").click(function(e) {
-			window.location.href="/dico/" + $(this).attr("petition") + "/petition/?vote;backURL="+encodedRef+";backName=Home"
+			window.location.href="/dico/" + $(this).attr("petition") + "/petition/?vote;showNext;backURL="+encodedRef+";backName=Home"
 		});
 	});
 

@@ -278,6 +278,25 @@ class PetitionManager(models.Manager):
                     petitions.append({'id': i[0], 'description': i[1], 'constituent_id': i[2], 'creation_time': i[3], 'vote': i[4]})
 
             return petitions
+            
+    def get_next_petition(self, petition_id, user):
+        with connection.cursor() as c:
+            sql = "SELECT p.id, p.creation_time" + \
+                  " FROM dico_petition p, (SELECT creation_time from dico_petition WHERE id = %s) p2" + \
+                  " WHERE (p.creation_time < p2.creation_time" + \
+                          " OR p.creation_time = p2.creation_time AND p.id < %s)" + \
+                  " AND   EXISTS(SELECT * FROM dico_constituentinterest ci, dico_petitionissue pi" + \
+                                  " WHERE ci.issue_id = pi.issue_id" + \
+                                  " AND pi.petition_id = p.id" + \
+                                  " AND ci.constituent_id = %s)" + \
+                  " AND NOT EXISTS(SELECT * FROM dico_petitionvote pv WHERE pv.petition_id = p.id AND pv.constituent_id = %s)" + \
+                  " ORDER BY p.creation_time DESC, p.id DESC"
+            c.execute(sql, [petition_id, petition_id, user.id, user.id])
+            row = c.fetchone()
+            if row:
+                return self.get(pk=row[0])
+            else:
+                return None
 
 class Petition(models.Model):
     description = models.TextField()

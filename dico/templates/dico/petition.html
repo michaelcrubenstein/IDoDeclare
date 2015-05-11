@@ -31,6 +31,7 @@
 		}
 		section>section {
 			padding-top: 10px;
+			display: none;	/* Initially, hide them all. */
 		}
 		#id_petitionNav>li>a {
 			padding-left: 10px;
@@ -53,7 +54,10 @@
 			width: 328px;
 		}
 		#yourVoteButton {
-			left: 0px;
+			left: 108px;
+		}
+		.panelNav {
+			display: none;
 		}
 	</style>
   </head>
@@ -72,7 +76,7 @@
 
 		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
 			{% if user.id == petition.constituent.user.id or user.is_superuser %}
-			<div id="id_voteNav" class="container-fluid">
+			<div id="id_voteNav" class="container-fluid panelNav">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="nav navbar-header pull-right">
@@ -83,7 +87,7 @@
 			</div>
 			{% endif %}
 			{% if user.is_authenticated %}
-			<div id="id_debateNav" class="container-fluid">
+			<div id="id_debateNav" class="container-fluid panelNav">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="nav navbar-header pull-left">
@@ -97,7 +101,7 @@
 					</span>
 				</div>
 			</div>
-			<div id="id_labelNav" class="container-fluid">
+			<div id="id_labelNav" class="container-fluid panelNav">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="nav navbar-header pull-left">
@@ -106,7 +110,7 @@
 					</span>
 				</div>
 			</div>
-			<div id="id_storyNav" class="container-fluid">
+			<div id="id_storyNav" class="container-fluid panelNav">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="nav navbar-header pull-left">
@@ -175,13 +179,20 @@
 						</label>
 					</div>
 				</div>
-				<div class="col-xs-12">
+				<div class="col-xs-10 col-xs-offset-1">
 					<div class="well">
-						<label id="yourVoteButton" class="btn btn-default">
+						<label id="yourVoteButton" class="btn btn-default btn-warning">
 						    Your Vote
 						</label>
 					</div>
 				</div>
+				{% if nextPetition %}
+					<div class="col-xs-1 pull-right">
+						<label class="pull-right text-muted" style="font-size:2.0em">
+							<span class="glyphicon glyphicon-chevron-right" onclick="go_to_next_petition()"></span>
+						</label>
+					</div>
+				{% endif %}
 			</section>
 			{% endif %}
 			<section id="id_debateSection" class="row">
@@ -272,6 +283,7 @@
 				</div>
 			</section>
 			<section id="id_storySection">
+				Loading stories...
 			</section>
 		</section>
 	</div> <!-- container -->
@@ -397,7 +409,7 @@
 			vote_no_opinion();
 		});
 		
-		var oldButton;
+		var oldButton=$("#noOpinionButton");
 		$('#yourVoteButton').draggable( {
 			containment: 'parent',
 			start: function(event, ui )
@@ -530,6 +542,14 @@
 		$("{{initialButton}}").click();
 		
 	});
+	
+	{% if nextPetition %}
+	function go_to_next_petition() {
+		var backURL = encodeURIComponent("{{backURL}}");
+		var backName = encodeURIComponent("{{backName}}");
+		window.location.href = "/dico/{{nextPetition.id}}/petition/?vote;backURL="+backURL+";backName="+backName;
+	}
+	{% endif %}
 
 	function show_petition_issues() {
 	  $.post("{% url 'getPetitionIssues' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){

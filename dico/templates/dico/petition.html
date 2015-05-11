@@ -56,6 +56,15 @@
 		#yourVoteButton {
 			left: 108px;
 		}
+		#id_nextlink {
+			margin-top:10px;
+			width:100%;
+			text-align:center;
+		}
+		#id_nextlink:hover {
+			text-decoration: none;
+			cursor: pointer;
+		}
 		.panelNav {
 			display: none;
 		}
@@ -179,7 +188,7 @@
 						</label>
 					</div>
 				</div>
-				<div class="col-xs-10 col-xs-offset-1">
+				<div class="col-xs-12">
 					<div class="well">
 						<label id="yourVoteButton" class="btn btn-default btn-warning">
 						    Your Vote
@@ -187,11 +196,13 @@
 					</div>
 				</div>
 				{% if nextPetition %}
-					<div class="col-xs-1 pull-right">
-						<label class="pull-right text-muted" style="font-size:2.0em">
-							<span class="glyphicon glyphicon-chevron-right" onclick="go_to_next_petition()"></span>
-						</label>
+				<div class="col-xs-12">
+					<div>
+						<div id="id_nextlink" class="text-muted" onclick="go_to_next_petition()"> Next Action
+							<span class="glyphicon glyphicon-chevron-right"></span>
+						</div>
 					</div>
+				</div>
 				{% endif %}
 			</section>
 			{% endif %}
@@ -547,7 +558,7 @@
 	function go_to_next_petition() {
 		var backURL = encodeURIComponent("{{backURL}}");
 		var backName = encodeURIComponent("{{backName}}");
-		window.location.href = "/dico/{{nextPetition.id}}/petition/?vote;backURL="+backURL+";backName="+backName;
+		window.location.href = "/dico/{{nextPetition.id}}/petition/?vote;showNext;backURL="+backURL+";backName="+backName;
 	}
 	{% endif %}
 
@@ -862,9 +873,9 @@
 		target.stop();
 		marginDiff = parseInt(source.attr('voteButtonLeft')) - parseInt(target.css("left"));
 		if (marginDiff < 0)
-			target.animate({left: "-="+(-marginDiff)+"px"}, 500);
+			target.animate({left: "-="+(-marginDiff)+"px"}, 250);
 		else
-			target.animate({left: "+="+marginDiff+"px"}, 500);
+			target.animate({left: "+="+marginDiff+"px"}, 250);
 	}
 	
 	function set_button_display() {

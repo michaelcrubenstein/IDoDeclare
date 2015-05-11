@@ -116,6 +116,7 @@ DONE 3 - Fix bug in centering of text in landing page. Also, make text different
 
 DONE 3 - Implement drag of button option for voting.
 DONE 3 - Use colors for different positions.
+DONE 3 - Use support and oppose vote colors for votes on issue pages.
 
 DONE 3 - Add a next button when flipping through votes from the News
 FIXED 3 - Fix the positions of radio buttons used to select the maps

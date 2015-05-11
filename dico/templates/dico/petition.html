@@ -255,21 +255,29 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="col-xs-6 map-options-column">
-						<label class="radio-inline">
-						  <input type="radio" name="mapVoteOptions" id="id_supportRadio" value=1 checked /> in Support
-						</label>
-						<label class="radio-inline">
-						  <input type="radio" name="mapVoteOptions" id="id_opposeRadio" value=0 /> in Opposition
-						</label>			
+					<div class="col-xs-6">
+						<div class="radio">
+							<label>
+							  <input type="radio" name="mapVoteOptions" id="id_supportRadio" value=1 checked /> in Support
+							</label>
+						</div>
+						<div class="radio">
+							<label class="radio">
+							  <input type="radio" name="mapVoteOptions" id="id_opposeRadio" value=0 /> in Opposition
+							</label>
+						</div>
 					</div>
-					<div class="col-xs-6 map-options-column">
-						<label class="radio-inline">
-						  <input type="radio" name="mapScopeOptions" id="byDistrictRadio" value=districtScope checked /> by District
-						</label>
-						<label class="radio-inline">
-						  <input type="radio" name="mapScopeOptions" id="byStateRadio" value=stateScope /> by State
-						</label>			
+					<div class="col-xs-6">
+						<div class="radio">
+							<label>
+							  <input type="radio" name="mapScopeOptions" id="byDistrictRadio" value=districtScope checked /> by District
+							</label>
+						</div>
+						<div class="radio">
+							<label>
+							  <input type="radio" name="mapScopeOptions" id="byStateRadio" value=stateScope /> by State
+							</label>			
+						</div>
 					</div>
 				</div>
 				<div class="row">
@@ -1151,10 +1159,25 @@
 						  newScope, 
 						  json['votes'],
 						  vote);
-			show_table_data("#id_constituent_table_body", 
-						  newScope, 
-						  json['votes'],
-						  vote);
+						  
+			$("#id_constituent_table_body").empty();
+	
+			tr = d3.select("#id_constituent_table_body").selectAll("tr")
+					.data(json['votes'])
+					.enter()
+					.append("tr");
+	
+			td = tr.selectAll("td")
+					.data(function(d) { 
+						if (newScope == districtScope)
+							area =  d['state'] + "-" + d['district'];
+						else
+							area =  d['state'];
+						return [area, d['support_count'], d['oppose_count']];
+					})
+					.enter()
+					.append("td")
+					.text(function(d) { return d; });
 		}
 	  });
 	}

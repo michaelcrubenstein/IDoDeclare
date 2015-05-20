@@ -17,7 +17,7 @@ import urllib.parse
 import json
 import uuid
 
-from custom_user.models import AuthUser, PasswordReset
+from custom_user.models import PasswordReset
 from dico.models import Issue, Constituent, ConstituentInterest, ContactMethod, \
     Petition, PetitionManager, PetitionIssue, PetitionVote, \
     Argument, ArgumentManager, ArgumentRating, Story, StoryManager, MC
@@ -27,24 +27,37 @@ from dico.titlecase import titlecase
 
 def index(request):
     if request.user.is_authenticated():
-        template = loader.get_template('dico/home.html')
-        issue_list = Issue.objects.order_by('name')
-        il = []
-        for i in issue_list:
-            il = il + [{'name': i.name, 'id': i.id}]
-        context = RequestContext(request, {
-            'user': request.user,
-            'issue_list': json.dumps(il),
-            'my_issue_list' : Constituent.get_interests(request.user),
-            'member_list': Constituent.get_members(request.user),
-            'news_list': Constituent.get_news(request.user),
-            'template': request.user.is_authenticated(),
-        })
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            template = loader.get_template('dico/constituentsettings.html')
+            backURL = request.GET.get('back', '/dico/')
+            contactMethod = { 'via': 1, 'frequency': 2 }
+            accessToken = request.GET.get('accessToken', None)
+            context = RequestContext(request, {
+                'user': request.user,
+                'backURL': urllib.parse.unquote_plus(backURL),
+                'contactMethod': contactMethod,
+                'accessToken':accessToken,
+            })
+        else:
+            template = loader.get_template('dico/home.html')
+            issue_list = Issue.objects.order_by('name')
+            il = []
+            for i in issue_list:
+                il = il + [{'name': i.name, 'id': i.id}]
+            context = RequestContext(request, {
+                'user': request.user,
+                'issue_list': json.dumps(il),
+                'my_issue_list' : Constituent.get_interests(request.user),
+                'member_list': Constituent.get_members(request.user),
+                'news_list': Constituent.get_news(request.user),
+            })
     else:
         template = loader.get_template('dico/index.html')
         
         context = RequestContext(request, {
-            'template', 'dico/index.html',
+            'template': 'dico/index.html',
+            'facebookAppID': settings.FACEBOOK_APP_ID, 
         })
         
     return HttpResponse(template.render(context))
@@ -80,6 +93,31 @@ def submitsignin(request):
         results = {'success':False, 'error': str(e)}
             
     return JsonResponse(results)
+    
+def submitFacebookSignin(request):
+    try:
+        accessToken = request.POST['accessToken']
+        with open('exception.log', 'a') as log:
+            log.write("accessToken:\n%s\n\n" % str(accessToken))
+            log.flush()
+
+        user = authenticate(accessToken=accessToken)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                results = {'success':True,
+                		   'accessToken':accessToken}
+            else:
+                raise Exception('This account is disabled.')
+        else:
+            raise Exception('This Facebook login is invalid.');
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+            
+    return JsonResponse(results)
 
 def signout(request):
     logout(request)
@@ -90,7 +128,7 @@ def editInterests(request):
         return signin(request)
     
     template = loader.get_template('dico/editinterests.html')
-    backURL = request.GET.get('back', "")
+    backURL = request.GET.get('back', '/dico/')
         
     context = RequestContext(request, {
         'user': request.user,
@@ -103,7 +141,7 @@ def account(request):
         return signin(request)
     
     template = loader.get_template('dico/account.html')
-    backURL = request.GET.get('back', "")
+    backURL = request.GET.get('back', '/dico/')
     constituent = Constituent.get_constituent(request.user)
     if constituent is None:
         return index(request)
@@ -122,7 +160,7 @@ def password(request):
         return signin(request)
     
     template = loader.get_template('dico/password.html')
-    backURL = request.GET.get('back', "")
+    backURL = request.GET.get('back', '/dico/')
         
     context = RequestContext(request, {
         'user': request.user,
@@ -137,7 +175,7 @@ def forgotPassword(request):
         return signin(request)
     
     template = loader.get_template('dico/forgotpassword.html')
-    backURL = request.GET.get('back', "")
+    backURL = request.GET.get('back', '/dico/')
         
     context = RequestContext(request, {
         'backURL': urllib.parse.unquote_plus(backURL)
@@ -227,7 +265,7 @@ def resetPassword(request):
         POST = request.POST
         email = request.POST['email']
         
-        if AuthUser.objects.filter(email=email).count() == 0:
+        if get_user_model().objects.filter(email=email).count() == 0:
             raise Exception("This email address is not recognized.");
             
         newKey = str(uuid.uuid4())
@@ -264,7 +302,7 @@ def setResetPassword(request):
         email = request.POST['email']
         password = request.POST['password']
         
-        if AuthUser.objects.filter(email=email).count() == 0:
+        if get_user_model().objects.filter(email=email).count() == 0:
             raise Exception("This email address is not recognized.");
         
         query_set = PasswordReset.objects.filter(reset_key=resetKey)
@@ -336,7 +374,7 @@ def submitdeleteinterest(request):
 def createConstituent(request):
     template = loader.get_template('dico/createConstituent.html')
 
-    backURL = request.GET.get('back', "")
+    backURL = request.GET.get('back', '/dico/')
 
     context = RequestContext(request, {
         'backURL' : urllib.parse.unquote_plus(backURL)
@@ -415,8 +453,6 @@ def updateConstituent(request):
             
         POST = request.POST;
         newUsername = POST.get('newUsername', '')
-        oldPassword = POST.get('oldPassword', '')
-        newPassword = POST.get('newPassword', '')
         newFirstName = POST.get('newFirstName', '')
         newLastName = POST.get('newLastName', '')
         newStreetAddress = POST.get('newStreetAddress', '')
@@ -426,23 +462,25 @@ def updateConstituent(request):
         newPhoneNumber = POST.get('newContactPhone', '')
         
         constituent = Constituent.get_constituent(request.user)
-        if constituent is None:
-            return
-        
-        if len(newStreetAddress) == 0:
-            newStreetAddress = constituent.streetAddress
-        if len(newZipCode) == 0:
-            newZipCode = constituent.zipCode
-            
-        districtInfo = getDistrict(newStreetAddress + " " + newZipCode)
-        
-        contactMethod = ContactMethod.get_contact_method(request.user)
-
         with transaction.atomic():
-            constituent.update_fields(newUsername, newPassword, 
-                                      newFirstName, newLastName, newStreetAddress, newZipCode, 
-                                      districtInfo[0]["state"], districtInfo[0]["district"])
-                                  
+            if constituent is None:
+                districtInfo = getDistrict(newStreetAddress + " " + newZipCode)
+                constituent = Constituent.objects.create(user=request.user, 
+                                          streetAddress=newStreetAddress, 
+                                          zipCode=newZipCode,
+                                          district=districtInfo[0]["district"], 
+                                          state=districtInfo[0]["state"])
+            else:
+                if len(newStreetAddress) == 0:
+                    newStreetAddress = constituent.streetAddress
+                if len(newZipCode) == 0:
+                    newZipCode = constituent.zipCode
+                districtInfo = getDistrict(newStreetAddress + " " + newZipCode)
+                constituent.update_fields(newUsername, newPassword, 
+                                          newFirstName, newLastName, newStreetAddress, newZipCode, 
+                                          districtInfo[0]["state"], districtInfo[0]["district"])
+        
+            contactMethod = ContactMethod.get_contact_method(request.user)
             if contactMethod is None:
                 ContactMethod.objects.create(frequency=newFrequency, via=newVia, phonenumber=newPhoneNumber)
             else:
@@ -475,7 +513,7 @@ def updatePassword(request):
         if testUser is not None:
             if testUser.is_active:
                 testUser.set_password(newPassword)
-                testUser.save(using=AuthUser.objects._db)
+                testUser.save(using=get_user_model().objects._db)
             else:
                 raise Exception('This account is disabled.');
                 # Return a 'disabled account' error message
@@ -1058,9 +1096,9 @@ def petition(request, petition_id):
         initialButton = "#id_debateButton"
         
     if 'showNext' in request.GET:
-    	nextPetition = Petition.objects.get_next_petition(petition_id=petition_id, user=request.user)
+        nextPetition = Petition.objects.get_next_petition(petition_id=petition_id, user=request.user)
     else:
-    	nextPetition = None
+        nextPetition = None
         
     filter = Petition.objects.filter(id=petition_id)
     context = RequestContext(request, {
@@ -1346,7 +1384,7 @@ def getPetitionStories(request):
             constituentID = a['constituent_id']
             a['isEditable'] = (constituentID == request_user_id or \
                                request.user.is_superuser)
-            creator = AuthUser.objects.get(pk=constituentID)
+            creator = get_user_model().objects.get(pk=constituentID)
             creatorConstituent = Constituent.objects.filter(pk=constituentID).select_related().get()
             a['heading'] = 'From ' + creatorConstituent.user.get_initials() + " in " + creatorConstituent.state + "-" + ("%d" % creatorConstituent.district) 
         

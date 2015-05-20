@@ -245,7 +245,6 @@
 		$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
 		$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
 		$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
-		$("#id_expressInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
 		$("#id_createActionLink").attr("href", "{% url 'createPetition' %}?back="+encodedRef);
 		$("#id_changeVoteLink").attr("href", "{% url 'issues' %}?actionPanel=vote;backURL="+encodedRef+";backName=Home");
 		$("#id_shareStoryLink").attr("href", "{% url 'issues' %}?actionPanel=story;backURL="+encodedRef+";backName=Home");

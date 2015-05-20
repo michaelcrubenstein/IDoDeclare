@@ -24,6 +24,9 @@
 
 	<!-- Styles for this web page -->
 	<style>
+		footer {
+			visibility: hidden;
+		}
 	</style>
   </head>
   <body class="container-fluid">
@@ -43,9 +46,14 @@
 			h2 {
 				text-align: center;
 			}
-			h4 {
+			h3 {
 				width: 100%;
 				text-align: center;
+			}
+			.fb-login-button {
+				width: 100%;
+				text-align: center;
+				display: block;
 			}
 			p {
 				width: 100%;
@@ -72,13 +80,15 @@
 		</style>
 		<header>
 		<h2>I Do Declare</h2>
-		{{ template }} <br>
 		<p id="descriptionParagraph">
 			I Do Declare is dedicated to helping all of us understand important issues, 
 		voice our opinions and share our stories on the matters before the legislators 
 		who are responsible for representing us in the U.S. Congress.
 		</p>
 		</header>
+		<div class="row">
+	    	<div id="myAlert" class="col-xs-12"></div>
+		</div>
 		<article id="actions">
 			<p class="action pane1">Describe actions that Congress should take</p>
 			<p class="action pane2">Discover actions others have proposed</p>
@@ -88,7 +98,14 @@
 			<p class="action pane6">Share your story</p>
 		</article>
 		<footer>
-			<h4>Let's Get Started!</h4>
+			<h3>Let's Get Started!</h3>
+			<div class="social-login-div">
+				<fb:login-button class="fb-login-button" data-max-rows="1" data-size="large" 
+					data-show-faces="false" data-auto-logout-link="false" 
+					scope="public_profile,email" onlogin="checkFacebookLogin();">
+				</fb:login-button>
+				<p>Or</p>
+			</div>
 			<p id="signUpParagraph">
 				<a href="{% url 'createConstituent' %}?back={% url 'home' %}">Sign Up With Your Email Address</a> 
 			</p>
@@ -100,7 +117,11 @@
 			</p>
 		</footer>
 	</section>
+	<div id="fb-root"></div>
 </body>
+
+<script>
+</script>
 
 <!-- Scripts for data mapping --!>
 <script src="{% static "d3/d3.v3.min.js" %}"></script>
@@ -114,19 +135,120 @@
 <script src="{% static "dico/js/mapus.js" %}"></script>
 
 <!-- Scripts for this web page -->
-<script type="text/JavaScript">				
+<script type="text/JavaScript">	
+	var isDocumentReady = false;
+	var isFacebookLoginChecked = false;
+				
+	function showLoginOptions()
+	{
+		if (isDocumentReady && isFacebookLoginChecked)
+		{
+			// Only show the footer once.
+			if ($("footer").css("visibility") == "hidden")
+			{
+				set_action_height();
+
+				$("#mapFrame").width($("#mapFrame").parent().width() - 30);
+				initmap("#mapFrame", "{% static "dico/us.json" %}");
+				set_map_left();
+
+				show_interest_map(districtScope);
+
+				crossfade($(".pane1"));
+		
+				$("footer").css("visibility", "visible");
+			}
+		
+			if (document.domain !== "127.0.0.1")
+				$(".social-login-div").css("display", "static");
+			else
+				$(".social-login-div").css("display", "none");
+		}
+	}
+
+	// This is called with the results from from FB.getLoginStatus().
+	function statusChangeCallback(response) {
+		// The response object is returned with a status field that lets the
+		// app know the current login status of the person.
+		// Full docs on the response object can be found in the documentation
+		// for FB.getLoginStatus().
+		if (response.status === 'connected') {
+		  // Logged into your app and Facebook.
+		  // Hide the login button.
+		  testFBAPI(response);
+		} else {
+			showLoginOptions();
+		}
+	}
+
+	  // Here we run a very simple test of the Graph API after login is
+	  // successful.  See statusChangeCallback() for when this call is made.
+	function testFBAPI(response) {
+		$.post("{% url 'submitFacebookSignin' %}", { csrfmiddlewaretoken: '{{ csrf_token }}', 
+													 "accessToken" : response.authResponse.accessToken },
+		  function(json){
+			if (json['success']) {
+				window.location.href = "{% url 'home' %}?accessToken="+json['accessToken'];
+			}
+			else
+			{
+				bootstrap_alert.warning(json['error']);
+				showLoginOptions();
+			}
+		});
+	}
+
 	$(document).ready (function() {
+		bootstrap_alert = function() {}
+		bootstrap_alert.show = function(parentDiv, message, alertClass) {
+			parentDiv.html('<div class="alert ' + alertClass + ' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+		}
+		bootstrap_alert.warning = function(message) {
+			bootstrap_alert.show($('#myAlert'), message, "alert-danger");
+		}
+		closealert = function() { 
+			$('.alert').parent().html('');
+		}
 		
-		set_action_height();
+		isDocumentReady = true;
 		
-		$("#mapFrame").width($("#mapFrame").parent().width() - 30);
-		initmap("#mapFrame", "{% static "dico/us.json" %}");
-		set_map_left();
-		
-		show_interest_map(districtScope);
-		
-		crossfade($(".pane1"));
+		if (document.domain == "127.0.0.1")	// Do not try for facebook if running in localHost.
+		{
+			isFacebookLoginChecked = true;
+		}
+		else
+		{
+			  (function(d, s, id) {
+				var js, fjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(id)) return;
+				js = d.createElement(s); js.id = id;
+				js.src = "//connect.facebook.net/en_US/sdk/debug.js" /* "//connect.facebook.net/en_US/sdk.js" */ ;
+				fjs.parentNode.insertBefore(js, fjs);
+			  }(document, 'script', 'facebook-jssdk'));
+			window.fbAsyncInit = function() {
+				FB.init({
+					appId      : '{{facebookAppID}}',
+					status     : true,
+					cookie     : true,  // enable cookies to allow the server to access 
+										// the session
+					xfbml      : true,  // parse social plugins on this page
+					version    : 'v2.3' // use version 2.3
+				});
+
+				FB.getLoginStatus(function(response) {
+					isFacebookLoginChecked = true;
+					statusChangeCallback(response);
+				});
+			};
+		}
+		showLoginOptions();
 	});
+	
+	function checkFacebookLogin() {
+		FB.getLoginStatus(function(response) {
+		  statusChangeCallback(response);
+		});
+	}
 	
 	function crossfade(pane)
 	{
@@ -153,7 +275,7 @@
 				$("footer").height() - 
 				parseInt($("h2").css("margin-top")) - 
 				parseInt($("#descriptionParagraph").css("margin-bottom")) - 
-				parseInt($("h4").css("margin-top")) - 
+				parseInt($("h3").css("margin-top")) - 
 				parseInt($("#feedbackParagraph").css("margin-bottom")) - 
 				15);
 	}

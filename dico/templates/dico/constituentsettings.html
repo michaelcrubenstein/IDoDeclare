@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>I Do Declare - Settings</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
+    <link href="{% static "dico/css/formsimple.css" %}" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+	<!-- Styles for this web page -->
+	<style>
+		body {
+		  padding-top: 55px;
+		}
+	</style>
+
+  </head>
+
+<body max-width="100%">
+
+    <div class="container">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav">
+					<div class="dico-navbar-commands">
+						<span class="dico-pull-left">
+							<span id="cancel_button" class="navbar-text navbar-link pull-left dico-navbar-text" href="#">Cancel</span>
+						</span>
+						<span class="dico-fill"><span class="navbar-text dico-inner-fill"><strong>Settings</strong></span></span>
+						<span class="dico-pull-right">
+							<span id="submit_button" class="navbar-text navbar-link pull-right dico-navbar-text">Done</span>
+						</span>
+					</div>
+				</div><!-- /.nav -->
+			</div>
+		</nav>
+
+		<div class="row">
+	    	<div id="myAlert" class="col-xs-12"></div>
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">Welcome to I Do Declare. Here are two more steps to set up your account before you
+			can vote on actions and share your stories.
+			</div>
+		</div>  
+
+		<form id="createconstituent-form" class="form-simple">
+			<div class="form-group row">
+				<span class="help-block">Your street address and zip code are used to identify your elected legislators.</span>
+			</div>
+			<div class="row">
+				<div class="form-group col-xs-offset-1">
+					<label for="id_streetaddress"  class="control-label">Street Address</label> 
+					<input id="id_streetaddress" class="form-control" maxlength="254" name="streetAddress" type="text" 
+							value="{{constituent.streetAddress}}" placeholder="{{constituent.streetAddress}}" required/>
+				</div>
+			</div>
+			<div class="row">
+				<div class="form-group col-xs-offset-1">
+					<label for="id_zipcode"  class="control-label">Zip Code</label> 
+					<input id="id_zipcode" class="form-control" maxlength="5" name="zipcode" type="text" 
+							value="{{constituent.zipCode}}" placeholder="{{constituent.zipCode}}" required/>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<span class="text-muted">Would you like help to easily share your voice periodically? Sign up to 
+						get messages so you can directly speak up on the issues you care about.</span>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label id="dailyButton" class="radio-inline">
+						  <input type="radio" name="frequencyOptions" id="id_dailyradio" value=1 />
+						  <span class="text-muted">Help Me Daily</span>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label id="weeklyButton" class="radio-inline">
+						  <input type="radio" name="frequencyOptions" id="weeklyRadio" value=2 />
+						  <span class="text-muted">Help Me Weekly</span>
+						</label>			
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2">
+						<label id="noneButton" class="radio-inline">
+						  <input type="radio" name="frequencyOptions" id="noneRadio" value=0 />
+						  <span class="text-muted">No Thanks</span>
+						</label>
+					</div>			
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="row">
+					<span class="text-muted">How would you like to be helped?</span>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label class="radio-inline">
+						<input type="radio" name="viaOptions" id="id_viasms" value=1></input>
+						<span class="text-muted">With a Text Message</span>
+						</label>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-3 group-row-item">
+						<label for="id_phonenumber" class="control-label sr-only">Phone Number</label> 
+						<input id="id_phonenumber" class="form-control" maxlength="25" name="phonenumber" type="text" 
+								value="{{contactMethod.phonenumber}}" placeholder="{{contactMethod.phonenumber}}" />
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-offset-2 group-row-item">
+						<label class="radio-inline">
+						<input type="radio" name="viaOptions" id="id_viaemail" value=2></input>
+						<span class="text-muted">With an E-Mail</span>
+						</label>
+					</div>
+				</div>
+			</div>		
+			<div class="form-group">
+				<div class="row">
+					<a class="btn btn-link btn-xs" href="{% url 'docTermsOfUse' %}">Terms of Use</a>
+				</div>
+			</div>
+		</form>
+	</div>
+
+<!--     IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="{% static "bootstrap/assets/js/ie10-viewport-bug-workaround.js" %}"></script>
+  </body>
+  
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+	<script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$(".close").click(function(){
+				$(this).parent().alert();
+			});
+			
+			bootstrap_alert = function() {}
+			bootstrap_alert.show = function(parentDiv, message, alertClass) {
+				parentDiv.html('<div class="alert ' + alertClass + ' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+			}
+			bootstrap_alert.warning = function(message) {
+				bootstrap_alert.show($('#myAlert'), message, "alert-danger");
+			}
+        	closealert = function() { 
+        		$('.alert').parent().html('');
+        	}
+        	
+        	 $("input[name=frequencyOptions][value={{contactMethod.frequency}}]").attr("checked", true);
+        	 $("input[name=viaOptions][value={{contactMethod.via}}]").attr("checked", true);
+			
+			$("#createconstituent-form").on('submit', function (e) {
+				closealert();
+				bootstrap_alert.show($('#myAlert'), "Updating Settings...", "alert-info");
+				
+				deferredObject = $.post("{% url 'updateConstituent' %}", 
+					{ csrfmiddlewaretoken: '{{ csrf_token }}', 
+						"newStreetAddress": $("#id_streetaddress").val(),
+						"newZipcode": $("#id_zipcode").val(),
+						"newContactFrequency": $('input[name=frequencyOptions]:checked', '#createconstituent-form').val(),
+						"newContactVia": $('input[name=viaOptions]:checked', '#createconstituent-form').val(),
+						"newContactPhone": $("#id_phonenumber").val()
+					})
+				  .done(function(json, textStatus, jqXHR)
+					{
+						if (json['success']) {
+							closealert();
+							var encodedRef = encodeURIComponent("{{backURL}}");
+							window.location = "{% url 'editInterests' %}?back="+encodedRef
+						}
+						else {
+							bootstrap_alert.warning(json['error']);
+						}
+					})
+				  .fail(function(jqXHR, textStatus, errorThrown) {
+		    		bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+					console.log( "error: " + textStatus + "; " + errorThrown + ";");
+					console.log( jqXHR.status + "; " + jqXHR.statusText);
+				  });
+
+			   //stop form submission
+			   e.preventDefault();
+			});
+
+			function revokeFBAccess(accessToken) {
+				var revoke_perm_url = "https://graph.facebook.com/me/permissions";
+				$.post(revoke_perm_url,
+					{
+					   'access_token' : accessToken,
+					   'method' : 'delete'
+					})
+				  .done(function(json, textStatus, jqXHR)
+					{
+						window.location.href = "{% url 'signout' %}";
+					})
+				  .fail(function(jqXHR, textStatus, errorThrown) {
+		    		bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+					console.log( "error: " + textStatus + "; " + errorThrown + ";");
+					console.log( jqXHR.status + "; " + jqXHR.statusText);
+				  });
+			}
+			$("#cancel_button").click(function(e) {
+				{% if accessToken %}
+					revokeFBAccess("{{accessToken}}");
+				{% else %}
+					window.location.href = "{% url 'signout' %}";
+				{% endif %}
+				e.preventDefault();
+			});
+			
+			$("#submit_button").click(function(e) {
+				testzipcode = $("#id_zipcode").val();
+				if (testzipcode.length != 5 && testzipcode.length != 0)
+				{
+					bootstrap_alert.warning("The zip code must be five digits.");
+					$("#id_zipcode").focus();
+				}
+				else
+					$("#createconstituent-form").submit();
+				e.preventDefault();
+			});
+		
+			$("#id_username").bind("keyup input paste", checkenabled);
+			$("#id_firstname").bind("keyup input paste", checkenabled);
+			$("#id_lastname").bind("keyup input paste", checkenabled);
+			$("#id_streetaddress").bind("keyup input paste", checkenabled);
+			$("#id_zipcode").bind("keyup input paste", checkenabled);
+			checkenabled();
+			document.getElementById('id_streetaddress').focus()
+		});
+		
+		function checkenabled() {
+			// Make sure the zipcode is 5 characters.
+			testzipcode = $("#id_zipcode").val();
+			if (testzipcode.length != 5 && testzipcode.length != 0)
+				$( "#submit_button" ).prop( "disabled", true );
+			else	
+				$( "#submit_button" ).prop( "disabled", false );
+		};
+		
+	</script>
+</html>

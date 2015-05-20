@@ -9,6 +9,8 @@ urlpatterns = patterns(
     url(r'^signin/', views.signin, name='signin'),
     # ex: /dico/submitsignin/
     url(r'^submitsignin/', views.submitsignin, name='submitSignin'),
+    # ex: /dico/submitFacebookSignin
+    url(r'^submitfacebooksignin/', views.submitFacebookSignin, name='submitFacebookSignin'),
     # ex: /dico/signout/
     url(r'^signout/', views.signout, name='signout'),
     # ex: /dico/editinterests/

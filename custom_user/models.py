@@ -6,6 +6,7 @@ from django.utils import timezone
 import datetime
 
 class AuthUserManager(BaseUserManager):
+    # create_user is required from a prototype of BaseUserManager
     def create_user(self, username, email, password=None):
         if not email:
             raise ValueError('Users must have an email address')
@@ -19,6 +20,7 @@ class AuthUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    # create_superuser is required from a prototype of BaseUserManager
     def create_superuser(self, username, email, password):
         user = self.create_user(username=username, email=email, password=password)
         user.is_staff = True
@@ -26,7 +28,7 @@ class AuthUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
         
-    def update_user(self, user, newEmail, newPassword, newFirstName, newLastName):
+    def update_user(self, user, newEmail, newFirstName, newLastName):
         if len(newEmail) == 0:
             newEmail = user.email
         if len(newFirstName) == 0:
@@ -34,9 +36,6 @@ class AuthUserManager(BaseUserManager):
         if len(newLastName) == 0:
             newLastName = user.last_name
         
-        if len(newPassword) > 0:
-            user.set_password(newPassword)
-            user.save()
         self.all().filter(id=user.id).update(email=self.normalize_email(newEmail), first_name=newFirstName, last_name=newLastName);
 
 class AuthUser(AbstractBaseUser, PermissionsMixin):

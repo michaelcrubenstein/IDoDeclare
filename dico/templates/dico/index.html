@@ -131,8 +131,10 @@
 <!-- jQuery  -->
 <script src="{% static "jquery/js/jquery.min.js" %}"></script>
 <script src="{% static "jquery/js/spin.min.js" %}"></script>
+<script src="{% static "jquerycookie/jquery.cookie.js" %}"></script>
 
 <script src="{% static "dico/js/mapus.js" %}"></script>
+
 
 <!-- Scripts for this web page -->
 <script type="text/JavaScript">	
@@ -188,7 +190,16 @@
 													 "accessToken" : response.authResponse.accessToken },
 		  function(json){
 			if (json['success']) {
-				window.location.href = "{% url 'home' %}?accessToken="+json['accessToken'];
+				$.cookie("authenticator", "Facebook", { path: "/"});
+				if (json['setupRequired']) {
+					var encodedRef = encodeURIComponent(window.location.href);
+					nextURL = "{% url 'editInterests' %}?back="+encodedRef
+					window.location.href = "{% url 'constituentSettings' %}?next="+nextURL+";accessToken="+json['accessToken'];
+				}
+				else
+				{
+					window.location.href = "{% url 'home' %}";
+				}
 			}
 			else
 			{

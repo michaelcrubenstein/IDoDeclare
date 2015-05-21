@@ -206,11 +206,11 @@ class Constituent(models.Model):
         return senators + reps
         
     # Update the properties of this constituent.    
-    def update_fields(self, newUsername, newPassword, newFirstName, newLastName, newStreetAddress, newZipCode, newState, newDistrict):
+    def update_fields(self, newUsername, newFirstName, newLastName, newStreetAddress, newZipCode, newState, newDistrict):
          
         with transaction.atomic():
             manager = get_user_model().objects    
-            manager.update_user(self.user, newUsername, newPassword, newFirstName, newLastName)
+            manager.update_user(self.user, newUsername, newFirstName, newLastName)
             
             if len(newStreetAddress) == 0:
                 newStreetAddress = self.streetAddress

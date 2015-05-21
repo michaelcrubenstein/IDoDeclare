@@ -30,7 +30,7 @@
 	<div id='container' class="container-fluid">
 		<style>
 			body {
-				padding-top: 25px;
+				padding-top: 55px;
 				padding-bottom: 220px;
 			}
 			header {
@@ -51,10 +51,8 @@
 				border: 0;
 				margin: 3px;
 			}
-			.logo {
-				position: absolute;
-				width: 100%;
-				padding-left: 7px;
+			nav>div>div>p {
+				padding-left: 15px;
 			}
 			.hello {
 				position: fixed;
@@ -64,33 +62,58 @@
 				font-size: 0.8em;
 			}
 		</style>
-		<header>
-			<span class="logo text-left">I Do Declare</span>
-			<span class="hello text-right">Hello, {{ user.get_full_name }}</span>
-		</header>
-<!-- 
-		<nav class="navbar navbar-default dico-navbar" role="navigation">
-			<div class="container-fluid">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid visible-xs-block">
 				<!~~ Brand and toggle get grouped for better mobile display ~~>
-				<div class="nav navbar-header pull-left">
+				<div class="navbar-header pull-left">
+					<p class="navbar-text">I Do Declare</p>
+				</div>
+
+				<div class="navbar-header pull-right">
+				  <button type="button" class="navbar-toggle navbar-right" data-toggle="collapse" 
+				  	data-target="#id_navbarCollapse">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				  </button>
 				</div>
 
 				<!~~ Collect the nav links, forms, and other content for toggling ~~>
-				<div class="nav navbar-nav navbar-header pull-right">
+				<div class="collapse navbar-collapse" id="id_navbarCollapse">
+				    <ul class="nav navbar-nav pull-right">
+						<li><a class="accountSettingsLink">Change Account</a></li>
+						<li><a class="changePasswordLink">Change Password</a></li>
+						<li class="divider"></li>
+						<li><a class="signOutLink">Sign Out</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="container-fluid hidden-xs">
+				<!~~ Brand and toggle get grouped for better mobile display ~~>
+				<div class="navbar-header navbar-left">
+					<span class="navbar-brand">I Do Declare</span>
+				</div>
+
+				<!~~ Collect the nav links, forms, and other content for toggling ~~>
+				<div class="nav navbar-nav navbar-header navbar-right">
 					<li class="dropdown">
-					  <a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
-					  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-					  </ul>
+						<a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
+						<ul class="dropdown-menu dropdown-menu-right" role="menu">
+							<li class="text-muted"><a class="accountSettingsLink">Change Account</a></li>
+							<li class="text-muted"><a class="changePasswordLink">Change Password</a></li>
+							<li class="divider"></li>
+							<li class="text-muted"><a class="signOutLink">Sign Out</a></li>
+						</ul>
 					</li>
 				</div>
 			</div>
 		</nav>
- -->
 		
 		<style>
 			footer {
 				position: fixed;
-				top: calc(100% - 220px);
+				top: calc(100% - 100px);
 				left: 0;
 				height: 220px;
 				width: 100%;
@@ -108,52 +131,34 @@
 				display: inline-block;
 			}
 			#id_createActionSpan {
-				top: calc(100% - 200px);
+				top: calc(100% - 90px);
 				left: calc(50% - 150px);
 				text-align: center;
 				width: 300px;
 			}
 			#id_learnActionSpan {
-				top: calc(100% - 160px);
+				top: calc(100% - 60px);
 				left: 0px;
 				width: 40%;
 				text-align: right;
 			}
 			#id_changeVoteSpan {
-				top: calc(100% - 160px);
+				top: calc(100% - 60px);
 				left: 60%;
 				text-align: left;
 				width: 40%;
 			}
 			#id_shareStorySpan {
-				top: calc(100% - 120px);
+				top: calc(100% - 30px);
 				left: 0px;
 				width: 30%;
 				text-align: right;
 			}
 			#id_editInterestsSpan {
-				top: calc(100% - 120px);
+				top: calc(100% - 30px);
 				left: 70%;
 				width: 30%;
 				text-align: left;
-			}
-			#id_accountSettingsSpan {
-				top: calc(100% - 80px);
-				left: 0px;
-				width: 40%;
-				text-align: right;
-			}
-			#id_changePasswordSpan {
-				top: calc(100% - 80px);
-				left: calc(60%);
-				text-align: left;
-				width: 40%;
-			}
-			#id_signOutSpan {
-				top: calc(100% - 40px);
-				left: calc(50% - 150px);
-				text-align: center;
-				width: 300px;
 			}
 		</style>
 		<footer>
@@ -162,9 +167,6 @@
 			<span id="id_changeVoteSpan" class="text-muted"><a id="id_changeVoteLink">Change Your Vote</a></span>
 			<span id="id_shareStorySpan" class="text-muted"><a id="id_shareStoryLink">Share a Story</a></span>
 			<span id="id_editInterestsSpan" class="text-muted"><a id="id_editInterestsLink">Identify Your Interests</a></span>
-			<span id="id_accountSettingsSpan" class="text-muted"><a id="id_accountSettingsLink">Change Account</a></span>
-			<span id="id_changePasswordSpan" class="text-muted"><a id="id_changePasswordLink">Change Password</a></span>
-			<span id="id_signOutSpan" class="text-muted"><a id="id_signOutLink">Sign Out</a></span>
 		</footer>
 		
 		<div class="row">
@@ -230,6 +232,8 @@
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="{% static "jquery/js/jquery.min.js" %}"></script>
+<script src="{% static "jquerycookie/jquery.cookie.js" %}"></script>
+
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
 
@@ -242,15 +246,24 @@
 	
 	$(document).ready (function() {
 		var encodedRef = encodeURIComponent(window.location.href);
-		$("#id_accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
-		$("#id_changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
+		
 		$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
 		$("#id_createActionLink").attr("href", "{% url 'createPetition' %}?back="+encodedRef);
 		$("#id_changeVoteLink").attr("href", "{% url 'issues' %}?actionPanel=vote;backURL="+encodedRef+";backName=Home");
 		$("#id_shareStoryLink").attr("href", "{% url 'issues' %}?actionPanel=story;backURL="+encodedRef+";backName=Home");
 		$("#id_learnActionLink").attr("href", "{% url 'issues' %}?actionPanel=debate;backURL="+encodedRef+";backName=Home");
-		$("#id_signOutLink").attr("href", "{% url 'signout' %}");
+		$(".signOutLink").attr("href", "{% url 'signout' %}");
 		
+		if ($.cookie("authenticator") == "email")
+		{
+			$(".accountSettingsLink").attr("href", "{% url 'account' %}?back="+encodedRef);
+			$(".changePasswordLink").attr("href", "{% url 'password' %}?back="+encodedRef);
+		}
+		else
+		{
+			$(".accountSettingsLink").attr("href", "{% url 'constituentSettings' %}?back="+encodedRef+";next="+encodedRef);
+			$(".changePasswordLink").css("display", "none");
+		}
 		$(".petition-news-item").click(function(e) {
 			window.location.href="/dico/" + $(this).attr("petition") + "/petition/?vote;showNext;backURL="+encodedRef+";backName=Home"
 		});

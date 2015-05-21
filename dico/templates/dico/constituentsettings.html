@@ -189,8 +189,7 @@
 					{
 						if (json['success']) {
 							closealert();
-							var encodedRef = encodeURIComponent("{{backURL}}");
-							window.location = "{% url 'editInterests' %}?back="+encodedRef
+							window.location = "{{ nextURL }}"
 						}
 						else {
 							bootstrap_alert.warning(json['error']);
@@ -227,7 +226,7 @@
 				{% if accessToken %}
 					revokeFBAccess("{{accessToken}}");
 				{% else %}
-					window.location.href = "{% url 'signout' %}";
+					window.location.href = "{{ backURL }}";
 				{% endif %}
 				e.preventDefault();
 			});

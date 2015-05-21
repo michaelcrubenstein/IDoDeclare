@@ -95,6 +95,7 @@
 		  			$.cookie("email", $("#id_username").val(), { expires : 10 });
 		  		else
 		  			$.removeCookie("email");
+		  		$.cookie("authenticator", "email", { path: "/"});
 		  		window.location = "{{backURL}}"
 		  	}
 		  	else

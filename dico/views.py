@@ -29,36 +29,21 @@ def index(request):
     if request.user.is_authenticated():
         constituent = Constituent.get_constituent(request.user)
         if constituent is None:
-            template = loader.get_template('dico/constituentsettings.html')
-            backURL = request.GET.get('back', '/dico/')
-            contactMethod = { 'via': 1, 'frequency': 2 }
-            accessToken = request.GET.get('accessToken', None)
-            context = RequestContext(request, {
-                'user': request.user,
-                'backURL': urllib.parse.unquote_plus(backURL),
-                'contactMethod': contactMethod,
-                'accessToken':accessToken,
-            })
+            # log out the current user so that the landing page is clean.
+            logout(request)
         else:
             template = loader.get_template('dico/home.html')
-            issue_list = Issue.objects.order_by('name')
-            il = []
-            for i in issue_list:
-                il = il + [{'name': i.name, 'id': i.id}]
             context = RequestContext(request, {
                 'user': request.user,
-                'issue_list': json.dumps(il),
-                'my_issue_list' : Constituent.get_interests(request.user),
                 'member_list': Constituent.get_members(request.user),
                 'news_list': Constituent.get_news(request.user),
             })
-    else:
-        template = loader.get_template('dico/index.html')
-        
-        context = RequestContext(request, {
-            'template': 'dico/index.html',
-            'facebookAppID': settings.FACEBOOK_APP_ID, 
-        })
+            return HttpResponse(template.render(context))
+            
+    template = loader.get_template('dico/index.html')
+    context = RequestContext(request, {
+        'facebookAppID': settings.FACEBOOK_APP_ID, 
+    })
         
     return HttpResponse(template.render(context))
 
@@ -87,9 +72,9 @@ def submitsignin(request):
         else:
             raise Exception('This login is invalid.');
     except Exception as e:
-        log = open('exception.log', 'a')
-        log.write("%s\n" % traceback.format_exc())
-        log.flush()
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
         results = {'success':False, 'error': str(e)}
             
     return JsonResponse(results)
@@ -97,16 +82,14 @@ def submitsignin(request):
 def submitFacebookSignin(request):
     try:
         accessToken = request.POST['accessToken']
-        with open('exception.log', 'a') as log:
-            log.write("accessToken:\n%s\n\n" % str(accessToken))
-            log.flush()
-
         user = authenticate(accessToken=accessToken)
         if user is not None:
             if user.is_active:
                 login(request, user)
+                setupRequired = (Constituent.get_constituent(user) is None)
                 results = {'success':True,
-                		   'accessToken':accessToken}
+                           'setupRequired': setupRequired,
+                           'accessToken':accessToken}
             else:
                 raise Exception('This account is disabled.')
         else:
@@ -151,6 +134,27 @@ def account(request):
         'user': request.user,
         'constituent': constituent,
         'backURL': urllib.parse.unquote_plus(backURL),
+        'contactMethod': contactMethod
+    })
+    return HttpResponse(template.render(context))
+
+def constituentSettings(request):
+    if not request.user.is_authenticated:
+        return signin(request)
+    
+    template = loader.get_template('dico/constituentsettings.html')
+    backURL = request.GET.get('back', '/dico/')
+    nextURL = request.GET.get('next', '/dico/')
+    accessToken = request.GET.get('accessToken', None)
+    constituent = Constituent.get_constituent(request.user)
+    contactMethod = ContactMethod.get_contact_method(request.user)
+        
+    context = RequestContext(request, {
+        'user': request.user,
+        'constituent': constituent,
+        'backURL': urllib.parse.unquote_plus(backURL),
+        'nextURL': urllib.parse.unquote_plus(nextURL),
+        'accessToken': accessToken,
         'contactMethod': contactMethod
     })
     return HttpResponse(template.render(context))
@@ -476,7 +480,7 @@ def updateConstituent(request):
                 if len(newZipCode) == 0:
                     newZipCode = constituent.zipCode
                 districtInfo = getDistrict(newStreetAddress + " " + newZipCode)
-                constituent.update_fields(newUsername, newPassword, 
+                constituent.update_fields(newUsername, 
                                           newFirstName, newLastName, newStreetAddress, newZipCode, 
                                           districtInfo[0]["state"], districtInfo[0]["district"])
         

@@ -1101,8 +1101,10 @@ def petition(request, petition_id):
         
     if 'showNext' in request.GET:
         nextPetition = Petition.objects.get_next_petition(petition_id=petition_id, user=request.user)
+        showDoneVoting = True
     else:
         nextPetition = None
+        showDoneVoting = False
         
     filter = Petition.objects.filter(id=petition_id)
     context = RequestContext(request, {
@@ -1111,7 +1113,8 @@ def petition(request, petition_id):
         'backURL' : urllib.parse.unquote_plus(backURL),
         'backName': urllib.parse.unquote_plus(backName),
         'initialButton': initialButton,
-        'nextPetition': nextPetition
+        'nextPetition': nextPetition,
+        'showDoneVoting': showDoneVoting,
     })
     return HttpResponse(template.render(context))
     

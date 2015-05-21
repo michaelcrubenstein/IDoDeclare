@@ -195,15 +195,21 @@
 						</label>
 					</div>
 				</div>
-				{% if nextPetition %}
 				<div class="col-xs-12">
 					<div>
-						<div id="id_nextlink" class="text-muted" onclick="go_to_next_petition()"> Next Action
+						<div id="id_nextlink" class="text-muted" onclick="go_to_next_petition()"> 
+							{% if nextPetition %}
+							Next Action
 							<span class="glyphicon glyphicon-chevron-right"></span>
+							{% else %}
+								{% if showDoneVoting %}
+								Done Voting
+								<span class="glyphicon glyphicon-chevron-right"></span>
+								{% endif %}
+							{% endif %}
 						</div>
 					</div>
 				</div>
-				{% endif %}
 			</section>
 			{% endif %}
 			<section id="id_debateSection" class="row">
@@ -562,13 +568,15 @@
 		
 	});
 	
-	{% if nextPetition %}
 	function go_to_next_petition() {
-		var backURL = encodeURIComponent("{{backURL}}");
-		var backName = encodeURIComponent("{{backName}}");
-		window.location.href = "/dico/{{nextPetition.id}}/petition/?vote;showNext;backURL="+backURL+";backName="+backName;
+		{% if nextPetition %}
+			var backURL = encodeURIComponent("{{backURL}}");
+			var backName = encodeURIComponent("{{backName}}");
+			window.location.href = "/dico/{{nextPetition.id}}/petition/?vote;showNext;backURL="+backURL+";backName="+backName;
+		{% else %}
+			window.location.href = "{{backURL}}"
+		{% endif %}
 	}
-	{% endif %}
 
 	function show_petition_issues() {
 	  $.post("{% url 'getPetitionIssues' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){

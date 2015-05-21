@@ -15,9 +15,6 @@ class FacebookBackend(object):
             origin_req_host=settings.FACEBOOK_REQ_HOST)
         response = urllib.request.urlopen(fbrequest)
         data = json.loads(response.read().decode("UTF-8"))
-        with open('exception.log', 'a') as log:
-            log.write("data:\n %s\n\n" % str(data))
-            log.flush()
         if data['id'] != settings.FACEBOOK_APP_ID:
             return None
             
@@ -25,9 +22,6 @@ class FacebookBackend(object):
             origin_req_host=settings.FACEBOOK_REQ_HOST)
         response = urllib.request.urlopen(fbrequest)
         data = json.loads(response.read().decode("UTF-8"))
-        with open('exception.log', 'a') as log:
-            log.write("data:\n %s\n\n" % str(data))
-            log.flush()
         
         if 'email' not in data:
             return None

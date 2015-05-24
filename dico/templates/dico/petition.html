@@ -388,6 +388,8 @@
 <script src="{% static "jquery/js/jquery.min.js" %}"></script>
 <script src="{% static "jqueryui/js/jquery-ui.min.js" %}"></script>
 <script src="{% static "jqueryui/js/jquery.ui.touch-punch.min.js" %}"></script>
+<script src="{% static "jquerycookie/jquery.cookie.js" %}"></script>
+
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
 <script src="{% static "d3/d3.v3.min.js" %}"></script>
@@ -1327,7 +1329,7 @@
 					}
 					else
 					{
-						window.location.href = "{% url 'home' %}";
+						window.location.reload(true);
 					}
 				}
 				else

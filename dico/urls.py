@@ -43,8 +43,8 @@ urlpatterns = patterns(
     url(r'^newinterest/', views.newInterest, name='newInterest'),
     # ex: /dico/submitdeleteinterest/
     url(r'^submitdeleteinterest/', views.submitdeleteinterest, name='deleteInterest'),
-    # ex: /dico/createConstituent/
-    url(r'^createConstituent/', views.createConstituent, name='createConstituent'),
+    # ex: /dico/signup/
+    url(r'^signup/', views.signup, name='signup'),
     # ex: /dico/newconstituent/
     url(r'^newconstituent/', views.newConstituent, name='newConstituent'),
     # ex: /dico/updateconstituent/

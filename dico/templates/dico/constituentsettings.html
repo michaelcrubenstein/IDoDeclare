@@ -63,7 +63,7 @@
 			</div>
 		</div>  
 
-		<form id="createconstituent-form" class="form-simple">
+		<form class="form-simple">
 			<div class="form-group row">
 				<span class="help-block">Your street address and zip code are used to identify your elected legislators.</span>
 			</div>
@@ -173,7 +173,7 @@
         	 $("input[name=frequencyOptions][value={{contactMethod.frequency}}]").attr("checked", true);
         	 $("input[name=viaOptions][value={{contactMethod.via}}]").attr("checked", true);
 			
-			$("#createconstituent-form").on('submit', function (e) {
+			$("form").on('submit', function (e) {
 				closealert();
 				bootstrap_alert.show($('#myAlert'), "Updating Settings...", "alert-info");
 				
@@ -181,8 +181,8 @@
 					{ csrfmiddlewaretoken: '{{ csrf_token }}', 
 						"newStreetAddress": $("#id_streetaddress").val(),
 						"newZipcode": $("#id_zipcode").val(),
-						"newContactFrequency": $('input[name=frequencyOptions]:checked', '#createconstituent-form').val(),
-						"newContactVia": $('input[name=viaOptions]:checked', '#createconstituent-form').val(),
+						"newContactFrequency": $('input[name=frequencyOptions]:checked', 'form').val(),
+						"newContactVia": $('input[name=viaOptions]:checked', 'form').val(),
 						"newContactPhone": $("#id_phonenumber").val()
 					})
 				  .done(function(json, textStatus, jqXHR)
@@ -239,7 +239,7 @@
 					$("#id_zipcode").focus();
 				}
 				else
-					$("#createconstituent-form").submit();
+					$("form").submit();
 				e.preventDefault();
 			});
 		

@@ -12,8 +12,6 @@ from sunlight import congress
 from dico.emailer import Emailer
 
 import traceback
-import urllib
-import urllib.parse
 import json
 import uuid
 
@@ -54,7 +52,7 @@ def signin(request):
     backURL = request.GET.get(u'backURL', "/dico/")
         
     context = RequestContext(request, {
-        'backURL' : urllib.parse.unquote_plus(backURL),
+        'backURL' : backURL,
     })
     return HttpResponse(template.render(context))
 
@@ -115,7 +113,7 @@ def editInterests(request):
         
     context = RequestContext(request, {
         'user': request.user,
-        'backURL': urllib.parse.unquote_plus(backURL),
+        'backURL': backURL,
     })
     return HttpResponse(template.render(context))
 
@@ -133,7 +131,7 @@ def account(request):
     context = RequestContext(request, {
         'user': request.user,
         'constituent': constituent,
-        'backURL': urllib.parse.unquote_plus(backURL),
+        'backURL': backURL,
         'contactMethod': contactMethod
     })
     return HttpResponse(template.render(context))
@@ -152,8 +150,8 @@ def constituentSettings(request):
     context = RequestContext(request, {
         'user': request.user,
         'constituent': constituent,
-        'backURL': urllib.parse.unquote_plus(backURL),
-        'nextURL': urllib.parse.unquote_plus(nextURL),
+        'backURL': backURL,
+        'nextURL': nextURL,
         'accessToken': accessToken,
         'contactMethod': contactMethod
     })
@@ -168,7 +166,7 @@ def password(request):
         
     context = RequestContext(request, {
         'user': request.user,
-        'backURL': urllib.parse.unquote_plus(backURL)
+        'backURL': backURL,
     })
     return HttpResponse(template.render(context))
 
@@ -179,10 +177,12 @@ def forgotPassword(request):
         return signin(request)
     
     template = loader.get_template('dico/forgotpassword.html')
-    backURL = request.GET.get('back', '/dico/')
+    backURL = request.GET.get('backURL', '/dico/')
+    nextURL = request.GET.get('nextURL', '/dico/')
         
     context = RequestContext(request, {
-        'backURL': urllib.parse.unquote_plus(backURL)
+        'backURL': backURL,
+        'nextURL': nextURL,
     })
     return HttpResponse(template.render(context))
 
@@ -219,8 +219,8 @@ def createPetition(request):
 
     context = RequestContext(request, {
         'user': request.user,
-        'backURL': urllib.parse.unquote_plus(backURL),
-        'backName': urllib.parse.unquote_plus(backName),
+        'backURL': backURL,
+        'backName': backName,
         'issue': issue,
         'allIssues': allIssues,
     })
@@ -254,8 +254,8 @@ def addPetitionIssue(request, petition_id):
         'user': request.user,
         'petition': petition,
         'allIssues': allIssues,
-        'backURL': urllib.parse.unquote_plus(backURL),
-        'backName': urllib.parse.unquote_plus(backName),
+        'backURL': backURL,
+        'backName': backName,
     })
     return HttpResponse(template.render(context))
 
@@ -368,20 +368,22 @@ def submitdeleteinterest(request):
         Constituent.delete_interest(request.user, oldinterest)
         results = {'success':True}
     except Exception as e:
-        log = open('exception.log', 'a')
-        log.write("%s\n" % traceback.format_exc())
-        log.flush()
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
         results = {'success':False, 'error': str(e)}
             
     return JsonResponse(results)
 
-def createConstituent(request):
-    template = loader.get_template('dico/createConstituent.html')
+def signup(request):
+    template = loader.get_template('dico/signup.html')
 
-    backURL = request.GET.get('back', '/dico/')
+    backURL = request.GET.get('backURL', '/dico/')
+    nextURL = request.GET.get('nextURL', '/dico/')
 
     context = RequestContext(request, {
-        'backURL' : urllib.parse.unquote_plus(backURL)
+        'backURL' : backURL,
+        'nextURL' : nextURL,
     })
     return HttpResponse(template.render(context))
     
@@ -749,8 +751,8 @@ def addSupportingArgument(request):
     context = RequestContext(request, {
         'user': request.user,
         'petition': petition,
-        'backURL': urllib.parse.unquote_plus(backURL),
-        'backName': urllib.parse.unquote_plus(backName),
+        'backURL': backURL,
+        'backName': backName,
         'argumentVote': 1,
         'voteLabel': "Supporting",
     })
@@ -771,8 +773,8 @@ def addOpposingArgument(request):
     context = RequestContext(request, {
         'user': request.user,
         'petition': petition,
-        'backURL': urllib.parse.unquote_plus(backURL),
-        'backName': urllib.parse.unquote_plus(backName),
+        'backURL': backURL,
+        'backName': backName,
         'argumentVote': 0,
         'voteLabel': "Opposing",
     })
@@ -793,12 +795,12 @@ def addStory(request):
     context = RequestContext(request, {
         'user': request.user,
         'petition': petition,
-        'backURL': urllib.parse.unquote_plus(backURL),
-        'backName': urllib.parse.unquote_plus(backName),
+        'backURL': backURL,
+        'backName': backName,
     })
     return HttpResponse(template.render(context))
 
-# Displays a web page for adding a supporting argument to a petition.
+# Displays a web page for showing the documentation for ratings.
 def docRatings(request):
     if not request.user.is_authenticated:
         return signin(request)
@@ -813,8 +815,8 @@ def docRatings(request):
     context = RequestContext(request, {
         'user': request.user,
         'petition': petition,
-        'backURL': urllib.parse.unquote_plus(backURL),
-        'backName': urllib.parse.unquote_plus(backName),
+        'backURL': backURL,
+        'backName': backName,
     })
     return HttpResponse(template.render(context))
 
@@ -1044,8 +1046,8 @@ def issues(request):
         
     context = RequestContext(request, {
         'user': request.user,
-        'backURL': urllib.parse.unquote_plus(backURL),
-        'backName': urllib.parse.unquote_plus(backName),
+        'backURL': backURL,
+        'backName': backName,
         'actionPanel': actionPanel,
         'helpText': helpText,
     })
@@ -1110,11 +1112,12 @@ def petition(request, petition_id):
     context = RequestContext(request, {
         'user': request.user,
         'petition': filter.get(),
-        'backURL' : urllib.parse.unquote_plus(backURL),
-        'backName': urllib.parse.unquote_plus(backName),
+        'backURL' : backURL,
+        'backName': backName,
         'initialButton': initialButton,
         'nextPetition': nextPetition,
         'showDoneVoting': showDoneVoting,
+        'facebookAppID': settings.FACEBOOK_APP_ID, 
     })
     return HttpResponse(template.render(context))
     

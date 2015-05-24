@@ -55,10 +55,11 @@
         		$(".alert").parent().html('');
         	}
         	
-        	var encodedURL = encodeURIComponent("{{backURL}}");
-        	$("#id_create_constituent_link").attr("href", "{% url 'createConstituent' %}?back="+encodedURL);
-        	$("#id_forgot_password_link").attr("href", "{% url 'forgotPassword' %}?back="+encodedURL);
-			
+        	var nextURL = encodeURIComponent("{{backURL}}");
+        	var backURL = encodeURIComponent(window.location.href);
+        	$("#id_forgot_password_link").attr("href", "{% url 'forgotPassword' %}?backURL="+backURL+";nextURL="+nextURL);
+        	$("#id_signup_link").attr("href", "{% url 'signup' %}?backURL="+backURL+";nextURL="+nextURL);
+
 			$("#cancel_button").click(function(e) {
 				var backURL = encodeURIComponent("{{backURL}}");
 				var backName = encodeURIComponent("{{backName}}");
@@ -66,7 +67,7 @@
 				e.preventDefault();
 			});
 
-			$("#id_signinform").on('submit', function (e) {
+			$("form").on('submit', function (e) {
 				closealert();
 				sign_in();
 				
@@ -129,7 +130,7 @@
 			</div>
 		</nav>
 
-      <form id="id_signinform" class="form-signin">
+      <form class="form-signin">
 	    <div id="myAlert"></div>
         <label for="id_username" class="sr-only">Email address</label>
         <input type="email" id="id_username" maxlength="254" name="username" class="form-control" placeholder="Email address" required autofocus>
@@ -144,7 +145,7 @@
       </form>
 
 	  <div class="div-create-new-account">
-	  	Don't have an account? <a id="id_create_constituent_link">Create one now.</a>
+	  	Don't have an account? <a id="id_signup_link">Create one now.</a>
 	  </div>
 	  <div class="div-forgot-password">
 		Forgot your password? <a id="id_forgot_password_link">Reset it now.</a>

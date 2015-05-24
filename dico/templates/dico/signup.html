@@ -52,7 +52,7 @@
         		$('.alert').parent().html('');
         	}
 			
-			$("#createconstituent-form").on('submit', function (e) {
+			$("form").on('submit', function (e) {
 				closealert();
 				
 				if ($("#id_username").val() === "") {
@@ -104,15 +104,15 @@
 							"lastName": $("#id_lastname").val(),
 							"streetAddress": $("#id_streetaddress").val(),
 							"zipcode": $("#id_zipcode").val(),
-							"contactFrequency": $('input[name=frequencyOptions]:checked', '#createconstituent-form').val(),
-							"contactVia": $('input[name=viaOptions]:checked', '#createconstituent-form').val(),
+							"contactFrequency": $('input[name=frequencyOptions]:checked', 'form').val(),
+							"contactVia": $('input[name=viaOptions]:checked', 'form').val(),
 							"contactPhone": $("#id_phonenumber").val()
 						})
 					  .done(function(json, textStatus, jqXHR)
 						{
 							if (json['success']) {
 								closealert();
-								window.location = "{% url 'editInterests' %}?back="+encodeURIComponent("{{ backURL }}");
+								window.location = "{% url 'editInterests' %}?back="+encodeURIComponent("{{ nextURL }}");
 							}
 							else {
 								bootstrap_alert.warning(json['error']);
@@ -205,7 +205,7 @@
 
 <body max-width="100%">
     <div class="container">
-		<form id="createconstituent-form" class="form-simple">
+		<form class="form-simple">
 			<div class="row">
 				<h3>Join I Do Declare today.</h3>
 

@@ -52,7 +52,7 @@
         	 $("input[name=frequencyOptions][value={{contactMethod.frequency}}]").attr("checked", true);
         	 $("input[name=viaOptions][value={{contactMethod.via}}]").attr("checked", true);
 			
-			$("#createconstituent-form").on('submit', function (e) {
+			$("form").on('submit', function (e) {
 				closealert();
 				bootstrap_alert.show($('#myAlert'), "Updating Account...", "alert-info");
 				
@@ -63,8 +63,8 @@
 						"newLastName": $("#id_lastname").val(),
 						"newStreetAddress": $("#id_streetaddress").val(),
 						"newZipcode": $("#id_zipcode").val(),
-						"newContactFrequency": $('input[name=frequencyOptions]:checked', '#createconstituent-form').val(),
-						"newContactVia": $('input[name=viaOptions]:checked', '#createconstituent-form').val(),
+						"newContactFrequency": $('input[name=frequencyOptions]:checked', 'form').val(),
+						"newContactVia": $('input[name=viaOptions]:checked', 'form').val(),
 						"newContactPhone": $("#id_phonenumber").val()
 					})
 				  .done(function(json, textStatus, jqXHR)
@@ -123,7 +123,7 @@
 
 <body max-width="100%">
     <div class="container">
-		<form id="createconstituent-form" class="form-simple">  
+		<form class="form-simple">  
     		<h3>Account Settings</h3>
 			<div class="form-group row">
 				<label for="id_username"  class="control-label">Email Address</label> 

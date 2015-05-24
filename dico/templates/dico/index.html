@@ -99,7 +99,7 @@
 		</article>
 		<footer>
 			<h3>Let's Get Started!</h3>
-			<div class="social-login-div">
+			<div class="social-login">
 				<fb:login-button class="fb-login-button" data-max-rows="1" data-size="large" 
 					data-show-faces="false" data-auto-logout-link="false" 
 					scope="public_profile,email" onlogin="checkFacebookLogin();">
@@ -107,7 +107,7 @@
 				<p>Or</p>
 			</div>
 			<p id="signUpParagraph">
-				<a href="{% url 'createConstituent' %}?back={% url 'home' %}">Sign Up With Your Email Address</a> 
+				<a href="{% url 'signup' %}?backURL={% url 'home' %}">Sign Up With Your Email Address</a> 
 			</p>
 			<p id="loginParagraph">
 				Already have an account? <a href="{% url 'signin' %}">Log in</a>
@@ -162,9 +162,9 @@
 			}
 		
 			if (document.domain !== "127.0.0.1")
-				$(".social-login-div").css("display", "static");
+				$(".social-login").css("display", "static");
 			else
-				$(".social-login-div").css("display", "none");
+				$(".social-login").css("display", "none");
 		}
 	}
 
@@ -233,7 +233,7 @@
 				var js, fjs = d.getElementsByTagName(s)[0];
 				if (d.getElementById(id)) return;
 				js = d.createElement(s); js.id = id;
-				js.src = "//connect.facebook.net/en_US/sdk/debug.js" /* "//connect.facebook.net/en_US/sdk.js" */ ;
+				js.src = "//connect.facebook.net/en_US/sdk.js" /* "//connect.facebook.net/en_US/sdk/debug.js" */ ;
 				fjs.parentNode.insertBefore(js, fjs);
 			  }(document, 'script', 'facebook-jssdk'));
 			window.fbAsyncInit = function() {

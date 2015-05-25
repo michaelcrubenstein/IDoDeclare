@@ -45,6 +45,8 @@ urlpatterns = patterns(
     url(r'^submitdeleteinterest/', views.submitdeleteinterest, name='deleteInterest'),
     # ex: /dico/signup/
     url(r'^signup/', views.signup, name='signup'),
+    # ex: /dico/checkUnusedEmail/
+    url(r'^checkunusedemail/', views.checkUnusedEmail, name='checkUnusedEmail'),
     # ex: /dico/newconstituent/
     url(r'^newconstituent/', views.newConstituent, name='newConstituent'),
     # ex: /dico/updateconstituent/

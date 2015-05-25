@@ -397,6 +397,27 @@ def getDistrict(address):
     #Get the list of legislators for these coordinates.
     return congress.locate_districts_by_lat_lon(coordinates[0], coordinates[1])
     
+def checkUnusedEmail(request):
+    results = {'success':False, 'error': 'checkEmail failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("checkEmail only responds to POST requests")
+
+        email = request.POST['email']
+        
+        manager = get_user_model().objects
+        if manager.filter(email=manager.normalize_email(email)).count() > 0:
+            results = {'success':False, 'error': 'That email address has already been used to sign up.'}
+        else:
+            results = {'success':True}
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
 def newConstituent(request):
     results = {'success':False, 'error': 'newConstituent failed'}
     try:
@@ -494,7 +515,7 @@ def updateConstituent(request):
 
         results = {'success':True}
     except IntegrityError as e:
-        results = {'success':False, 'error': 'That email address has already been used to sign up.'}
+        results = {'success':False, 'error': 'That email address has already been used to identify someone.'}
     except Exception as e:
         log = open('exception.log', 'a')
         log.write("%s\n" % traceback.format_exc())

@@ -151,14 +151,22 @@
 			
 			$("#id_step2").css('display', 'none');
 			
-			function show_step_2()
+			function showStep1()
 			{
-					closealert();
-					$("#id_submitbutton").text('Create');
-					$("#cancel_button").text('Back');
-					$("#id_step2").css('display', 'table');
-					$("#id_step1").css('display', 'none');
-					show_issues();
+				$("#id_submitbutton").text('Next');
+				$("#cancel_button").text('Cancel');
+				$("#id_step1").css('display', 'table');
+				$("#id_step2").css('display', 'none');
+				$("#id_textarea").focus();
+			}
+			
+			function showStep2()
+			{
+				closealert();
+				$("#id_submitbutton").text('Create');
+				$("#cancel_button").text('Back');
+				$("#id_step2").css('display', 'table');
+				$("#id_step1").css('display', 'none');
 			}
 			
 			$("#id_form").on('submit', function (e) {
@@ -168,7 +176,7 @@
 				}
 				{% if issue == null %}
 				else if ($("#id_step2").css('display') == 'none') {
-					show_step_2();
+					showStep2();
 				}
 				{% endif %}
 				else
@@ -194,11 +202,7 @@
 				}
 				else
 				{
-					$("#id_submitbutton").text('Next');
-					$("#cancel_button").text('Cancel');
-					$("#id_step1").css('display', 'table');
-					$("#id_step2").css('display', 'none');
-					$("#id_textarea").focus();
+					showStep1();
 				}
 				{% endif %}
 			});
@@ -209,7 +213,7 @@
 				}
 				{% if issue == null %}
 				else if ($("#id_step2").css('display') == 'none') {
-					show_step_2();
+					showStep2();
 				}
 				{% endif %}
 				else

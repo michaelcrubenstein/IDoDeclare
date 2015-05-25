@@ -16,6 +16,7 @@
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
     <link href="{% static "dico/css/formsimple.css" %}" rel="stylesheet">
 
 	<style>
@@ -30,309 +31,411 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-	<script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
-	<script src="{% static "jquerycookie/jquery.cookie.js" %}"></script>
-	
-	<script type="text/javascript">
-		$(document).ready(function(){
-			<!-- Block of code for an alert area at the top of the window -->
-			$(".close").click(function(){
-				$(this).parent().alert();
-			});
-			
-			bootstrap_alert = function() {}
-			bootstrap_alert.show = function(parentDiv, message, alertClass) {
-				parentDiv.html('<div class="alert ' + alertClass + ' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
-			}
-			bootstrap_alert.warning = function(message) {
-				bootstrap_alert.show($('#myAlert'), message, "alert-danger");
-			}
-        	closealert = function() { 
-        		$('.alert').parent().html('');
-        	}
-			
-			$("form").on('submit', function (e) {
-				closealert();
-				
-				if ($("#id_username").val() === "") {
-					bootstrap_alert.warning("An email address is required.");
-					$("#id_username").focus();
-				}
-				else if ($("#id_password").val() === "") {
-					bootstrap_alert.warning("A password is required.");
-					$("#id_password").focus();
-				}
-				else if ($("#id_confirmpassword").val() != $("#id_password").val()) {
-					bootstrap_alert.warning("Your password is not confirmed.");
-					$("#id_confirmpassword").focus();
-				}
-				else if ($("#id_firstname").val() === "") {
-					bootstrap_alert.warning("A first name is required.");
-					$("#id_firstname").focus();
-				}
-				else if ($("#id_lastname").val() === "") {
-					bootstrap_alert.warning("A last name is required.");
-					$("#id_lastname").focus();
-				}
-				else if ($("#id_streetaddress").val() === "") {
-					bootstrap_alert.warning("A street address is required.");
-					$("#id_streetaddress").focus();
-				}
-				else if ($("#id_zipcode").val() === "") {
-					bootstrap_alert.warning("A ZIP code is required.");
-					$("#id_zipcode").focus();
-				}
-				else if ($("#id_zipcode").val().length != 5) {
-					bootstrap_alert.warning("The ZIP code must be 5 digits");
-					$("#id_zipcode").focus();
-				}
-				else if ($("#id_phonenumber").val() === "" &&
-						 $('#id_viasms').is(':checked')) {
-					bootstrap_alert.warning("You must specify a phone number to receive help with a text message.");
-					$("#id_phonenumber").focus();
-				}
-				else
-				{
-					bootstrap_alert.show($('#myAlert'), "Signing up...<br>(this may take a minute)", "alert-info");
-				
-					deferredObject = $.post("{% url 'newConstituent' %}", 
-						{ csrfmiddlewaretoken: '{{ csrf_token }}', 
-							"username": $("#id_username").val(),
-							"password": $("#id_password").val(),
-							"firstName": $("#id_firstname").val(),
-							"lastName": $("#id_lastname").val(),
-							"streetAddress": $("#id_streetaddress").val(),
-							"zipcode": $("#id_zipcode").val(),
-							"contactFrequency": $('input[name=frequencyOptions]:checked', 'form').val(),
-							"contactVia": $('input[name=viaOptions]:checked', 'form').val(),
-							"contactPhone": $("#id_phonenumber").val()
-						})
-					  .done(function(json, textStatus, jqXHR)
-						{
-							if (json['success']) {
-								closealert();
-								window.location = "{% url 'editInterests' %}?back="+encodeURIComponent("{{ nextURL }}");
-							}
-							else {
-								bootstrap_alert.warning(json['error']);
-							}
-						})
-					  .fail(function(jqXHR, textStatus, errorThrown) {
-						console.log( "error: " + textStatus + "; " + errorThrown + ";");
-						console.log( jqXHR.status + "; " + jqXHR.statusText);
-					  	var s = jqXHR.status + "; " + jqXHR.statusText +
-							"<br>error: " + textStatus + "; " + errorThrown + ";"
-						if (jqXHR.status == 403) {
-							console.log("Error 403");
-							var csrftoken = $.cookie('csrftoken');
-							console.log("csrftoken: " + csrftoken);
-							if (csrfToken == '{{ csrf_token }}')
-								s = s + " csrftoken OK";
-							else
-								s = s + " csrftoken mismatch: (" + csrftoken + ", " + "{{ csrf_token }})";
-						}
-						bootstrap_alert.warning(s);
-					  });
-				}
-
-			   //stop form submission
-			   e.preventDefault();
-			});
-
-			$("#cancel_button").click(function(e) {
-				window.location = "{{ backURL }}";
-				e.preventDefault();
-			});
-		
-			$("input[type='text']").bind("keyup input paste", checkenabled);
-			$("input[type='password']").bind("keyup input paste", checkenabled);
-			checkenabled();
-			
-			$("#id_viasms").change(function(e) {
-				$( "#id_phonenumber" ).prop( "disabled", !($('#id_viasms').is(':checked')) );
-			});
-			
-			$("#id_dailyradio").prop("checked", true);
-			$("#id_viasms").prop("checked", true);
-		});
-		
-		function checkenabled() {
-// 			if ($("#id_username").val() === "" ||
-// 				$("#id_password").val() === "" ||
-// 				$("#id_firstname").val() === "" ||
-// 				$("#id_lastname").val() === "" ||
-// 				$("#id_streetaddress").val() === "" ||
-// 				$("#id_zipcode").val() === "")
-// 				$( "#submit_button" ).prop( "disabled", true );
-// 			else if ($("#id_confirmpassword").val() != $("#id_password").val()) {
-// 				$( "#submit_button" ).prop( "disabled", true );
-// 			}
-// 			else
-// 			{
-// 				// Make sure the email address has an "@" sign followed by a "."
-// 				testusername = $("#id_username").val();
-// 				if (testusername.indexOf("@") == -1 ||
-// 					testusername.indexOf(".") == -1 ||
-// 					testusername.indexOf("@") > testusername.lastIndexOf("."))
-// 					$( "#submit_button" ).prop( "disabled", true );
-// 				else
-// 				{
-// 					// Make sure the zipcode is 5 characters.
-// 					testzipcode = $("#id_zipcode").val();
-// 					if (testzipcode.length != 5)
-// 						$( "#submit_button" ).prop( "disabled", true );
-// 					else	
-// 						$( "#submit_button" ).prop( "disabled", false );
-// 				}
-// 			}
-			
-			if ($("#id_password").val() === "" ||
-			    $("#id_confirmpassword").val() !== $("#id_password").val())
-			{
-				$( "#id_confirm_form_group" ).removeClass( "has-success");
-			    $( "#id_passwordOK" ).removeClass( "glyphicon-ok" );
-			}
-			else
-			{
-				$( "#id_confirm_form_group" ).addClass( "has-success");
-			    $( "#id_passwordOK" ).addClass( "glyphicon-ok" );
-			}
-		};
-	</script>
-
   </head>
 
 <body max-width="100%">
     <div class="container">
-		<form class="form-simple">
-			<div class="row">
-				<h3>Join I Do Declare today.</h3>
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="nav">
+					<div class="dico-navbar-commands">
+						<span class="dico-pull-left">
+							<span id="id_cancelButton" class="navbar-text navbar-link pull-left dico-navbar-text">Cancel</span>
+						</span>
+						<span class="dico-fill"><span class="navbar-text dico-inner-fill dico-navbar-text"><strong>Sign Up</strong></span></span>
+						<span class="dico-pull-right">
+							<span id="id_submitButton" class="navbar-text navbar-link pull-right dico-navbar-text">Next</span>
+						</span>
+					</div>
+				</div><!-- /.nav -->
+			</div>
+		</nav>
 
-				<div class="form-group">
-					<label for="id_username"  class="control-label sr-only">Email Address</label> 
-					<input id="id_username" class="form-control" maxlength="254" name="username" 
-						   type="email" placeholder="Email address"/>
-				</div>
-				<div class="form-group">
-					<label for="id_password"  class="control-label sr-only">Password</label> 
-					<input id="id_password" class="form-control password-control" name="password" type="password" placeholder="Password" />
-				</div>
-				<div id="id_confirm_form_group" class="form-group has-feedback">
-					<label for="id_confirmpassword"  class="control-label sr-only">Confirm Password</label> 
-					<input id="id_confirmpassword" class="form-control password-control" name="confirmpassword" type="password" placeholder="Confirm password" />
-					<span id="id_passwordOK" class="glyphicon form-control-feedback"></span>
-				</div>
-				<div class="form-group">
+		<style>
+			.form-simple {
+				padding-top: 0px;
+				padding-bottom: 0px;
+			}
+		</style>
+		
+		<div class="row">
+			<div id="myAlert" class="col-xs-12"></div>
+		</div>
+		
+		<form class="form-simple">
+			<div id = "id_step1">
+				<div class="row">
+					<div class="form-group col-xs-12">
+						<label for="id_username" class="control-label sr-only">Email Address</label> 
+						<input id="id_username" class="form-control" maxlength="254" name="username" 
+							   type="email" placeholder="Email address"/>
+					</div>
+					<div class="form-group col-xs-12">
+						<label for="id_password"  class="control-label sr-only">Password</label> 
+						<input id="id_password" class="form-control password-control" name="password" type="password" placeholder="Password" />
+					</div>
+					<div id="id_confirm_form_group" class="form-group col-xs-12 has-feedback">
+						<label for="id_confirmpassword"  class="control-label sr-only">Confirm Password</label> 
+						<input id="id_confirmpassword" class="form-control password-control" name="confirmpassword" type="password" placeholder="Confirm password" />
+						<span id="id_passwordOK" class="glyphicon form-control-feedback"></span>
+					</div>
+					<div class="form-group col-xs-12">
 	
-					<!-- maxLength of firstname is the same as in the custom_user.AuthUser.firstName field --!>
-					<label for="id_firstname"  class="control-label sr-only">First Name</label> 
-					<input id="id_firstname" class="form-control" maxlength="30" name="firstName" type="text" placeholder="First name" required/>
+						<!-- maxLength of firstname is the same as in the custom_user.AuthUser.firstName field --!>
+						<label for="id_firstname"  class="control-label sr-only">First Name</label> 
+						<input id="id_firstname" class="form-control" maxlength="30" name="firstName" type="text" placeholder="First name" required/>
+					</div>
+					<div class="form-group col-xs-12">
+						<!-- maxLength of lastname is the same as in the custom_user.AuthUser.lastName field --!>
+						<label for="id_lastname"  class="control-label sr-only">Last Name</label> 
+						<input id="id_lastname" class="form-control" maxlength="50" name="lastName" type="text" placeholder="Last name" required />
+					</div>
 				</div>
-				<div class="form-group">
-	
-					<!-- maxLength of firstname is the same as in the custom_user.AuthUser.lastName field --!>
-					<label for="id_lastname"  class="control-label sr-only">Last Name</label> 
-					<input id="id_lastname" class="form-control" maxlength="50" name="lastName" type="text" placeholder="Last name" required />
-				</div>
-				
-				<div class="form-group">
-					<span class="help-block">Your street address and zip code are used to identify your elected legislators.</span>
-				</div>
+			</div>
+			<div id="id_step2">
+				<div class="row">
+					<div class="form-group col-xs-12">
+						<span class="help-block">Your street address and zip code are used to identify your elected legislators.</span>
+					</div>
   
-				<div class="form-group col-xs-offset-1">
-					<label for="id_streetaddress"  class="control-label sr-only">Street Address</label> 
-					<input id="id_streetaddress" class="form-control" maxlength="254" name="streetAddress" type="text" 
-							placeholder="Street address" required/>
-							</div>
-				<div class="form-group col-xs-offset-1">
-					<label for="id_zipcode"  class="control-label sr-only">Zip Code</label> 
-					<input id="id_zipcode" class="form-control" maxlength="5" name="zipcode" type="text" placeholder="ZIP code" required/>
-				</div>
-			</div>
+					<div class="form-group col-xs-offset-1 col-xs-11">
+						<label for="id_streetaddress"  class="control-label sr-only">Street Address</label> 
+						<input id="id_streetaddress" class="form-control" maxlength="254" name="streetAddress" type="text" 
+								placeholder="Street address" required/>
+								</div>
+					<div class="form-group col-xs-offset-1 col-xs-11">
+						<label for="id_zipcode"  class="control-label sr-only">Zip Code</label> 
+						<input id="id_zipcode" class="form-control" maxlength="5" name="zipcode" type="text" placeholder="ZIP code" required/>
+					</div>
 				
-			<div class="form-group">
-				<div class="row">
-					<span class="text-muted">Would you like help to easily share your voice periodically? Sign up to 
-						get messages so you can directly speak up on the issues you care about.</span>
-				</div>
-				<div class="row">
-					<div class="col-xs-offset-2 group-row-item">
-						<label id="dailyButton" class="radio-inline">
-						  <input type="radio" name="frequencyOptions" id="id_dailyradio" value=1 />
-						  <span class="text-muted">Help Me Daily</span>
-						</label>
+					<div class="form-group col-xs-12">
+						<div class="row">
+							<span class="text-muted col-xs-12">Would you like help to easily share your voice periodically? Sign up to 
+								get messages so you can directly speak up on the issues you care about.</span>
+						</div>
+						<div class="row">
+							<div class="col-xs-offset-2 col-xs-10 group-row-item">
+								<label id="dailyButton" class="radio-inline">
+								  <input type="radio" name="frequencyOptions" id="id_dailyradio" value=1 />
+								  <span class="text-muted">Help Me Daily</span>
+								</label>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xs-offset-2 col-xs-10 group-row-item">
+								<label id="weeklyButton" class="radio-inline">
+								  <input type="radio" name="frequencyOptions" id="weeklyRadio" value=2 />
+								  <span class="text-muted">Help Me Weekly</span>
+								</label>			
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xs-offset-2 col-xs-10">
+								<label id="noneButton" class="radio-inline">
+								  <input type="radio" name="frequencyOptions" id="noneRadio" value=0 />
+								  <span class="text-muted">No Thanks</span>
+								</label>
+							</div>			
+						</div>
 					</div>
-				</div>
-				<div class="row">
-					<div class="col-xs-offset-2 group-row-item">
-						<label id="weeklyButton" class="radio-inline">
-						  <input type="radio" name="frequencyOptions" id="weeklyRadio" value=2 />
-						  <span class="text-muted">Help Me Weekly</span>
-						</label>			
+					<div class="form-group col-xs-12">
+						<div class="row">
+							<span class="text-muted col-xs-12">How would you like to be helped?</span>
+						</div>
+						<div class="row">
+							<div class="col-xs-offset-2 col-xs-10 group-row-item">
+								<label class="radio-inline">
+								<input type="radio" name="viaOptions" id="id_viasms" value=1></input>
+								<span class="text-muted">With a Text Message</span>
+								</label>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xs-offset-3 col-xs-9 group-row-item">
+								<label for="id_phonenumber" class="control-label sr-only">Phone Number</label> 
+								<input id="id_phonenumber" class="form-control" maxlength="25" name="phonenumber" type="text" placeholder="Phone Number" />
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xs-offset-2 col-xs-10 group-row-item">
+								<label class="radio-inline">
+								<input type="radio" name="viaOptions" id="id_viaemail" value=2></input>
+								<span class="text-muted">With an E-Mail</span>
+								</label>
+							</div>
+						</div>
 					</div>
-				</div>
-				<div class="row">
-					<div class="col-xs-offset-2">
-						<label id="noneButton" class="radio-inline">
-						  <input type="radio" name="frequencyOptions" id="noneRadio" value=0 />
-						  <span class="text-muted">No Thanks</span>
-						</label>
-					</div>			
-				</div>
-			</div>
-			<div class="form-group">
-				<div class="row">
-					<span class="text-muted">How would you like to be helped?</span>
-				</div>
-				<div class="row">
-					<div class="col-xs-offset-2 group-row-item">
-						<label class="radio-inline">
-						<input type="radio" name="viaOptions" id="id_viasms" value=1></input>
-						<span class="text-muted">With a Text Message</span>
-						</label>
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-xs-offset-3 group-row-item">
-						<label for="id_phonenumber" class="control-label sr-only">Phone Number</label> 
-						<input id="id_phonenumber" class="form-control" maxlength="25" name="phonenumber" type="text" placeholder="Phone Number" />
-					</div>
-				</div>
-				<div class="row">
-					<div class="col-xs-offset-2 group-row-item">
-						<label class="radio-inline">
-						<input type="radio" name="viaOptions" id="id_viaemail" value=2></input>
-						<span class="text-muted">With an E-Mail</span>
-						</label>
-					</div>
-				</div>
-			</div>		
-			<div class="form-group">
-				<div class="row">
-					<a class="btn btn-link btn-xs" href="{% url 'docTermsOfUse' %}">Terms of Use</a>
-				</div>
-			</div>
-			<div class="form-group">
-				<div class="row">
-					<div id="myAlert"></div>
-				</div>
-				<div class="row">
-					<input id="submit_button" class="btn btn-primary btn-block col-xs-12" type="submit" value="Sign Up"></input>
-				</div>
-				<div class="row">
-					<input id="cancel_button" class="btn btn-default btn-block cancel-button col-xs-12" type="button" value="Cancel"></input>
-				</div>
+				</div>	
 			</div>
 		</form>
-
-<script type="text/javascript">
-document.getElementById('id_username').focus()
-</script>
-
-</div>
+		<div class="row">
+			<a id="id_termsOfUseLink" class="btn btn-link btn-xs col-xs-12">Terms Of Use</a>
+		</div>
+		<div class="row">
+			<div id="id_termsAlert" class="col-xs-12">				
+			</div>
+		</div>
+	</div>
 
 <!--     IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="{% static "bootstrap/assets/js/ie10-viewport-bug-workaround.js" %}"></script>
   </body>
 </html>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+<script src="{% static "jquerycookie/jquery.cookie.js" %}"></script>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		<!-- Block of code for an alert area at the top of the window -->
+		$(".close").click(function(){
+			$(this).parent().alert();
+		});
+		
+		bootstrap_alert = function() {}
+		bootstrap_alert.show = function(parentDiv, message, alertClass) {
+			parentDiv.html('<div class="alert ' + alertClass + ' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+		}
+		bootstrap_alert.warning = function(message) {
+			bootstrap_alert.show($('#myAlert'), message, "alert-danger");
+		}
+		closealert = function() { 
+			$('.alert').parent().html('');
+		}
+		
+		function showStep1()
+		{
+			$("#id_submitButton").text('Next');
+			$("#id_cancelButton").text('Cancel');
+			$("#id_step1").css('display', 'table');
+			$("#id_step2").css('display', 'none');
+			$("#id_username").focus();
+		}
+		
+		function showStep2()
+		{
+			closealert();
+			$("#id_submitButton").text('Next');
+			$("#id_cancelButton").text('Back');
+			$("#id_step2").css('display', 'table');
+			$("#id_step1").css('display', 'none');
+		}
+		
+		function checkStep1()
+		{
+			if ($("#id_username").val() === "") {
+				bootstrap_alert.warning("An email address is required.");
+				$("#id_username").focus();
+			}
+			else if ($("#id_password").val() === "") {
+				bootstrap_alert.warning("A password is required.");
+				$("#id_password").focus();
+			}
+			else if ($("#id_confirmpassword").val() != $("#id_password").val()) {
+				bootstrap_alert.warning("Your password is not confirmed.");
+				$("#id_confirmpassword").focus();
+			}
+			else if ($("#id_firstname").val() === "") {
+				bootstrap_alert.warning("A first name is required.");
+				$("#id_firstname").focus();
+			}
+			else if ($("#id_lastname").val() === "") {
+				bootstrap_alert.warning("A last name is required.");
+				$("#id_lastname").focus();
+			}
+			else
+				return true;	/* Everything is OK */
+				
+			return false;
+		}
+		
+		function checkStep2() {
+			if ($("#id_streetaddress").val() === "") {
+				bootstrap_alert.warning("A street address is required.");
+				$("#id_streetaddress").focus();
+			}
+			else if ($("#id_zipcode").val() === "") {
+				bootstrap_alert.warning("A ZIP code is required.");
+				$("#id_zipcode").focus();
+			}
+			else if ($("#id_zipcode").val().length != 5) {
+				bootstrap_alert.warning("The ZIP code must be 5 digits");
+				$("#id_zipcode").focus();
+			}
+			else if ($("#id_phonenumber").val() === "" &&
+					 $('#id_viasms').is(':checked')) {
+				bootstrap_alert.warning("You must specify a phone number to receive help with a text message.");
+				$("#id_phonenumber").focus();
+			}
+			else
+				return true;	/* Everything is OK */
+				
+			return false;
+		}
+		
+		function submitForm()
+		{
+			bootstrap_alert.show($('#myAlert'), "Signing up...<br>(this may take a minute)", "alert-info");
+		
+			deferredObject = $.post("{% url 'newConstituent' %}", 
+				{ csrfmiddlewaretoken: '{{ csrf_token }}', 
+					"username": $("#id_username").val(),
+					"password": $("#id_password").val(),
+					"firstName": $("#id_firstname").val(),
+					"lastName": $("#id_lastname").val(),
+					"streetAddress": $("#id_streetaddress").val(),
+					"zipcode": $("#id_zipcode").val(),
+					"contactFrequency": $('input[name=frequencyOptions]:checked', 'form').val(),
+					"contactVia": $('input[name=viaOptions]:checked', 'form').val(),
+					"contactPhone": $("#id_phonenumber").val()
+				})
+			  .done(function(json, textStatus, jqXHR)
+				{
+					if (json['success']) {
+						closealert();
+						window.location = "{% url 'editInterests' %}?back="+encodeURIComponent("{{ nextURL }}");
+					}
+					else {
+						bootstrap_alert.warning(json['error']);
+					}
+				})
+			  .fail(function(jqXHR, textStatus, errorThrown) {
+				console.log( "error: " + textStatus + "; " + errorThrown + ";");
+				console.log( jqXHR.status + "; " + jqXHR.statusText);
+				var s = jqXHR.status + "; " + jqXHR.statusText +
+					"<br>error: " + textStatus + "; " + errorThrown + ";"
+				if (jqXHR.status == 403) {
+					var csrftoken = $.cookie('csrftoken');
+					if (csrfToken == '{{ csrf_token }}')
+						s = s + " csrftoken OK";
+					else
+						s = s + " csrftoken mismatch: (" + csrftoken + ", " + "{{ csrf_token }})";
+				}
+				bootstrap_alert.warning(s);
+			  });
+		}
+		
+		$("form").on('submit', function (e) {
+			closealert();
+			
+			if (checkStep1() && checkStep2())
+			{
+				submitForm();
+			}
+
+		   //stop form submission
+		   e.preventDefault();
+		});
+
+		$("#id_cancelButton").click(function(e) {
+			if ($("#id_step1").css('display') != 'none') {
+				window.location = "{{ backURL }}";
+			}
+			else
+			{
+				showStep1();
+			}
+			e.preventDefault();
+		});
+		
+		function checkUnusedEmail() {
+			bootstrap_alert.show($('#myAlert'), "Checking Email Address...<br>(this may take a minute)", "alert-info");
+		
+			deferredObject = $.post("{% url 'checkUnusedEmail' %}", 
+				{ csrfmiddlewaretoken: '{{ csrf_token }}', 
+					"email": $("#id_username").val(),
+				})
+			  .done(function(json, textStatus, jqXHR)
+				{
+					if (json['success']) {
+						closealert();
+						showStep2();
+					}
+					else {
+						bootstrap_alert.warning(json['error']);
+					}
+				})
+			  .fail(function(jqXHR, textStatus, errorThrown) {
+				console.log( "error: " + textStatus + "; " + errorThrown + ";");
+				console.log( jqXHR.status + "; " + jqXHR.statusText);
+				var s = jqXHR.status + "; " + jqXHR.statusText +
+					"<br>error: " + textStatus + "; " + errorThrown + ";"
+				if (jqXHR.status == 403) {
+					var csrftoken = $.cookie('csrftoken');
+					if (csrfToken == '{{ csrf_token }}')
+						s = s + " csrftoken OK";
+					else
+						s = s + " csrftoken mismatch: (" + csrftoken + ", " + "{{ csrf_token }})";
+				}
+				bootstrap_alert.warning(s);
+			  });
+		}
+	
+		$("#id_submitButton").click(function(e) {
+			if ($("#id_step1").css('display') != 'none')
+			{
+				if (checkStep1())
+					checkUnusedEmail();
+			}
+			else
+			{
+				if (checkStep2())
+					submitForm();
+			}
+
+			e.preventDefault();
+		});
+		
+		$("#id_termsOfUseLink").click(function(e) {
+			showTermsOfUse();
+			e.preventDefault();
+		});
+		
+		function showTermsOfUse() {
+			var message = "<p>I Do Declare is a public forum for people's views to be shared. As such," + 
+				   " any information you enter into the system is in the public" + 
+				   " domain with the following exceptions:</p>" + 
+				"<ul>" + 
+				"<li>Addresses and phone numbers will not be shared" + 
+				    " except as required by law. Any change to this exception will be preceded by" + 
+				    " an email notification to registered users not less than 30 days before the" + 
+				    " change along with the ability of registered users to opt out of such a change.</li>" + 
+				"<li>In keeping with best security practices, passwords are not stored in this system.</li>" + 
+				"</ul>" + 
+				"<p>These terms of use have not been subject to any revision based on" +  
+					" review by a lawyer." + 
+				"</p>";
+			$("#id_termsAlert").html('<div class="alert alert-info alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>'+message+'</div>');
+		}
+		
+		$("#id_username").focus()
+		$("#id_step2").css('display', 'none');
+		$("input[type='text']").bind("keyup input paste", checkenabled);
+		$("input[type='password']").bind("keyup input paste", checkenabled);
+		checkenabled();
+		
+		$("#id_viasms").change(function(e) {
+			$( "#id_phonenumber" ).prop( "disabled", !($('#id_viasms').is(':checked')) );
+		});
+		
+		$("#id_dailyradio").prop("checked", true);
+		$("#id_viasms").prop("checked", true);
+	});
+	
+	function checkenabled() {			
+		if ($("#id_password").val() === "" ||
+			$("#id_confirmpassword").val() !== $("#id_password").val())
+		{
+			$( "#id_confirm_form_group" ).removeClass( "has-success");
+			$( "#id_passwordOK" ).removeClass( "glyphicon-ok" );
+		}
+		else
+		{
+			$( "#id_confirm_form_group" ).addClass( "has-success");
+			$( "#id_passwordOK" ).addClass( "glyphicon-ok" );
+		}
+	};
+</script>
+

@@ -67,7 +67,8 @@
 				display: none;
 				left: 0px;
 			}
-			.pane1 { top:  20px }
+			.pane1 { top:  20px; 
+				font-size: 0.75em; }
 			.pane2 { top:  40px }
 			.pane3 { top:  65px;
 				font-size: 1.25em; }
@@ -75,7 +76,7 @@
 				font-size: 1.5em; }
 			.pane5 { top: 130px;
 				font-size: 1.75em; }
-			.pane6 { top: 185px;
+			.pane6 { top: 170px;
 				font-size: 2.0em; }
 		</style>
 		<header>
@@ -263,15 +264,12 @@
 	
 	function crossfade(pane)
 	{
-		pane.fadeIn(3000)
-				 .queue(function() {
-					$(this).fadeOut(3000);
-					if ($(this).next().length > 0)
-						crossfade($(this).next());
-					else
-						crossfade($(this).parent().children().eq(0));
-					$(this).dequeue();
-				 });
+		pane.fadeIn(1500)
+			.queue(function() {
+				if ($(this).next().length > 0)
+					crossfade($(this).next());
+				$(this).dequeue();
+			});
 	}
 
 	$(window).resize(function() {

@@ -35,6 +35,8 @@ urlpatterns = patterns(
     url(r'^issue/', views.issue, name='issue'),
     # ex: /dico/petition/5/
     url(r'^(?P<petition_id>\d+)/petition/', views.petition, name='petition'),
+    # ex: /dico/vote/
+    url(r'^vote/', views.vote, name='vote'),
     # ex: /dico/createPetition/
     url(r'^createpetition/', views.createPetition, name='createPetition'),
     # ex: /dico/addpetitionissue/5/

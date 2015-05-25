@@ -1117,10 +1117,8 @@ def petition(request, petition_id):
         initialButton = "#id_mapsButton"
     elif 'story' in request.GET:
         initialButton = "#id_storyButton"
-    elif request.user.is_authenticated:
-        initialButton = "#id_voteButton"
     else:
-        initialButton = "#id_debateButton"
+        initialButton = "#id_voteButton"
         
     if 'showNext' in request.GET:
         nextPetition = Petition.objects.get_next_petition(petition_id=petition_id, user=request.user)
@@ -1130,6 +1128,35 @@ def petition(request, petition_id):
         showDoneVoting = False
         
     filter = Petition.objects.filter(id=petition_id)
+    context = RequestContext(request, {
+        'user': request.user,
+        'petition': filter.get(),
+        'backURL' : backURL,
+        'backName': backName,
+        'initialButton': initialButton,
+        'nextPetition': nextPetition,
+        'showDoneVoting': showDoneVoting,
+        'facebookAppID': settings.FACEBOOK_APP_ID, 
+    })
+    return HttpResponse(template.render(context))
+    
+# Displays a web page for a petition.
+def vote(request):
+    template = loader.get_template('dico/petition.html')
+    
+    backURL = request.GET.get(u'backURL', '/dico/')
+    backName = request.GET.get('backName', 'Home')
+    
+    if 'id' not in request.GET:
+        raise Exception('The action to vote on is not specified')
+    id = int(request.GET['id'])
+    
+    initialButton = "#id_voteButton"
+        
+    nextPetition = None
+    showDoneVoting = False
+        
+    filter = Petition.objects.filter(id=id)
     context = RequestContext(request, {
         'user': request.user,
         'petition': filter.get(),

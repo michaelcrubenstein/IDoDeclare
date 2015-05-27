@@ -61,6 +61,14 @@
 				padding-right: 7px;
 				font-size: 0.8em;
 			}
+			.search-toggle-button {
+				padding-top: 6px;
+				padding-bottom: 6px;
+			}
+			.navbar-search > .input-group {
+				padding-top: 10px;
+				padding-bottom: 10px;
+			}
 		</style>
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid visible-xs-block">
@@ -73,9 +81,13 @@
 				  <button type="button" class="navbar-toggle navbar-right" data-toggle="collapse" 
 				  	data-target="#id_navbarCollapse">
 					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
+					<span class="icon-bar" aria-hidden="true"></span>
+					<span class="icon-bar" aria-hidden="true"></span>
+					<span class="icon-bar" aria-hidden="true"></span>
+				  </button>
+				  <button type="button" class="navbar-toggle navbar-right search-toggle-button" data-toggle="collapse" 
+				  	data-target="#id_navbarSearchCollapse-xs">
+					<span class="glyphicon glyphicon-search"></span>
 				  </button>
 				</div>
 
@@ -88,6 +100,16 @@
 						<li><a class="signOutLink">Sign Out</a></li>
 					</ul>
 				</div>
+				<div class="collapse navbar-collapse navbar-search" id="id_navbarSearchCollapse-xs">
+					<div class="input-group input-group-sm">
+						<input type="text" class="form-control" placeholder="Search"></input>
+						<span class="input-group-btn">
+							<button class="btn btn-primary btn-search" aria-label="search">
+								<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+							</button>
+						</span>
+					</div>
+				</div>
 			</div>
 			<div class="container-fluid hidden-xs">
 				<!~~ Brand and toggle get grouped for better mobile display ~~>
@@ -97,7 +119,7 @@
 
 				<!~~ Collect the nav links, forms, and other content for toggling ~~>
 				<div class="nav navbar-nav navbar-header navbar-right">
-					<li class="dropdown">
+					<li class="dropdown navbar-right">
 						<a href="#" class="dropdown-toggle navbar-link" data-toggle="dropdown">{{ user.get_full_name }}<span class="caret"></span></a>
 						<ul class="dropdown-menu dropdown-menu-right" role="menu">
 							<li class="text-muted"><a class="accountSettingsLink">Change Account</a></li>
@@ -106,6 +128,22 @@
 							<li class="text-muted"><a class="signOutLink">Sign Out</a></li>
 						</ul>
 					</li>
+					<style>
+						.navbar-form {
+							margin-top: 10px;
+							margin-bottom: 10px;
+						}
+					</style>
+					<form class="navbar-form navbar-right">
+						<div class="input-group input-group-sm">
+							<input type="text" class="form-control search-input" placeholder="Search"></input>
+							<span class="input-group-btn">
+								<button class="btn btn-primary btn-search" aria-label="search">
+									<span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+								</button>
+							</span>
+						</div>
+					</form>
 				</div>
 			</div>
 		</nav>
@@ -267,6 +305,29 @@
 		$(".petition-news-item").click(function(e) {
 			window.location.href="/dico/" + $(this).attr("petition") + "/petition/?vote;showNext;backURL="+encodedRef+";backName=Home"
 		});
+
+		/* Set the Focus to navbar text when showing the collapse */
+		$(".navbar-search").on('shown.bs.collapse', function(){
+        	$(this).children(".input-group").children("input").focus();
+   		});
+   		
+   		$(".btn-search").click(function(e) {
+   			query = $(this).parent().parent().children("input").val();
+   			if (query != "") {
+   				window.location = "{% url 'search' %}?query="+encodeURIComponent(query);
+   			}
+   			e.preventDefault();
+   		});
+   		
+   		$("input").keypress(function(e) {
+   			if (e.which == 13) {	/* Handle the return key. */
+				query = $(this).val();
+				if (query != "") {
+					window.location = "{% url 'search' %}?query="+encodeURIComponent(query);
+				}
+   				e.stopPropogation();
+   			}
+   		});
 	});
 
 	function show_my_interests() {

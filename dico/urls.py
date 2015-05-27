@@ -29,6 +29,8 @@ urlpatterns = patterns(
     url(r'^passwordreset/', views.passwordReset, name='passwordReset'),
     # ex: /dico/passwordreset/
     url(r'^setresetpassword/', views.setResetPassword, name='setResetPassword'),
+    # ex: /dico/search/
+    url(r'^search/', views.search, name='search'),
     # ex: /dico/issues/
     url(r'^issues/', views.issues, name='issues'),
     # ex: /dico/issue/issue=5
@@ -103,6 +105,8 @@ urlpatterns = patterns(
     url(r'^getmynews/', views.getMyNews, name='getMyNews'),
     # ex: /dico/getmymembers -- Get information about all of the members for the current logged-in user.
     url(r'^getmymembers/', views.getMyMembers, name='getMyMembers'),
+    # ex: /dico/getsearchresults -- Get search results plus votes of the current logged-in user.
+    url(r'^getsearchresults/', views.getSearchResults, name='getSearchResults'),
     #
     # from the petition.html page
     # ex: /dico/getpetitionvotetotals/

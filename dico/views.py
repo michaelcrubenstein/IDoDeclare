@@ -1074,6 +1074,22 @@ def issues(request):
     })
     return HttpResponse(template.render(context))
 
+def search(request):
+    template = loader.get_template('dico/search.html')
+    query = request.GET.get('query', "");
+    if request.user.is_authenticated:
+        defaultPanel = 'vote'
+    else:
+        defaultPanel = 'debate'
+    actionPanel = request.GET.get('actionPanel', defaultPanel);
+    
+    context = RequestContext(request, {
+        'user': request.user,
+        'query': query,
+        'actionPanel': actionPanel,
+    })
+    return HttpResponse(template.render(context))
+
 def issue(request):
     template = loader.get_template('dico/issuePetitions.html')
     issue_id = int(request.GET.get('issue', 0));
@@ -1249,6 +1265,23 @@ def getIssues(request):
 
     return JsonResponse(results)
     
+def getSearchResults(request):
+    results = {'success':False, 'error': 'getSearchResults failed'}
+    try:
+        if 'query' not in request.GET:
+            raise Exception('the query is not specified')
+        query = request.GET['query'];
+        results = {'searchResults' : Constituent.get_search_results(request.user, query), 'success':True}
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+            
+    return JsonResponse(results)
+
+    
+    
 # Responds to a Json request to get the issues of the currently logged-in user.
 # Returns: JsonResponse with results. 
 # Return element success: True if the operation is successful, False otherwise.
@@ -1257,7 +1290,7 @@ def getIssues(request):
 # The petition_count is the number of petitions associated with that issue for which the
 # currently logged-in user has not voted.
 def getMyInterests(request):
-    results = {'success':False}
+    results = {'success':False, 'error': 'getMyInterests failed'}
     try:
         if not request.user.is_authenticated:
             raise Exception("The current login is invalid")

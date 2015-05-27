@@ -182,7 +182,20 @@ class Constituent(models.Model):
             for i in c.fetchall():
                 petitions.append({'section': 'petition', 'id': i[0], 'description': i[1], 'creation_time': i[2]})
             return petitions
-
+            
+    def get_search_results(user, query):
+        with connection.cursor() as c:
+            sql = "SELECT p.id, p.description, p.creation_time, pv.vote, match(p.description) against (%s) as Relevance" + \
+                  " FROM dico_petition p" + \
+                  "      LEFT JOIN dico_petitionvote pv ON (pv.petition_id = p.id AND pv.constituent_id = %s)" + \
+                  " WHERE match( description) AGAINST (%s) HAVING Relevance > 0.2" + \
+                  " ORDER BY Relevance DESC"
+            c.execute(sql, (query, user.id, query))
+            petitions = []
+            for i in c.fetchall():
+                petitions.append({'section': 'petition', 'id': i[0], 'description': i[1], 'creation_time': i[2], 'vote': i[3]})
+            return petitions
+            
     def get_members(user):
         constituent = Constituent.get_constituent(user)
         if constituent is None:

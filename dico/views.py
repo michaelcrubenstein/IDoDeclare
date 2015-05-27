@@ -1056,7 +1056,7 @@ def issues(request):
     actionPanel = request.GET.get('actionPanel', defaultPanel);
     
     helpTexts = { 'vote': 'Select an issue that is related to the action you want to vote on.', \
-                  'debate': 'Select an issue that is related to the action you want to learn about.', \
+                  'debate': 'Select an issue that you want to explore.', \
                   'issues': 'Select an issue that is related to the action you want to label.', \
                   'maps': 'Select an issue that is related to the action you want to analyze.', \
                   'story': 'Select an issue that is related to the action you want to create a story for.' }

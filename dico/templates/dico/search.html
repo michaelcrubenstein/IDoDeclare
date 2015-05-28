@@ -82,10 +82,9 @@
 					<thead>
 						<tr>
 							<th>
-								<label for="id_actions" class="control-label">Actions</label>
+								Actions
 							</th>
 							<th>Your vote</th>
-							<th></th>
 						</tr>
 					</thead>
 					<tbody id='id_actions'></tbody>
@@ -100,6 +99,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+	<script src="{% static "d3/d3.v3.min.js" %}"></script>
 
 	<!-- Scripts for this web page -->
 	<script type="text/JavaScript">
@@ -184,58 +184,38 @@
 		  $.getJSON("{% url 'getSearchResults' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 		  											"query" : query }, function(json){
 		  	if (json['success']) {
-				petitions = json['searchResults'];
+				var backName = encodeURIComponent("Search");
+				var backURL = encodeURIComponent("{% url 'search' %}?query="+encodeURIComponent(query));
 			
-				for (i = 0; i < petitions.length; ++i) {
-					petition = petitions[i];
-					li = document.createElement("tr");
-					$("#id_actions").append(li);
-					td = document.createElement("td");
-					$(li).append(td);
-
-					$(td).append(htmlEncode(petition['description']));
-										
-					td = document.createElement("td");
-					$(li).append(td);
-					newButton = document.createElement("a");
-					newSpan = document.createElement("span");
-					var backName = encodeURIComponent("Search");
-					var backURL = encodeURIComponent("{% url 'search' %}?query="+encodeURIComponent(query));
-					if (petition['vote'] === 0) {
-						$(td).append(newButton);
-						$(newButton).addClass("btn btn-link btn-xs")
-									.attr("href", "/dico/" + petition['id'] + "/petition/?{{actionPanel}};backURL="+backURL+";backName="+backName)
-									.append(newSpan);
-						$(newSpan).addClass("label label-danger")
-								  .append("Oppose");
-						td = document.createElement("td");
-						$(li).append(td);
-						newButton = document.createElement("a");
-					} else if (petition['vote'] === 1) {
-						$(td).append(newButton);
-						$(newButton).addClass("btn btn-link btn-xs")
-									.attr("href", "/dico/" + petition['id'] + "/petition/?{{actionPanel}};backURL="+backURL+";backName="+backName)
-									.append(newSpan);
-						$(newSpan).addClass("label label-success")
-								  .append("Support");
-						td = document.createElement("td");
-						$(li).append(td);
-						newButton = document.createElement("a");
-					} else {
-						td = document.createElement("td");
-						$(li).append(td);
-						$(newButton).append("Vote Now");
-					}
-
-					<!-- Add a button to show the petition -->
-					newSpan = document.createElement("span");
-					$(td).addClass("align-right-column")
-						 .append(newButton);
-					$(newButton).addClass("btn btn-link btn-xs")
-					            .attr("href", "/dico/" + petition['id'] + "/petition/?{{actionPanel}};backURL="+backURL+";backName="+backName)
-					            .append(newSpan);
-					$(newSpan).addClass("glyphicon glyphicon-chevron-right");
-				}
+				d3.select("#id_actions").selectAll("tr")
+					.data(json['searchResults'])
+					.enter()
+					.append("tr")
+					.attr("href", function(d) {
+							return "/dico/" + d['id'] + "/petition/?{{actionPanel}};backURL="+backURL+";backName="+backName;						
+						})
+					.selectAll("td")
+					.data(function(d) {
+						chevronHTML = '<span class="glyphicon glyphicon-chevron-right"></span>'
+						if (d['vote'] === 0) {
+							html1 = '<span class="label label-danger">Oppose</span>';
+						} else if (d['vote'] === 1) {
+							html1 = '<span class="label label-success">Support</span>';
+						} else {
+							html1 = 'Vote Now';
+						}
+							 
+						return [htmlEncode(d['description']), 
+							'<span class="btn btn-link btn-xs">' + html1+ chevronHTML+'</span>'];
+					})
+					.enter()
+					.append("td")
+					.html(function(d, i) { return d; })
+					.on("click", function(d, i) {
+						if (i == 1)
+							window.location.href = $(this).parent().attr("href");
+					})
+					.classed("align-right-column", function(d, i) { return i == 1 });
 			}
 			else
 				bootstrap_alert.warning(json['error']);

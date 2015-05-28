@@ -18,6 +18,22 @@
 	text-decoration: none;
 	cursor: pointer;
 }
+
+/* Titles go in the lower center of the nav bar. */
+.dico-title {
+	padding-bottom: 6px;
+}
+/* Links go on the right or left over titles. */
+.dico-navbar-link {
+	margin-top: 6px;
+	margin-bottom: 2px;
+	margin-left: 15px;
+	margin-right: 2px;
+}
+.dico-navbar-link:hover {
+	text-decoration: none;
+	cursor: pointer;
+}
 .dico-spacer {
 	visibility: hidden;
 }

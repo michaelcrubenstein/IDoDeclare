@@ -1118,6 +1118,20 @@ def issue(request):
     })
     return HttpResponse(template.render(context))
 
+def votingHistory(request):
+    template = loader.get_template('dico/votingHistory.html')
+    if request.user.is_authenticated:
+        defaultPanel = 'vote'
+    else:
+        defaultPanel = 'debate'
+    actionPanel = request.GET.get('actionPanel', defaultPanel);
+    
+    context = RequestContext(request, {
+        'user': request.user,
+        'actionPanel': actionPanel,
+    })
+    return HttpResponse(template.render(context))
+
 # Displays a web page for a petition.
 def petition(request, petition_id):
     template = loader.get_template('dico/petition.html')
@@ -1354,6 +1368,22 @@ def getIssuePetitions(request):
         
         # Return the results.
         results = {'success':True, 'petitions' : petitions}
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def getVotingHistory(request):
+    results = {'success':False, 'error': 'getIssuePetitions failed'}
+    try:
+        # Do the model operation
+        petitions = Constituent.get_voting_history(user=request.user);
+        
+        # Return the results.
+        results = {'success':True, 'actions' : petitions}
     except Exception as e:
         with open('exception.log', 'a') as log:
             log.write("%s\n" % traceback.format_exc())

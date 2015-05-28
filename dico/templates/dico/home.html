@@ -202,7 +202,7 @@
 		<footer>
 			<span id="id_createActionSpan" class="text-muted"><a id="id_createActionLink">Create an Action</a></span>
 			<span id="id_learnActionSpan" class="text-muted"><a id="id_learnActionLink">Explore an Issue</a></span>
-			<span id="id_changeVoteSpan" class="text-muted"><a id="id_changeVoteLink">Change Your Vote</a></span>
+			<span id="id_changeVoteSpan" class="text-muted"><a id="id_changeVoteLink">Your Voting History</a></span>
 			<span id="id_shareStorySpan" class="text-muted"><a id="id_shareStoryLink">Share a Story</a></span>
 			<span id="id_editInterestsSpan" class="text-muted"><a id="id_editInterestsLink">Identify Your Interests</a></span>
 		</footer>
@@ -287,7 +287,7 @@
 		
 		$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
 		$("#id_createActionLink").attr("href", "{% url 'createPetition' %}?back="+encodedRef);
-		$("#id_changeVoteLink").attr("href", "{% url 'issues' %}?actionPanel=vote;backURL="+encodedRef+";backName=Home");
+		$("#id_changeVoteLink").attr("href", "{% url 'votingHistory' %}?backURL="+encodedRef+";backName=Home");
 		$("#id_shareStoryLink").attr("href", "{% url 'issues' %}?actionPanel=story;backURL="+encodedRef+";backName=Home");
 		$("#id_learnActionLink").attr("href", "{% url 'issues' %}?actionPanel=debate;backURL="+encodedRef+";backName=Home");
 		$(".signOutLink").attr("href", "{% url 'signout' %}");

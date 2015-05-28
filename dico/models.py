@@ -196,6 +196,18 @@ class Constituent(models.Model):
                 petitions.append({'section': 'petition', 'id': i[0], 'description': i[1], 'creation_time': i[2], 'vote': i[3]})
             return petitions
             
+    def get_voting_history(user):
+        with connection.cursor() as c:
+            sql = "SELECT p.id, p.description, p.creation_time, pv.vote, pv.last_modified_time" + \
+                  " FROM dico_petition p, dico_petitionvote pv" + \
+                  " WHERE pv.petition_id = p.id AND pv.constituent_id = %s" + \
+                  " ORDER BY pv.last_modified_time DESC"
+            c.execute(sql, [user.id])
+            petitions = []
+            for i in c.fetchall():
+                petitions.append({'section': 'petition', 'id': i[0], 'description': i[1], 'creation_time': i[2], 'vote': i[3]})
+            return petitions
+            
     def get_members(user):
         constituent = Constituent.get_constituent(user)
         if constituent is None:

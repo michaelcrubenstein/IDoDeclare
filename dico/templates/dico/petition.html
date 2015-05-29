@@ -24,9 +24,8 @@
 
 	<!-- Styles for this web page -->
 	<style>
-		<!-- Account for bottom navigation bar -->
 		body {
-		  padding-top: 55px;
+		  padding-top: 60px;
 		  padding-bottom: 55px;
 		}
 		section>section {
@@ -89,18 +88,27 @@
 	</style>
   </head>
   
-  <body class="dico-two-nav-container">
-	<div id='container' class="container-fluid">
-		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
-			<div class="container-fluid">
-				<ul class="nav navbar-header pull-left">
-					<a class="navbar-text navbar-link pull-left dico-navbar-text" href="{{ backURL }}">
-						<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}
-					</a>
-				</ul>
-			</div>
-		</nav>
-
+	<body>
+		<div id='container' class="container-fluid">
+			<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+				<div class="container-fluid">
+					<!-- Collect the nav links, forms, and other content for toggling -->
+					<div class="nav navbar-header">
+						<div class="dico-navbar-commands">
+							<span class="dico-pull-left">
+								<a class="navbar-link pull-left dico-navbar-link" href="{{ backURL }}">
+									<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}
+								</a>
+							</span>
+						</div>
+					</div><!-- /.nav -->
+					<div class="nav navbar-header">
+						<div class="dico-navbar-commands">
+							<div class="dico-title dico-fill"><span class="dico-inner-fill">An Action for Congress</span></div>
+						</div>
+					</div><!-- /.nav -->
+				</div>
+			</nav>
 		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
 			{% if user.id == petition.constituent.user.id or user.is_superuser %}
 			<div id="id_voteNav" class="container-fluid panelNav">
@@ -166,8 +174,7 @@
 		</div>
 		<div class="row">
 			<div class="col-xs-12">
-				<h5 id='id_petition_title' class="toplabel">An Action for Congress:</h5>
-				<p class="lead"><strong>{{petition.description}}</strong></p>
+				<p><strong>{{petition.description}}</strong></p>
 			</div>
 		</div>
 		
@@ -403,12 +410,6 @@
 
 	var deferredObject;
 
-	function htmlDecode(input){
-	  var e = document.createElement('div');
-	  e.innerHTML = input;
-	  return e.childNodes[0].nodeValue;
-	}
-	
 	function htmlEncode(input){
 		return $('<div>').text(input).html();
 	}
@@ -537,6 +538,7 @@
 				$("#id_labelNav").css("display", $("#id_issuesSection").css("display"));
 				$("#id_storyNav").css("display", $("#id_storySection").css("display"));
 			{% endif %}
+			$("body").css("padding-bottom", $(".navbar-fixed-bottom").height());
 		});
 		
 		$("#id_mapsButton").click(

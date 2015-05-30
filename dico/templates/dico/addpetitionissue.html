@@ -97,7 +97,7 @@
 					closealert();
 					var backURL = encodeURIComponent("{{backURL}}");
 					var backName = encodeURIComponent("{{backName}}");
-					window.location.href = "/dico/{{petition.id}}/petition/?issues;edit;backURL="+backURL+";backName="+backName;
+					window.location.href = "/dico/{{petition.id}}/petition/?notes;edit;backURL="+backURL+";backName="+backName;
 				}
 				else {
 					bootstrap_alert.warning("Sorry, " + json['error']);

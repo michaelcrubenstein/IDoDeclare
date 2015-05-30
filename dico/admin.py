@@ -6,7 +6,7 @@ from django.contrib import admin
 
 # Register your models here.
 from dico.models import Issue, Constituent, ConstituentInterest, ContactMethod, \
-    Petition, PetitionIssue, PetitionVote, Argument, ArgumentRating, Story, \
+    Petition, PetitionIssue, PetitionVote, Argument, ArgumentRating, Note, Story, \
     MC, Event, MCInterest, EventIssue
     
 class ArgumentRatingInline(admin.TabularInline):
@@ -20,12 +20,16 @@ class ArgumentInline(admin.StackedInline):
     model = Argument
     extra = 1
     
+class NoteInline(admin.StackedInline):
+    model = Note
+    extra = 1
+    
 class StoryInline(admin.StackedInline):
     model = Story
     extra = 1
     
 class PetitionAdmin(admin.ModelAdmin):
-    inlines = [ArgumentInline, StoryInline]
+    inlines = [ArgumentInline, NoteInline, StoryInline]
     
 class PetitionIssueInline(admin.StackedInline):
     model = PetitionIssue
@@ -82,4 +86,5 @@ admin.site.register(Petition, PetitionAdmin)
 admin.site.register(Argument, ArgumentAdmin)
 admin.site.register(MC, MCAdmin)
 admin.site.register(Event, EventAdmin)
+admin.site.register(Note)
 admin.site.register(Story)

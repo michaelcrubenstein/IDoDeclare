@@ -24,7 +24,9 @@
 
 	<!-- Styles for this web page -->
 	<style>
-
+		body {
+		  padding-top: 55px;
+		}
 	</style>
 
 
@@ -43,19 +45,22 @@
 	<div id='container' class="container-fluid">
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
-				<!-- Brand and toggle get grouped for better mobile display -->
-				<div class="nav navbar-nav navbar-header pull-left">
-				  <a class="navbar-text navbar-link dico-nav-edge-link" href="javascript:window.history.back()">
+				<div class="pull-left">
+				  <a class="navbar-link dico-navbar-link" href="javascript:window.history.back()">
 					<span class="glyphicon glyphicon-chevron-left"></span>Done</a>
+				</div>
+				<div class="dico-navbar-commands">
+					<div class="dico-title dico-fill"><span class="dico-inner-fill">Terms of Use</span></div>
 				</div>
 			</div>
 		</nav>
 
-	    <div id="myAlert" class="row"></div>
+		<div class="row">
+	    	<div id="myAlert" class="col-xs-12"></div>
+		</div>
 
 		<div class="row">
 			<div class="col-xs-12">
-				<h4>Terms of Use</h4>
 				<p>I Do Declare is a public forum for people's views to be shared. As such,
 				   any information you enter into the system is in the public
 				   domain with the following exceptions:</p>

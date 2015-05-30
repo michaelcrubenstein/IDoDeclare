@@ -39,17 +39,15 @@
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-header">
-					<div class="dico-navbar-commands">
-						<span class="dico-pull-left">
-							<span id="cancel_button" class="navbar-text navbar-link pull-left dico-navbar-text">Cancel</span>
-						</span>
-						<div class="dico-fill"><span class="navbar-text dico-inner-fill"><strong>Create Action</strong></span></div>
-						<span class="dico-pull-right">
-							<span id="id_submitbutton" class="navbar-text navbar-link pull-right dico-navbar-text">Next</span>
-						</span>
-					</div>
-				</div><!-- /.nav -->
+				<div class="pull-left">
+					<span id="cancel_button" class="navbar-link dico-navbar-link">Cancel</span>
+				</div>
+				<div class="pull-right">
+					<span id="id_submitbutton" class="navbar-link dico-navbar-link">Next</span>
+				</div>
+				<div class="dico-navbar-commands">
+					<div class="dico-title dico-fill"><span class="dico-inner-fill">Create Action</span></div>
+				</div>
 			</div>
 		</nav>
 		
@@ -177,6 +175,8 @@
 				$("#cancel_button").text('Back');
 				$("#id_step2").css('display', 'table');
 				$("#id_step1").css('display', 'none');
+				if (allIssues.length == 0)
+					show_issues();
 			}
 			
 			$("#id_form").on('submit', function (e) {

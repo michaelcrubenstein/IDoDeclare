@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>I Do Declare - Share Your Story</title>
+    <title>I Do Declare - Add Note</title>
 
     <!-- Bootstrap -->
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
@@ -30,7 +30,7 @@
 		.lead {
 			padding-top: 10px;
 		}
-		#id_new_story_link {
+		#id_new_note_link {
 			width: 100%;
 		}
 	</style>
@@ -46,10 +46,10 @@
 					<span id="cancel_button" class="navbar-link dico-navbar-link">Cancel</span>
 				</div>
 				<div class="pull-right">
-					<span id="id_add_story_button" class="navbar-link dico-navbar-link">Add</span>
+					<span id="id_add_note_button" class="navbar-link dico-navbar-link">Add</span>
 				</div>
 				<div class="dico-navbar-commands">
-					<div class="dico-title dico-fill"><span class="dico-inner-fill">Share Your Story</span></div>
+					<div class="dico-title dico-fill"><span class="dico-inner-fill">Add Note</span></div>
 				</div>
 			</div>
 		</nav>
@@ -66,15 +66,14 @@
 			
 		<div class="row">
 			<div class="col-xs-12">
-				<label for="id_new_story_text">Share Your Story</label>
-				<textarea id="id_new_story_text" rows="4" maxlength="2048" class="form-control"></textarea>
+				<textarea id="id_new_note_text" rows="4" maxlength="2048" class="form-control"></textarea>
 			</div>
 			<div class="col-xs-12">
-				<label for="id_new_story_link">Link to a picture or video:</label>
-				<input type="text" id="id_new_story_link" ></input>
+				<label for="id_new_note_link">Link to more information:</label>
+				<input type="text" id="id_new_note_link" ></input>
 			</div>
 			<div class="col-xs-12">
-				<a class="btn btn-link btn-xs" href="##" onClick="showTips()">Tips for writing stories</a>
+				<a class="btn btn-link btn-xs" href="##" onClick="showTips()">Tips for writing notes</a>
 				<div id="tipsAlert"></div>
 			</div>
 		</div>
@@ -109,39 +108,39 @@
 			$('.alert').parent().html('');
 		}
 		
-		$("#id_add_story_button").click(function() {
-			add_story($("#id_new_story_text").val(), $("#id_new_story_link").val());
+		$("#id_add_note_button").click(function() {
+			add_note($("#id_new_note_text").val(), $("#id_new_note_link").val());
 		});
 		
 		$("#cancel_button").click(function(e) {
 			var backURL = encodeURIComponent("{{backURL}}");
 			var backName = encodeURIComponent("{{backName}}");
-			window.location.href = "/dico/{{petition.id}}/petition/?story;edit;backURL="+backURL+";backName="+backName;
+			window.location.href = "/dico/{{petition.id}}/petition/?notes;edit;backURL="+backURL+";backName="+backName;
 			e.preventDefault();
 		});
 
-		$("#id_new_story_text").focus();
+		$("#id_new_note_text").focus();
 	});
 
-	function add_story(newStoryText, newStoryLink) {
+	function add_note(newDescription, newLink) {
 	  closealert();
-	  if (newStoryText.length == 0) {
-		bootstrap_alert.warning("First specify the story.");
-		$("#id_new_story_text").focus();
+	  if (newDescription.length == 0) {
+		bootstrap_alert.warning("First specify the note.");
+		$("#id_new_note_text").focus();
 	  }
 	  else
 	  {
-			$.post("{% url 'newStory' %}", { csrfmiddlewaretoken: storedcsrftoken, 
+			$.post("{% url 'newNote' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 														  "petition" : "{{petition.id}}", 
-														  "description": newStoryText,
-														  "link": newStoryLink } 
+														  "description": newDescription,
+														  "link": newLink } 
 			)
 		  .done(function(json, textStatus, jqXHR)
 			{
 				if (json['success']) {
 					var backURL = encodeURIComponent("{{backURL}}");
 					var backName = encodeURIComponent("{{backName}}");
-					window.location.href = "/dico/{{petition.id}}/petition/?story;edit;backURL="+backURL+";backName="+backName;
+					window.location.href = "/dico/{{petition.id}}/petition/?notes;edit;backURL="+backURL+";backName="+backName;
 				}
 				else {
 					bootstrap_alert.warning(json['error']);
@@ -157,8 +156,8 @@
 
 	function enter_new_story(e, inputObject){
 		var code = (e.keyCode ? e.keyCode : e.which);
-		if(code == 13 && $("#id_new_story_text").val().length > 0) { //Enter keycode
-			add_story($("#id_new_story_text").val());
+		if(code == 13 && $("#id_new_note_text").val().length > 0) { //Enter keycode
+			add_note($("#id_new_note_text").val());
 			e.stopPropagation();
 		}
 	}
@@ -167,7 +166,7 @@
 		bootstrap_alert.show($('#tipsAlert'), 
 			"<small>Double check your spelling and grammer. Don't use all capital letters and" + 
 			" avoid acronyms whenever possible." +
-			"<br><br>You won't be able to edit the story once it has been created.</small>",
+			"<br><br>You won't be able to edit the note once it has been created.</small>",
 			"alert-info");
 	};
 </script>

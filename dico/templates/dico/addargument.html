@@ -24,7 +24,6 @@
 
 	<!-- Styles for this web page -->
 	<style>
-		<!-- Account for bottom navigation bar -->
 		body {
 		  padding-top: 55px;
 		}
@@ -74,7 +73,7 @@
 			$("#cancel_button").click(function(e) {
 				var backURL = encodeURIComponent("{{backURL}}");
 				var backName = encodeURIComponent("{{backName}}");
-				window.location.href = "/dico/{{petition.id}}/petition/?debate;backURL="+backURL+";backName="+backName;
+				window.location.href = "/dico/{{petition.id}}/petition/?debate;edit;backURL="+backURL+";backName="+backName;
 				e.preventDefault();
 			});
 
@@ -99,7 +98,7 @@
 					if (json['success']) {
 						var backURL = encodeURIComponent("{{backURL}}");
 						var backName = encodeURIComponent("{{backName}}");
-						window.location.href = "/dico/{{petition.id}}/petition/?debate;backURL="+backURL+";backName="+backName;
+						window.location.href = "/dico/{{petition.id}}/petition/?debate;edit;backURL="+backURL+";backName="+backName;
 					}
 					else {
 						bootstrap_alert.warning(json['error']);
@@ -133,18 +132,15 @@
 	<div id='container' class="container-fluid">
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
-				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav">
-					<div class="dico-navbar-commands">
-						<span class="dico-pull-left">
-							<span id="cancel_button" class="navbar-text navbar-link pull-left dico-navbar-text" href="#">Cancel</span>
-						</span>
-						<span class="dico-fill"><span class="navbar-text dico-inner-fill"><strong>Add {{voteLabel}} Argument</strong></span></span>
-						<span class="dico-pull-right">
-							<span id="id_add_argument_button" class="navbar-text navbar-link pull-right dico-navbar-text">Add</span>
-						</span>
-					</div>
-				</div><!-- /.nav -->
+				<div class="pull-left">
+					<span id="cancel_button" class="navbar-link dico-navbar-link">Cancel</span>
+				</div>
+				<div class="pull-right">
+					<span id="id_add_argument_button" class="navbar-link dico-navbar-link">Add</span>
+				</div>
+				<div class="dico-navbar-commands">
+					<div class="dico-title dico-fill"><span class="dico-inner-fill">Add {{voteLabel}} Argument</span></div>
+				</div>
 			</div>
 		</nav>
 
@@ -153,24 +149,8 @@
 		</div>
 
 		<div class="row">
-			<div class="col-xs-12 col-sm-8">
-				<h5 id='id_petition_title' class="toplabel">An Action for Congress:</h5>
-				<p class="lead"><strong>{{petition.description}}</strong></p>
-			</div>
-			<div class="col-xs-12 col-sm-4">
-				<div class="issue-column">
-					<div class="row">
-						<div class="col-xs-9">
-							<label for="id_petition_issues" class="toplabel">Related Issues</label>
-							{% for issue in petition.issues.all %}
-							<div class="row" />
-								<div class="col-xs-12"><span class="btn btn-xs">{{ issue.name }}</span></div>
-							</div>
-							{% endfor %}
-						</div>
-					</div>
-					<div id='id_petition_issues'> </div>
-				</div>
+			<div class="col-xs-12">
+				<p><strong>{{petition.description}}</strong></p>
 			</div>
 		</div>
 			

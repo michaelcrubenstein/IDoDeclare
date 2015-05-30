@@ -16,6 +16,7 @@
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
     <link href="{% static "dico/css/formsimple.css" %}" rel="stylesheet">
 
 	<style>
@@ -122,9 +123,22 @@
   </head>
 
 <body max-width="100%">
-    <div class="container">
+    <div class="container-fluid">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<div class="pull-left">
+					<span id="cancel_button" class="navbar-link dico-navbar-link">Cancel</span>
+				</div>
+				<div class="dico-navbar-commands">
+					<div class="dico-title dico-fill"><span class="dico-inner-fill">Account Settings</span></div>
+				</div>
+			</div>
+		</nav>
+
 		<form class="form-simple">  
-    		<h3>Account Settings</h3>
+			<div class="row">
+				<div id="myAlert" class="col-xs-12"></div>
+			</div>
 			<div class="form-group row">
 				<label for="id_username"  class="control-label">Email Address</label> 
 				<input id="id_username" class="form-control" maxlength="254" name="username" 
@@ -225,13 +239,7 @@
 			</div>
 			<div class="form-group">
 				<div class="row">
-					<div id="myAlert"></div>
-				</div>
-				<div class="row">
 					<input id="submit_button" class="btn btn-primary btn-block col-xs-12" type="submit" value="Update Account"></input>
-				</div>
-				<div class="row">
-					<button id="cancel_button" class="btn btn-default btn-block cancel-button col-xs-12">Cancel</button>
 				</div>
 			</div>
 		</form>

@@ -81,6 +81,10 @@ urlpatterns = patterns(
     url(r'^newpetitionvote/', views.newPetitionVote, name='newPetitionVote'),
     # ex: /dico/deletepetitionvote/
     url(r'^deletepetitionvote/', views.deletePetitionVote, name='deletePetitionVote'),
+    # ex: /dico/newnote/
+    url(r'^newnote/', views.newNote, name='newNote'),
+    # ex: /dico/deletenote/
+    url(r'^deletenote/', views.deleteNote, name='deleteNote'),
     # ex: /dico/newargument/
     url(r'^newargument/', views.newArgument, name='newArgument'),
     # ex: /dico/deleteargument/
@@ -117,8 +121,12 @@ urlpatterns = patterns(
     url(r'^getpetitionvotetotals/', views.getPetitionVoteTotals, name='getPetitionVoteTotals'),
     # ex: dico/5/getpetitionvotesbyscope/
     url(r'^getpetitionvotesbyscope/', views.getPetitionVotesByScope, name='getPetitionVotesByScope'),
+    # ex: /dico/getpetitionnotes/
+    url(r'^getpetitionnotes/', views.getPetitionNotes, name='getPetitionNotes'),
     # ex: /dico/getpetitionstories/
     url(r'^getpetitionstories/', views.getPetitionStories, name='getPetitionStories'),
+    # ex: /dico/addnote/
+    url(r'^addnote/', views.addNote, name='addNote'),
     # ex: /dico/rateargument/
     url(r'^rateargument/', views.rateArgument, name='rateArgument'),
     # ex: /dico/unrateargument/

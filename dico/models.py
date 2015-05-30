@@ -474,6 +474,32 @@ class ArgumentRating(models.Model):
     def __str__(self):
         return str(self.constituent) + ": " + str(self.vote)
 
+class NoteManager(models.Manager):
+    def get_notes(petition_id):
+        with connection.cursor() as c:
+            sql = "SELECT a.id, a.constituent_id, a.description, a.link, a.creation_time " + \
+                  " FROM dico_note a" + \
+                  " WHERE a.petition_id = %s" + \
+                  " ORDER BY a.creation_time DESC"
+            c.execute(sql, [petition_id])
+            notes = []
+            for i in c.fetchall():
+                notes.append({'id': i[0], 'constituent_id': int(i[1]), 'description': i[2], 'link': i[3], \
+                                  'creation_time': i[4]})
+            return notes
+    
+class Note(models.Model):
+    petition = models.ForeignKey(Petition, db_index=True, db_column='petition_id')
+    constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
+    description = models.TextField()
+    link = models.TextField()
+    creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+    
+    objects = NoteManager()
+    
+    def __str__(self):
+        return self.description
+
 class StoryManager(models.Manager):
     def get_stories(petition_id):
         with connection.cursor() as c:

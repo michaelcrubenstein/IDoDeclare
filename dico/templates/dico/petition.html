@@ -36,10 +36,6 @@
 			padding-left: 10px;
 			padding-right: 10px;
 		}
-		#id_deleteActionButton {
-			margin-left: 10px;
-			margin-right: 10px;
-		}
 		.well {
 			margin-top: 10px;
 			padding: 0px;
@@ -92,64 +88,69 @@
 		<div id='container' class="container-fluid">
 			<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 				<div class="container-fluid">
-					<!-- Collect the nav links, forms, and other content for toggling -->
-					<div class="nav navbar-header">
-						<div class="dico-navbar-commands">
-							<span class="dico-pull-left">
-								<a class="navbar-link pull-left dico-navbar-link" href="{{ backURL }}">
-									<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}
-								</a>
-							</span>
-						</div>
-					</div><!-- /.nav -->
-					<div class="nav navbar-header">
-						<div class="dico-navbar-commands">
-							<div class="dico-title dico-fill"><span class="dico-inner-fill">An Action for Congress</span></div>
-						</div>
-					</div><!-- /.nav -->
+					<div class="pull-left">
+						<a class="navbar-link dico-navbar-link" href="{{ backURL }}">
+							<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}
+						</a>
+					</div>
+					{% if user.is_authenticated %}
+					<div class="pull-right">
+						<span id="id_editButton" class="navbar-link dico-navbar-link" onClick="edit_action()"}>
+							Edit
+						</span>
+					</div>
+					{% endif %}
+					<div class="dico-navbar-commands">
+						<div class="dico-title dico-fill"><span class="dico-inner-fill">An Action for Congress</span></div>
+					</div>
 				</div>
 			</nav>
 		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
 			{% if user.id == petition.constituent.user.id or user.is_superuser %}
-			<div id="id_voteNav" class="container-fluid panelNav">
+			<div id="id_voteNav" class="container-fluid panelNav" section="id_voteSection">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-header pull-right">
-					<span id="id_deleteActionButton" class="pull-right dico-navbar-text text-danger"}>
+				<div class="pull-right">
+					<span id="id_deleteActionButton" class="dico-navbar-link text-danger"}>
 						Delete Action
 					</span>
 				</div>
 			</div>
 			{% endif %}
 			{% if user.is_authenticated %}
-			<div id="id_debateNav" class="container-fluid panelNav">
+			<div id="id_debateNav" class="container-fluid panelNav" section="id_debateSection">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-header pull-left">
-					<span class="navbar-text navbar-link pull-left dico-navbar-text" onClick="add_supporting_argument()"}>
+				<div class="pull-left">
+					<span class="navbar-link dico-navbar-link" onClick="add_supporting_argument()"}>
 						Add Supporting Argument
 					</span>
 				</div>
-				<div class="nav navbar-header pull-right">
-					<span class="navbar-text navbar-link pull-right dico-navbar-text" onClick="add_opposing_argument()"}>
+				<div class="pull-right">
+					<span class="navbar-link dico-navbar-link" onClick="add_opposing_argument()"}>
 						Add Opposing Argument
 					</span>
 				</div>
 			</div>
-			<div id="id_labelNav" class="container-fluid panelNav">
+			<div id="id_notesNav" class="container-fluid panelNav" section="id_notesSection">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-header pull-left">
-					<span class="navbar-text navbar-link pull-left dico-navbar-text" onClick="add_issue()"}>
-						Add Related Issue
+				<div class="pull-left">
+					<span class="navbar-link dico-navbar-link" onClick="add_issue()"}>
+						Add Issue
+					</span>
+				</div>
+				<div class="pull-right">
+					<span class="navbar-link dico-navbar-link" onClick="add_note()"}>
+						Add Note
 					</span>
 				</div>
 			</div>
-			<div id="id_storyNav" class="container-fluid panelNav">
+			<div id="id_storyNav" class="container-fluid panelNav" section="id_storySection">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="nav navbar-header pull-left">
-					<span class="navbar-text navbar-link pull-left dico-navbar-text" onClick="add_story()"}>
+				<div class="pull-left">
+					<span class="navbar-link dico-navbar-link" onClick="add_story()"}>
 						Share Your Story
 					</span>
 				</div>
@@ -159,11 +160,11 @@
 			<div class="container-fluid">
 						<!-- Brand and toggle get grouped for better mobile display -->
 						<!-- Collect the nav links, forms, and other content for toggling -->
-				<ul id="id_petitionNav" class="nav nav-tabs pull-left" role="navigation" aria-label="petitionButtons">
+				<ul id="id_petitionNav" class="nav nav-tabs pull-left" role="navigation" aria-label="actionButtons">
 					<li section="id_voteSection"><a id="id_voteButton" href="#">Vote</a></li>
+					<li section="id_notesSection"><a id="id_notesButton" href="#">Notes</a></li>
 					<li section="id_debateSection"><a id="id_debateButton" href="#">Debate</a></li>
-					<li section="id_issuesSection"><a id="id_issuesButton" href="#">Issues</a></li>
-					<li section="id_analyzeSection"><a id="id_mapsButton" href="#">Maps</a></li>
+					<li section="id_statsSection"><a id="id_mapsButton" href="#">Stats</a></li>
 					<li section="id_storySection"><a id="id_storyButton" href="#">Stories</a></li>
 				</ul>
 			</div>
@@ -183,14 +184,45 @@
 		</div>
 
 		<section id="id_petitionSections">
-			<section id="id_issuesSection" class="row">
+			<section id="id_notesSection" class="row">
 				<div class="col-xs-12">
 					<div class="row">
 						<div class="col-xs-12">
-							<label for="id_petition_issues" class="toplabel">Related Issues</label>
+							<style>
+								.table-condensed-xs>tbody>tr>td,
+								.table-condensed-xs>thead>tr>th {
+									padding-left: 5px;
+									padding-right: 5px;
+								}
+								.table-condensed-xs>tbody>tr>td>span:hover {
+									text-decoration: none;
+								}
+							</style>
+							<table class="table-condensed-xs">
+								<thead>
+									<tr>
+										<th class"editTool" style="width:1px"></th>
+										<th style:"width:100%">Issues</th>
+									</tr>
+								</thead>
+								<tbody id='id_petition_issues'></tbody>
+							</table>
 						</div>
 					</div>
-					<div id='id_petition_issues'> </div>
+					<div class="row">
+						<div class="col-xs-12">
+							<table class="table table-condensed table-striped">
+								<thead>
+									<tr>
+										<th class"editTool" style="width:1px"></th>
+										<th style:"width:100%">Notes</th>
+									</tr>
+								</thead>
+								<tbody id='id_petition_notes'></tbody>
+							</table>
+						</div>
+					</div>
+					
 				</div>
 			</section>
 			<section id="id_voteSection" class="row">
@@ -258,6 +290,7 @@
 				<div class="col-xs-12 col-md-6">
 					<table class="table table-striped table-condensed argument-container">
 						<thead>
+							<th style:"width:1px"></th>
 							<th>Supporting Arguments
 							</th>
 							<th>Your Rating 
@@ -265,7 +298,6 @@
 									<span class="glyphicon glyphicon-question-sign"></span>
 								</button>
 							</th>
-							<th></th>
 						</thead>
 						<tbody id='id_supporting_arguments'>
 						</tbody>
@@ -274,6 +306,7 @@
 				<div class="col-xs-12 col-md-6">
 					<table class="table table-striped table-condensed argument-container">
 						<thead>
+							<th style:"width:1px"></th>
 							<th>Opposing Arguments
 							</th>
 							<th>Your Rating 
@@ -281,14 +314,13 @@
 									<span class="glyphicon glyphicon-question-sign"></span>
 								</button>
 							</th>
-							<th></th>
 						</thead>
 						<tbody id='id_opposing_arguments'>
 						</tbody>
 					</table>
 				</div>
 			</section>
-			<section id="id_analyzeSection">
+			<section id="id_statsSection">
 				<div class="row">
 					<div class="col-xs-12">
 						<div id="id_total_votes" class="bottom-padding">
@@ -367,6 +399,17 @@
 		</div>
 	</div>
 	
+	<div id="id_deleteNoteDialog" class="modal fade">
+		<div class="modal-dialog modal-sm">
+			<div class="modal-content">
+				<div class="modal-body">
+					<button id="id_confirmDeleteNoteButton" type="button" data-dismiss="modal" class="btn btn-danger btn-block">Delete Note</button>
+					<button type="button" class="btn btn-default btn-block" data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
 	<div id="id_deleteStoryDialog" class="modal fade">
 		<div class="modal-dialog modal-sm">
 			<div class="modal-content">
@@ -424,6 +467,7 @@
 	var debateShown = false;
 	var storiesShown = false;
 	var choicesInitialized = false;
+	var inEditMode = false;			// True if currently editing.
 	
 	$(document).ready (function(e) {
 		<!-- Block of code for an alert area at the top of the window -->
@@ -446,6 +490,10 @@
 			remove_argument(elementToDelete, $("#id_deleteDialog").attr("argumentId"));
 		});
 
+		$("#id_confirmDeleteNoteButton").click(function() {
+			remove_note(elementToDelete, $("#id_deleteNoteDialog").attr("noteId"));
+		});
+
 		$("#id_confirmDeleteStoryButton").click(function() {
 			remove_story(elementToDelete, $("#id_deleteStoryDialog").attr("storyId"));
 		});
@@ -457,20 +505,6 @@
 		$("#id_deleteActionButton").click(function() {
 			$("#id_deleteActionDialog").modal('show');
 		});		
-		
-		// After showing the petition votes, set the change methods of the radio buttons
-		// for the current user's vote.
-		$("#supportRadio").change(function() {
-			cast_vote(1);
-		});
-		
-		$("#opposeRadio").change(function() {
-			cast_vote(0);
-		});
-		
-		$("#noOpinionRadio").change(function() {
-			vote_no_opinion();
-		});
 		
 		var oldButton=$("#noOpinionButton");
 		$('#yourVoteButton').draggable( {
@@ -533,12 +567,8 @@
 			$("section>section").css("display", "none");
 			$("#"+$(this).attr("section")).css("display", "block");
 			{% if user.is_authenticated %}
-				$("#id_voteNav").css("display", $("#id_voteSection").css("display"));
-				$("#id_debateNav").css("display", $("#id_debateSection").css("display"));
-				$("#id_labelNav").css("display", $("#id_issuesSection").css("display"));
-				$("#id_storyNav").css("display", $("#id_storySection").css("display"));
+				setup_edit();
 			{% endif %}
-			$("body").css("padding-bottom", $(".navbar-fixed-bottom").height());
 		});
 		
 		$("#id_mapsButton").click(
@@ -548,21 +578,7 @@
 					show_petition_votes(true);
 					petitionVotesShown = true;
 				}
-				if (!choicesInitialized) {
-					$("#id_supportRadio").change( function() {
-						change_vote($(this).val(), getscope());
-					});
-					$("#id_opposeRadio").change( function() {
-						change_vote($(this).val(), getscope());
-					});
-					$("#byDistrictRadio").change( function() {
-						show_vote_map(districtScope);
-					});
-					$("#byStateRadio").change( function() { 
-						show_vote_map(stateScope);
-					});
-					choicesInitialized = true;
-				}
+				setup_petition_radios();
 				if (!mapsShown) {
 					initmapheight("#mapFrame");
 					init_map_width();
@@ -588,10 +604,11 @@
 			}
 		});
 		
-		$("#id_issuesButton").click( function() {
+		$("#id_notesButton").click( function() {
 			if (!labelShown) {
 				// Display the issues associated with the current petition.
 				show_petition_issues();
+				show_petition_notes();
 				labelShown = true;
 			}
 		});
@@ -603,9 +620,52 @@
 			}
 		});
 		
+		inEditMode = {{inEditMode}};
 		$("{{initialButton}}").click();
 		
 	});
+	
+	function setup_edit() {
+		{% if user.is_authenticated %}
+			// Return the display for editingnav's associated with the specified item.
+			function editNavDisplay(id) {
+				if (inEditMode) 
+					return $(id).css("display"); 
+				else 
+					return "none";
+			}
+		
+			// Set up the text of the Edit button ("", Edit or Done),
+			$("#id_editButton").text(function() {
+			if ($("#id_voteSection").css("display") != "none" ||
+				$("#id_statsSection").css("display") != "none")
+				return "";
+			else if (inEditMode)
+				return "Done";
+			else
+				return "Edit";
+			});
+			
+			// Set up the visibility of all of the panel navs
+			$(".panelNav").css("display", 
+							   function() { 
+									return editNavDisplay("#" + $(this).attr("section")); 
+							   });
+			
+			if (inEditMode)				   
+				$(".editTool").css("display", "table-cell");
+			else
+				$(".editTool").css("display", "none");
+				
+			// Set up the pointers over the issue links.
+			if (inEditMode)
+				$(".table-condensed-xs>tbody>tr>td>span").css("cursor", '');
+			else
+				$(".table-condensed-xs>tbody>tr>td>span").css("cursor", "pointer");
+				
+		{% endif %}
+		$("body").css("padding-bottom", $(".navbar-fixed-bottom").height());
+	}
 	
 	function go_to_next_petition() {
 		{% if nextPetition %}
@@ -623,36 +683,43 @@
 			issues = json['issues'];
 		
 			$("#id_petition_issues").empty();
-		
-			for (i = 0; i < issues.length; ++i) {
-				issue = issues[i];
-				li = document.createElement("div");
-				$(li).addClass("row");
-				$("#id_petition_issues").append(li);
-				newButton = document.createElement("a");
-				newDiv = document.createElement("div");
-				$(li).append(newDiv);
-				$(newDiv).addClass("col-xs-9")
-						 .append(newButton);
-				$(newButton).append(htmlEncode(issue['name']));
-				$(newButton).addClass("btn-xs text-muted");
-				$(newButton).attr("href", "{% url 'issue' %}?issue=" + issue['id']);
-
-				<!-- Add a button to delete the issue from the petition -->
-				newButton = document.createElement("button");
-				$(newButton).addClass("btn btn-link btn-xs col-xs-3 pull-right");
-				$(li).append(newButton);
-				if (issue['isEditable'] && issues.length > 1) {
-					newSpan = document.createElement("span");
-					$(newButton).append(newSpan);
-					$(newButton).attr("issueID", issue['id']);
-					$(newButton).click(function() {
+			
+			rows = d3.select("#id_petition_issues").selectAll("tr")
+					.data(issues)
+					.enter()
+					.append("tr");
+			
+			<!-- Add a button to delete the issue from the action -->
+			rows.append("td")
+				.append("button")
+				.classed("btn btn-link btn-xs editTool", true)
+				.style("display", "inline-block")
+				.filter(function(d) { return d['isEditable'] && issues.length > 1 })
+				.append("span")
+				.classed("glyphicon glyphicon-remove editTool", true)
+				.attr("issueID", function(d) { return d['id']})
+				.on('click', function() {
+					if (inEditMode)
+					{
 						closealert();
 						remove_issue($(this).parent(), $(this).attr("issueID"));
-					});
-					$(newSpan).addClass("glyphicon glyphicon-remove");
-				}
-			}
+					}
+				});
+
+			rows.append("td")
+				.append("span")
+				.classed("small text-muted", true)
+				.text(function(d) { return htmlEncode(d['name']); })
+				.attr("issue", function(d) { return d['id']; })
+				.on('click', function() {
+					if (!inEditMode)
+					{
+						window.location.href = "{% url 'issue' %}?issue=" + $(this).attr('issue');
+					}
+				});
+				
+			setup_edit();
+				
 		}
 		else
 			bootstrap_alert.warning(json['error']);
@@ -675,10 +742,104 @@
 		});
 	}
 	
+	function show_petition_notes() {
+		$("#id_petition_notes").empty();
+	
+	  $.post("{% url 'getPetitionNotes' %}", { csrfmiddlewaretoken: storedcsrftoken, "id" : "{{petition.id}}" }, function(json){
+		if (json['success']) {
+			notes = json['notes'];
+			
+			if (notes.length == 0)
+			{
+				var rows = d3.select("#id_petition_notes")
+				  .append("tr");
+				rows.append("td");
+				rows.append("td")
+					.text("No notes related to this action.");
+			}
+			else
+			{
+				var rows = d3.select("#id_petition_notes").selectAll("tr")
+					.data(notes)
+					.enter()
+					.append("tr");
+
+				// Add buttons to each media item that is editable.	   
+				rows.append("td")
+					.append("button")
+					.classed("btn btn-link btn-xs editTool", true)
+					.attr("noteId", function(d) { return d['id']; })
+					.style("display", "inline-block")
+					.filter(function(d) { return d['isEditable']; })
+					.on("click", function() {
+						if (inEditMode)
+						{
+							closealert();
+							$("#id_deleteNoteDialog").attr("noteId", $(this).attr("noteId"));
+							elementToDelete = $(this).parent().parent();
+							$("#id_deleteNoteDialog").modal('show');
+						}
+					})
+					.append("span")
+					.classed("glyphicon glyphicon-remove editTool", true);
+					
+				divs = rows.append("td")
+					.append("div")
+					.classed("media", "true");
+			
+				mediaBodies = divs.append("div")
+								  .classed("media-body", true);
+							  
+				mediaBodies.append("small")
+						   .classed("text-muted media-heading", true)
+						   .text(function(d) { return d['heading'] + ": "; });
+					   
+				paragraphs = mediaBodies.append("span")
+						   .text(function(d) { return d['description']; })
+						   .filter(function(d) { return d['link'].length > 0; } );
+				
+				paragraphs.append("span")
+						   .text("  ");
+				paragraphs.append("a")
+						   .attr("href", function(d) { return d['link']; })
+						   .attr("target", "_blank")
+						   .append("span")
+						   .classed("glyphicon glyphicon-new-window", true);
+						   
+				setup_edit();
+			}
+		}
+		else
+			bootstrap_alert.warning(json['error']);
+	  })
+	  .fail(function(jqXHR, textStatus, errorThrown)
+		{
+			bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+			console.log( "error: " + textStatus + "; " + errorThrown + ";");
+			console.log( jqXHR.status + "; " + jqXHR.statusText);
+		});
+	}
+	
+	function add_note() {
+		var backURL = encodeURIComponent("{{backURL}}");
+		var backName = encodeURIComponent("{{backName}}");
+		window.location.href = "{% url 'addNote' %}?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+	}
+	
+	function remove_note(li, note_id) {
+	  $.post("{% url 'deleteNote' %}", { csrfmiddlewaretoken: storedcsrftoken, "id" : note_id }, function(json){
+		if (json['success']) {
+			$(li).remove();
+		}
+		else
+			bootstrap_alert.warning(json['error']);
+		});
+	}
+	
 	function add_story() {
 		var backURL = encodeURIComponent("{{backURL}}");
 		var backName = encodeURIComponent("{{backName}}");
-		window.location.href = "/dico/addstory/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+		window.location.href = "{% url 'addStory' %}?petition={{petition.id}};backURL="+backURL+";backName="+backName;
 	}
 	
 	function show_petition_arguments() {
@@ -692,7 +853,7 @@
 				append_zero_arguments($("#id_supporting_arguments"));
 			} else {
 				for (i = 0; i < supportingArguments.length; ++i) {
-					append_argument(supportingArguments[i], $("#id_supporting_arguments"));
+					append_argument(supportingArguments[i], "#id_supporting_arguments");
 				}
 			}
 			$("#id_opposing_arguments").empty();
@@ -700,9 +861,10 @@
 				append_zero_arguments($("#id_opposing_arguments"));
 			} else {
 				for (i = 0; i < opposingArguments.length; ++i) {
-					append_argument(opposingArguments[i], $("#id_opposing_arguments"));
+					append_argument(opposingArguments[i], "#id_opposing_arguments");
 				}
 			}
+			setup_edit();
 		}
 		else
 			bootstrap_alert.warning(json['error']);
@@ -734,98 +896,83 @@
 				  ];
 				  
 	function append_argument(arg, containerObj) {
-		li = document.createElement("tr");
-		newParagraph = document.createElement("td");
-		containerObj.append(li);
-		$(li).append(newParagraph);
-
-		$(newParagraph).append(htmlEncode(arg['description']));
-		
-		ratingCell = document.createElement("td");
-		$(li).append(ratingCell);
-		ratingGroupDiv = document.createElement("div");
-		$(ratingCell).append(ratingGroupDiv);
-		$(ratingGroupDiv).addClass("btn-group");
-		set_rating_button(ratingGroupDiv, arg['rating_vote'], arg['id']);
-						
-		newCell = document.createElement("td");
-		$(li).append(newCell);
+		li = d3.select(containerObj).append("tr");
+		newButton = li.append("td")
+		  .append("button")
+		  .classed("btn btn-link btn-xs editTool", true)
+		  .attr("argumentId", arg['id'])
+		  .on('click', function() {
+								if (inEditMode)
+									{
+										closealert();
+										$("#id_deleteDialog").attr("argumentId", $(this).attr("argumentId"));
+										elementToDelete = $(this).parent().parent();
+										$("#id_deleteDialog").modal('show');
+									}
+								});
 		if (arg['isEditable']) {
-			newButton = document.createElement("button");
-			newSpan = document.createElement("span");
-			$(newCell).append(newButton);
-			$(newButton).addClass("btn btn-link btn-xs");
-			$(newButton).attr("argumentId", arg['id']);
-			$(newButton).click(function() {
-				closealert();
-				$("#id_deleteDialog").attr("argumentId", $(this).attr("argumentId"));
-				elementToDelete = $(this).parent().parent();
-				$("#id_deleteDialog").modal('show');
-			});
-			$(newButton).append(newSpan);
-			$(newSpan).addClass("glyphicon glyphicon-remove");
+			newButton.append("span")
+					 .classed("glyphicon glyphicon-remove editTool", true);
 		}
+
+		newParagraph = li.append("td")
+						 .text(htmlEncode(arg['description']));
+		
+		ratingGroupDiv = li.append("td").append("div")
+								   .classed("btn-group", true);
+		set_rating_button(ratingGroupDiv, arg['rating_vote'], arg['id']);
 	}
 	
 	function set_rating_button(ratingGroupDiv, ratingVote, argumentID) {
-		$(ratingGroupDiv).empty();
-		var ratingButton = document.createElement("button");
-		ratingCaret = document.createElement("span");
-		ratingMenu = document.createElement("ul");
-		$(ratingGroupDiv).append(ratingButton)
-						 .append(ratingMenu);
-						 
+		ratingGroupDiv.html('');
 		if (ratingVote === null || ratingVote == -1)
 			ratingText = 'Rate Now';
 		else
 			ratingText = ratingData[ratingData.length - 1 - ratingVote].text;
 			
-		$(ratingButton).prop("type", "button")
-					   .addClass("btn btn-xs btn-link block-display dropdown-toggle")
-					   .attr("data-toggle", "dropdown")
-					   .html(ratingText + ' ')
-					   .append(ratingCaret);
-		$(ratingCaret).addClass("caret");
-		$(ratingMenu).addClass("dropdown-menu")
-					 .attr("role", "menu");
+		ratingGroupDiv.append("button")
+					 .classed("btn btn-xs btn-link block-display dropdown-toggle", true)
+					 .attr("data-toggle", "dropdown")
+					 .html(ratingText + ' ')
+					 .append("span")
+					 .classed("caret", true);
+		ratingMenu = ratingGroupDiv.append("ul")
+								   .classed("dropdown-menu", true)
+					 			   .attr("role", "menu");
 		
-		for (var i = 0; i < ratingData.length; ++i) {
-			ratingItem = document.createElement("li");
-			ratingItemButton = document.createElement("button");
-			ratingItemSpan = document.createElement("span");
-			$(ratingMenu).append(ratingItem);
-			$(ratingItem).append(ratingItemButton);
-			$(ratingItemButton).append(ratingItemSpan)
-							   .append(ratingData[i].text);
-						 
-			$(ratingItemSpan).addClass("btn btn-xs btn-link glyphicon glyphicon-ok");
-			if (ratingVote != ratingData[i].value)
-				$(ratingItemSpan).addClass("invisible");
-				
-			$(ratingItemButton).val(ratingData[i].value)
-							   .addClass("btn btn-xs btn-link")
-							   .attr("argumentId", argumentID)
-							   .click(function() { 
+		ratingItemButtons = ratingMenu.selectAll("li")
+				  .data(ratingData)
+				  .enter()
+				  .append("li")
+				  .append("button")
+				  .classed("btn btn-xs btn-link", true)
+				  .attr("argumentId", argumentID)
+				  .attr("value", function(d) { return d.value; })
+				  .on ('click', function() { 
 								 theDiv = $(this).parents(".btn-group")[0];
-								 rate_argument(theDiv, $(this).attr("argumentId"), $(this).val());
+								 rate_argument(d3.select(theDiv), $(this).attr("argumentId"), $(this).val());
 								 });
-		}
+		ratingItemButtons
+				  .append("span")
+				  .classed("btn btn-xs btn-link glyphicon glyphicon-ok", true)
+				  .classed("invisible", function(d) { return ratingVote != d.value });
+				  
+		ratingItemButtons
+				  .text(function(d) { return d.text });
 
 		if (ratingVote !== null) {
 			ratingItem = document.createElement("li");
-			$(ratingMenu).append(ratingItem);
-			$(ratingItem).addClass("divider");
-			ratingItem = document.createElement("li");
-			ratingItemButton = document.createElement("button");
-			$(ratingMenu).append(ratingItem);
-			$(ratingItem).append(ratingItemButton);
-			$(ratingItemButton).text("Remove this rating")
-							   .val(-1)
-							   .addClass("btn btn-xs btn-link")
-							   .attr("argumentId", argumentID)
-							   .click(function() { 
+			ratingMenu.append("li")
+					  .classed("divider", true);
+			ratingMenu.append("li")
+					  .append("button")
+					  .classed("btn btn-xs btn-link", true)
+					  .attr("argumentId", argumentID)
+					  .text("Remove this rating")
+					  .attr("value", -1)
+					  .on ('click', function() { 
 								 theDiv = $(this).parents(".btn-group")[0];
-								 rate_argument(theDiv, $(this).attr("argumentId"), $(this).val());
+								 rate_argument(d3.select(theDiv), $(this).attr("argumentId"), $(this).val());
 								 });
 		}
 	}
@@ -868,6 +1015,11 @@
 		var backURL = encodeURIComponent("{{backURL}}");
 		var backName = encodeURIComponent("{{backName}}");
 		window.location = "{% url 'docRatings' %}?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+	}
+	
+	function edit_action() {
+		inEditMode = !inEditMode;
+		setup_edit();
 	}
 	
 	function cast_vote(vote) {
@@ -948,6 +1100,25 @@
 		
 	}
 	
+	function setup_petition_radios() {
+		if (!choicesInitialized) {
+			// After showing the petition votes, set the change methods of the radio buttons
+			// for the current user's vote.
+			$("#supportRadio").change(function() {
+				cast_vote(1);
+			});
+		
+			$("#opposeRadio").change(function() {
+				cast_vote(0);
+			});
+		
+			$("#noOpinionRadio").change(function() {
+				vote_no_opinion();
+			});
+			choicesInitialized = true;
+		}
+	}
+	
 	function show_petition_votes(init_user_vote) {
 		deferredObject = $.get("{% url 'getPetitionVoteTotals' %}", { csrfmiddlewaretoken: storedcsrftoken, 
 													  "petition" : "{{petition.id}}"} 
@@ -1022,6 +1193,9 @@
 					
 					$("input[name=voteOptions]").parent().each(set_button_display);
 					mapsShown = false;
+					
+					// Now that the votes are set, handle change functions.
+					setup_petition_radios();
 				}
 				else {
 					bootstrap_alert.warning(json['error']);
@@ -1073,7 +1247,7 @@
 	}
 
 	function show_petition_stories() {
-	  $.post("{% url 'getPetitionStories' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
+	  $.post("{% url 'getPetitionStories' %}", { csrfmiddlewaretoken: storedcsrftoken, "id" : "{{petition.id}}" }, function(json){
 		if (json['success']) {
 			stories = json['stories'];
 			
@@ -1100,7 +1274,8 @@
 					.append("div")
 					.classed("media", "true");
 			
-				divs.append("div")
+				divs.filter(function(story) { return story['link'].length > 0; } )
+					.append("div")
 					.classed("media-left", true)
 					.append("a")
 					.attr("href", function(story) { return story['link']; })
@@ -1114,27 +1289,28 @@
 				mediaBodies = divs.append("div")
 								  .classed("media-body", true);
 							  
-				mediaBodies.append("h5")
-						   .classed("media-heading", true)
-						   .text(function(story) { return story['heading']; });
+				mediaBodies.append("small")
+						   .classed("text-muted media-heading", true)
+						   .text(function(d) { return d['heading'] + ": "; });
 					   
-				paragraphs = mediaBodies.append("p")
+				paragraphs = mediaBodies.append("span")
 						   .text(function(story) { return story['description']; })
 						   .filter(function(story) { return story['link'].length > 0; } );
 				
-				paragraphs.append("br");
+				paragraphs.append("span")
+						   .text("  ");
 				paragraphs.append("a")
-						   .attr("href", function(story) { return story['link']; })
+						   .attr("href", function(d) { return d['link']; })
 						   .attr("target", "_blank")
-						   .style("word-wrap", "break-word")
-						   .text("More Info");
+						   .append("span")
+						   .classed("glyphicon glyphicon-new-window", true);
 				
 				// Add buttons to each media item that is editable.	   
 				divs.filter(function(story) { return story['isEditable']; })
 					.append("div")
 					.classed("media-right", true)
 					.append("button")
-					.classed("btn btn-link btn-xs", true)
+					.classed("btn btn-link btn-xs editTool", true)
 					.attr("storyId", function(story) { return story['id']; })
 					.on("click", function() {
 						closealert();
@@ -1144,8 +1320,10 @@
 					})
 					.style("display", "inline-block")
 					.append("span")
-					.classed("glyphicon glyphicon-remove", true);
+					.classed("glyphicon glyphicon-remove editTool", true);
 			}
+			
+			setup_edit();
 		}
 		else
 			bootstrap_alert.warning(json['error']);

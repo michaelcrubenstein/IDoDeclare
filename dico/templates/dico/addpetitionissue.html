@@ -60,9 +60,11 @@
 		var storedcsrftoken = "{{ csrf_token }}";
 
 		$(document).ready (function(e) {
-			var backURL = encodeURIComponent("{{backURL}}");
-			var backName = encodeURIComponent("{{backName}}");
-			$("#id_done_anchor").attr("href", "/dico/{{petition.id}}/petition/?issues;backURL="+backURL+";backName="+backName);
+			$("#id_done_anchor").click( function(e) {
+				var backURL = encodeURIComponent("{{backURL}}");
+				var backName = encodeURIComponent("{{backName}}");
+				window.location.href = "/dico/{{petition.id}}/petition/?notes;edit;backURL="+backURL+";backName="+backName;
+			});
 		});
 
 		$(document).ready (function(e) {
@@ -95,7 +97,7 @@
 					closealert();
 					var backURL = encodeURIComponent("{{backURL}}");
 					var backName = encodeURIComponent("{{backName}}");
-					window.location.href = "/dico/{{petition.id}}/petition/?issues;backURL="+backURL+";backName="+backName;
+					window.location.href = "/dico/{{petition.id}}/petition/?issues;edit;backURL="+backURL+";backName="+backName;
 				}
 				else {
 					bootstrap_alert.warning("Sorry, " + json['error']);
@@ -122,24 +124,24 @@
 	<div id='container' class="container-fluid">
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
-				<div class="nav navbar-header pull-left">
-					<li>
-						<a id="id_done_anchor" class="navbar-link dico-nav-edge-link">
-			  				Done
-			  			</a>
-			  		</li>
-			  	</div>
+				<div class="pull-right">
+					<span id="id_done_anchor" class="navbar-link dico-navbar-link">Done</span>
+				</div>
+				<div class="dico-navbar-commands">
+					<div class="dico-title dico-fill"><span class="dico-inner-fill">Add Issue</span></div>
+				</div>
 			</div><!-- /.container-fluid -->
 		</nav>
 
 	    <div id="myAlert" class="row"></div>
 
 		<div class="row">
-			<div class="col-xs-12 col-sm-8">
-				<h5 id='id_petition_title' class="toplabel">An Action for Congress:</h5>
-				<p class="lead"><strong>{{petition.description}}</strong></p>
+			<div class="col-xs-12">
+				<p><strong>{{petition.description}}</strong></p>
 			</div>
-			<div class="col-xs-12 col-sm-4 container">
+		</div>
+		<div class="row">
+			<div class="col-xs-12 container">
 				<div class="issue-column">
 					<div class="row">
 						<div class="col-xs-9">

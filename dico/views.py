@@ -18,7 +18,7 @@ import uuid
 from custom_user.models import PasswordReset
 from dico.models import Issue, Constituent, ConstituentInterest, ContactMethod, \
     Petition, PetitionManager, PetitionIssue, PetitionVote, \
-    Argument, ArgumentManager, ArgumentRating, Story, StoryManager, MC
+    Argument, ArgumentManager, ArgumentRating, Note, NoteManager, Story, StoryManager, MC
 from dico.titlecase import titlecase
 
 # Create your views here.
@@ -757,6 +757,26 @@ def deletePetitionVote(request):
     
     return JsonResponse(results)
 
+# Displays a web page for adding a story to a petition.
+def addNote(request):
+    if not request.user.is_authenticated:
+        return signin(request)
+    
+    template = loader.get_template('dico/addnote.html')
+        
+    petition_id = request.GET.get('petition', 0)
+    petition = Petition.objects.filter(pk=petition_id).select_related().get()
+    backURL = request.GET.get(u'backURL', '/dico/')
+    backName = request.GET.get('backName', 'Home')
+    
+    context = RequestContext(request, {
+        'user': request.user,
+        'petition': petition,
+        'backURL': backURL,
+        'backName': backName,
+    })
+    return HttpResponse(template.render(context))
+
 # Displays a web page for adding a supporting argument to a petition.
 def addSupportingArgument(request):
     if not request.user.is_authenticated:
@@ -856,6 +876,67 @@ def docYourInterests(request):
     context = RequestContext(request, {
     })
     return HttpResponse(template.render(context))
+
+def newNote(request):
+    results = {'success':False, 'error': 'newNote failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("newNote only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            raise Exception('The current login is not a constituent');
+
+        # Get the petition info.
+        petition_id = request.POST['petition']
+        description = request.POST['description']
+        link = request.POST['link']
+        
+        # Do the model operation
+        note = Note.objects.create(petition_id=petition_id, \
+                                               constituent_id=constituent.user.id, \
+                                               description=description,
+                                               link=link)
+        
+        # Return the results.
+        results = {'success':True, 'story': {'creationTime': note.creationTime}}
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+def deleteNote(request):
+    results = {'success':False, 'error': 'deleteNote failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("deleteNote only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        id = request.POST['id']
+        
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            raise Exception('The current login is not a constituent');
+
+        # Do the model operation
+        Note.objects.filter(pk=id).delete()
+        
+        # Return the results.
+        results = {'success':True}
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
 
 def newArgument(request):
     results = {'success':False, 'error': 'newArgument failed'}
@@ -1141,14 +1222,16 @@ def petition(request, petition_id):
     
     if 'debate' in request.GET:
         initialButton = "#id_debateButton"
-    elif 'issues' in request.GET:
-        initialButton = "#id_issuesButton"
+    elif 'notes' in request.GET:
+        initialButton = "#id_notesButton"
     elif 'maps' in request.GET:
         initialButton = "#id_mapsButton"
     elif 'story' in request.GET:
         initialButton = "#id_storyButton"
     else:
         initialButton = "#id_voteButton"
+        
+    inEditMode = int('edit' in request.GET)
         
     if 'showNext' in request.GET:
         nextPetition = Petition.objects.get_next_petition(petition_id=petition_id, user=request.user)
@@ -1165,6 +1248,7 @@ def petition(request, petition_id):
         'backName': backName,
         'initialButton': initialButton,
         'nextPetition': nextPetition,
+        'inEditMode': inEditMode,
         'showDoneVoting': showDoneVoting,
         'facebookAppID': settings.FACEBOOK_APP_ID, 
     })
@@ -1483,20 +1567,54 @@ def getPetitionVoteTotals(request):
     
     return JsonResponse(results)
         
-# Returns a json response containing the stories associated with the specified petition. 
-def getPetitionStories(request):
-    results = {'success':False, 'error': 'getPetitionStories failed'}
+# Returns a json response containing the notes associated with the specified petition. 
+def getPetitionNotes(request):
+    results = {'success':False, 'error': 'getPetitionNotes failed'}
     try:
-        if request.method != "POST":
-            raise Exception("getPetitionStories only responds to POST requests")
+        if request.method == "POST":
+            petition_id = request.POST['id']
+        else:
+            petition_id = request.GET['id']
             
         if request.user.is_authenticated:
             request_user_id = request.user.id
         else:
             request_user_id = None
 
-        # Get the petition info.
-        petition_id = request.POST['petition']
+        # Do the model operation
+        notes = NoteManager.get_notes(petition_id)
+        
+        for a in notes:
+            constituentID = a['constituent_id']
+            a['isEditable'] = (constituentID == request_user_id or \
+                               request.user.is_superuser)
+            creator = get_user_model().objects.get(pk=constituentID)
+            creatorConstituent = Constituent.objects.filter(pk=constituentID).select_related().get()
+            a['heading'] = 'From ' + creatorConstituent.user.get_initials() + " in " + creatorConstituent.state + "-" + ("%d" % creatorConstituent.district) 
+        
+        # Return the results.
+        results = {'success':True, 'notes' : notes}
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
+# Returns a json response containing the stories associated with the specified petition. 
+def getPetitionStories(request):
+    results = {'success':False, 'error': 'getPetitionStories failed'}
+    try:
+        if request.method == "POST":
+            petition_id = request.POST['id']
+        else:
+            petition_id = request.GET['id']
+            
+        if request.user.is_authenticated:
+            request_user_id = request.user.id
+        else:
+            request_user_id = None
 
         # Do the model operation
         stories = StoryManager.get_stories(petition_id)
@@ -1512,9 +1630,9 @@ def getPetitionStories(request):
         # Return the results.
         results = {'success':True, 'stories' : stories}
     except Exception as e:
-        log = open('exception.log', 'a')
-        log.write("%s\n" % traceback.format_exc())
-        log.flush()
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
         results = {'success':False, 'error': str(e)}
     
     return JsonResponse(results)

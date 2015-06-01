@@ -1,10 +1,11 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, include, url
 
 from dico import views
 
 urlpatterns = patterns(
     '',
     url(r'^$', views.index, name='home'),
+    url(r'^reports/', include('dico.reports.urls')),
     # ex: /dico/signin/
     url(r'^signin/', views.signin, name='signin'),
     # ex: /dico/submitsignin/

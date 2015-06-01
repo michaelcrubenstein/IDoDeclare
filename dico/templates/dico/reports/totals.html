@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>I Do Declare - Report Totals</title>
+
+    <!-- Bootstrap -->
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
+    <link href="{% static "dico/css/index.css" %}" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+	<!-- Styles for this web page -->
+	<style>
+		body
+		{
+			padding-top: 55px;
+		}
+		td
+		{
+			width: 60px;
+		}
+	</style>
+
+
+  </head>
+  <body>
+
+<!-- Scripts for data mapping --!>
+	<div id='container' class="container-fluid">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<div class="pull-left">
+					<span id="done_button" class="navbar-link dico-navbar-link">Done</span>
+				</div>
+				<div class="dico-navbar-commands">
+					<div class="dico-title dico-fill"><span class="dico-inner-fill">Report Totals</span></div>
+				</div>
+			</div><!-- /.container-fluid -->
+		</nav>
+
+		<div class="row">
+	    	<div id="myAlert" class="col-xs-12"></div>
+	    </div>
+
+		<div id="issue_div" class="row">
+			<div class="col-xs-12">
+				<table class="table table-condensed table-striped">
+					<tbody>
+						<tr>
+							<td>Users:</td><td>{{userCount}}</td>
+						<tr>
+						<tr>
+							<td>Issues:</td><td>{{issueCount}}</td>
+						<tr>
+						<tr>
+							<td>Interests:</td><td>{{interestCount}}</td>
+						<tr>
+						<tr>
+							<td>Actions:</td><td>{{actionCount}}</td>
+						<tr>
+						<tr>
+							<td>Votes:</td><td>{{voteCount}}</td>
+						<tr>
+						<tr>
+							<td>Notes:</td><td>{{noteCount}}</td>
+						<tr>
+						<tr>
+							<td>Arguments:</td><td>{{argumentCount}}</td>
+						<tr>
+						<tr>
+							<td>Stories:</td><td>{{storyCount}}</td>
+						<tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+</div> <!-- container -->
+</body>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	<script src="{% static "jquery/js/jquery.min.js" %}"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+
+	<script src="{% static "d3/d3.v3.min.js" %}"></script>
+
+	<!-- Scripts for this web page -->
+	<script type="text/JavaScript">
+	
+		function htmlDecode(input){
+		  var e = document.createElement('div');
+		  e.innerHTML = input;
+		  return e.childNodes[0].nodeValue;
+		}
+		
+		function htmlEncode(input){
+			str = $('<div>').text(input).html();
+		    return String(str).replace(/ /g, '&nbsp;');
+		}
+		
+		function oneWordTitleCase(input) {
+			return i[0].toUpperCase() + i.substring(1);
+		}
+		
+		function validIssueName(input){
+			return input.split(" ").map(function(i){return oneWordTitleCase(i)}).join(" ");
+		}
+
+		// Display all of the interests in the system.
+		var storedcsrftoken = "{{ csrf_token }}";
+
+		$(document).ready (function(e) {
+			<!-- Block of code for an alert area at the top of the window -->
+			$(".close").click(function(){
+				$(this).parent().alert();
+			});
+			
+			bootstrap_alert = function() {}
+			bootstrap_alert.show = function(parentDiv, message, alertClass) {
+				parentDiv.html('<div class="alert ' + alertClass + ' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+			}
+			bootstrap_alert.warning = function(message) {
+				bootstrap_alert.show($('#myAlert'), message, "alert-danger");
+			}
+        	closealert = function() { 
+        		$('.alert').parent().html('');
+        	}
+			
+			$("#done_button").click(function(e) {
+				window.location = "{{ backURL }}";
+				e.preventDefault();
+			});
+			
+		});
+	</script>

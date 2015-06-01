@@ -46,10 +46,6 @@
 			h2 {
 				text-align: center;
 			}
-			h3 {
-				width: 100%;
-				text-align: center;
-			}
 			.fb-login-button {
 				width: 100%;
 				text-align: center;
@@ -93,13 +89,12 @@
 		<article id="actions">
 			<p class="action pane1">Describe actions that Congress should take</p>
 			<p class="action pane2">Discover actions others have proposed</p>
-			<p class="action pane3">Support or oppose an action by Congress</p>
-			<p class="action pane4">Share why you support or oppose an action</p>
-			<p class="action pane5">Rate the reasons that other people give</p>
-			<p class="action pane6">Share your story</p>
+			<p class="action pane3">Vote on Important Issues</p>
+			<p class="action pane4">Participate in Debate</p>
+			<p class="action pane5">Share Your Story</p>
+			<p class="action pane6">Let's Get Started!</p>
 		</article>
 		<footer>
-			<h3>Let's Get Started!</h3>
 			<div class="social-login">
 				<fb:login-button class="fb-login-button" data-max-rows="1" data-size="large" 
 					data-show-faces="false" data-auto-logout-link="false" 
@@ -278,15 +273,27 @@
 	});
 	
 	function set_action_height() {
-		$("#actions").height(
+		var newHeight = 
 			window.innerHeight - 
 				$("header").height() - 
 				$("footer").height() - 
 				parseInt($("h2").css("margin-top")) - 
 				parseInt($("#descriptionParagraph").css("margin-bottom")) - 
-				parseInt($("h3").css("margin-top")) - 
+				parseInt($(".social-login").css("margin-top")) - 
 				parseInt($("#feedbackParagraph").css("margin-bottom")) - 
-				15);
+				15;
+				
+		if (newHeight < parseInt($(".pane6").css("top")) + parseInt($(".pane6").css("height")))
+		{
+			$("#actions").css("display", "none");
+		}
+		else
+		{
+			$("#actions").height(newHeight);
+			$("#actions").css("display", "block");
+		}
+			
+		
 	}
 	
 	function set_map_left() {

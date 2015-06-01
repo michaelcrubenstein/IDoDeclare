@@ -78,7 +78,35 @@ def totals(request):
         })
         return HttpResponse(template.render(context))
     except TemplateDoesNotExist as e:
-    	return HttpResponse("Template does not exist: " + str(e))
+        return HttpResponse("Template does not exist: " + str(e))
     except Exception as e:
         return HttpResponse("Error: " + str(e))
+
+def getTotals(request):
+    try:
+        totals = [ {"name": "Users", "sql": "SELECT COUNT(*) FROM dico_constituent"},
+                   {"name": "Issues", "sql": "SELECT COUNT(*) FROM dico_issue"},
+                   {"name": "User Interests", "sql": "SELECT COUNT(*) FROM dico_constituentinterest"},
+                   {"name": "Actions", "sql": "SELECT COUNT(*) FROM dico_petition"},
+                   {"name": "Votes", "sql": "SELECT COUNT(*) FROM dico_petitionvote"},
+                   {"name": "Notes", "sql": "SELECT COUNT(*) FROM dico_note"},
+                   {"name": "Action Issues", "sql": "SELECT COUNT(*) FROM dico_petitionissue"},
+                   {"name": "Arguments", "sql": "SELECT COUNT(*) FROM dico_argument"},
+                   {"name": "Stories", "sql": "SELECT COUNT(*) FROM dico_story"},
+                   ]
+        
+        for a in totals:
+            with connection.cursor() as c:
+                c.execute(a["sql"], [])
+                a["count"] = c.fetchone()[0]
+                del a["sql"]
+          
+        results = {'success':True, 'totals': totals}
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+            
+    return JsonResponse(results)
 

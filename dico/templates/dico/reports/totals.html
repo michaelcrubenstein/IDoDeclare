@@ -57,31 +57,10 @@
 		<div id="issue_div" class="row">
 			<div class="col-xs-12">
 				<table class="table table-condensed table-striped">
-					<tbody>
-						<tr>
-							<td>Users:</td><td>{{userCount}}</td>
-						<tr>
-						<tr>
-							<td>Issues:</td><td>{{issueCount}}</td>
-						<tr>
-						<tr>
-							<td>Interests:</td><td>{{interestCount}}</td>
-						<tr>
-						<tr>
-							<td>Actions:</td><td>{{actionCount}}</td>
-						<tr>
-						<tr>
-							<td>Votes:</td><td>{{voteCount}}</td>
-						<tr>
-						<tr>
-							<td>Notes:</td><td>{{noteCount}}</td>
-						<tr>
-						<tr>
-							<td>Arguments:</td><td>{{argumentCount}}</td>
-						<tr>
-						<tr>
-							<td>Stories:</td><td>{{storyCount}}</td>
-						<tr>
+					<thead>
+					</thead>
+					<tbody id='id_totals'>
+						<tr><td>Loading Totals...</td></tr>
 					</tbody>
 				</table>
 			</div>
@@ -144,5 +123,38 @@
 				e.preventDefault();
 			});
 			
+			show_totals();
 		});
+		
+	function show_totals() {
+	  $.getJSON("{% url 'getTotals' %}", { csrfmiddlewaretoken: storedcsrftoken }, function(json){
+		if (json['success']) {
+			data = json['totals'];
+		
+			$("#id_totals").empty();
+			
+			rows = d3.select("#id_totals").selectAll("tr")
+					.data(data)
+					.enter()
+					.append("tr");
+			
+			rows.append("td")
+				.style("width", "1%")
+				.style("white-space", "nowrap")
+				.style("text-align", "right")
+				.append("span")
+				.style("width", "1%")
+				.style("white-space", "nowrap")
+				.text(function(d) { return d['name'] + ":"; });
+				
+			rows.append("td")
+				.append("span")
+				.text(function(d) { return d['count']; });
+				
+		}
+		else
+			bootstrap_alert.warning(json['error']);
+	  });
+	}
+	
 	</script>

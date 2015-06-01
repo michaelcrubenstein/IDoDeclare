@@ -7,4 +7,5 @@ urlpatterns = patterns(
     url(r'^$', views.totals, name='home'),
     # ex: /dico/totals/
     url(r'^totals/', views.totals, name='totals'),
+    url(r'^gettotals/', views.getTotals, name='getTotals'),
 )

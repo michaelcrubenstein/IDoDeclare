@@ -67,22 +67,27 @@ class ConstituentManager(models.Manager):
         user.last_name = lastname
         user.save(using=manager._db)
         
-        try:
-            constituent = self.create(user=user, streetAddress=streetaddress, zipCode=zipcode,
-                                      district=district, state=state)
+        return self.create(user=user, streetAddress=streetaddress, zipCode=zipcode,
+                                  district=district, state=state)
             
-            return constituent
-        except Exception as e:
-            try:
-                manager.delete(user)
-            except Exception:
-                pass
-            raise e
-            
+class Frequency(models.Model):
+    id = models.PositiveSmallIntegerField(default=0, primary_key=True) # 0 - never, 1 - daily, 2 - weekly
+    name = models.CharField(max_length=25, null=True)
+
+    def __str__(self):
+        return str(self.name)
+    
+class Via(models.Model):
+    id = models.PositiveSmallIntegerField(primary_key=True) # 1 - sms, 2 - email
+    name = models.CharField(max_length=25, null=True)
+
+    def __str__(self):
+        return str(self.name)
+    
 class ContactMethod(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, primary_key=True);
-    frequency = models.PositiveSmallIntegerField(db_index=True, default=0) # 0 - never, 1 - daily, 2 - weekly
-    via = models.PositiveSmallIntegerField(db_index=True, null=True) # 1 - email, 2 - sms, 3 - app
+    frequency = models.ForeignKey(Frequency, db_index=True, default=0) # 0 - never, 1 - daily, 2 - weekly
+    via = models.ForeignKey(Via, db_index=True, null=True) # 1 - sms, 2 - email
     phonenumber = models.CharField(max_length=25, null=True)
     
     def get_contact_method(user):
@@ -91,7 +96,9 @@ class ContactMethod(models.Model):
             
         query_set = ContactMethod.objects.filter(user_id=user.id)
         if query_set.count() == 0:
-            return ContactMethod.objects.create(user=user, frequency=1, via=2)
+            return ContactMethod.objects.create(user=user, 
+                                                frequency=Frequency.objects.filter(pk=1).get(), 
+                                                via=Via.objects.filter(pk=2).get())
         else:
             return query_set.get()
     

@@ -54,7 +54,7 @@
 	    	<div id="myAlert" class="col-xs-12"></div>
 	    </div>
 
-		<div id="issue_div" class="row">
+		<div class="row">
 			<div class="col-xs-12">
 				<table class="table table-condensed table-striped">
 					<thead>
@@ -63,6 +63,12 @@
 						<tr><td>Loading Totals...</td></tr>
 					</tbody>
 				</table>
+			</div>
+		</div>
+
+		<div class="row">
+			<div id="id_contactTotals" class="col-xs-12">
+				Loading Contact Totals...
 			</div>
 		</div>
 
@@ -124,6 +130,7 @@
 			});
 			
 			show_totals();
+			show_contact_totals();
 		});
 		
 	function show_totals() {
@@ -151,6 +158,36 @@
 				.append("span")
 				.text(function(d) { return d['count']; });
 				
+		}
+		else
+			bootstrap_alert.warning(json['error']);
+	  });
+	}
+	
+	function show_contact_totals() {
+	  $.getJSON("{% url 'getContactTotals' %}", { csrfmiddlewaretoken: storedcsrftoken }, function(json){
+		if (json['success']) {
+			data = json['totals'];
+		
+			$("#id_contactTotals").empty();
+			
+			charts = d3.select("#id_contactTotals").selectAll("section")
+					.data(data)
+					.enter()
+					.append("section");
+			charts.append("h4")
+				  .text(function(d) { return d['name'];});
+				  
+			charts.selectAll("div")
+				  .data(function(d) { return d['data'];})
+				  .enter()
+				  .append("div")
+ 				  .append("p")
+				  .selectAll("span")
+				  .data(function(d) { return [d['x'] + ": " , d['y']]; })
+				  .enter()
+				  .append("span")
+				  .text(function(d) { return d; });
 		}
 		else
 			bootstrap_alert.warning(json['error']);

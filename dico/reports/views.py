@@ -110,3 +110,34 @@ def getTotals(request):
             
     return JsonResponse(results)
 
+def getContactTotals(request):
+    try:
+        totals = [ {"name": "User Contact Frequency", "sql": 
+                        "SELECT b.name, COUNT(*), a.frequency_id" + \
+                        " FROM dico_contactmethod a " + \
+                        " LEFT JOIN dico_frequency b on (a.frequency_id = b.id)" + \
+                        " GROUP BY frequency_id"},
+                   {"name": "User Contact Method", "sql": 
+                        "SELECT b.name, COUNT(*), a.via_id" + \
+                        " FROM dico_contactmethod a " + \
+                        " LEFT JOIN dico_via b on (a.via_id = b.id)" + \
+                        " WHERE a.frequency_id <> 0" + \
+                        " GROUP BY a.via_id"},
+                   ]
+        
+        for a in totals:
+            with connection.cursor() as c:
+                c.execute(a["sql"], [])
+                a["data"] = [];
+                for r in c.fetchall():
+                    a["data"].append({"x": r[0], "y": r[1]})
+                del a["sql"]
+          
+        results = {'success':True, 'totals': totals}
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+            
+    return JsonResponse(results)

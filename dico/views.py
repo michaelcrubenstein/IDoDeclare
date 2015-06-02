@@ -18,6 +18,7 @@ import uuid
 from custom_user.models import PasswordReset
 from dico.models import Issue, Constituent, ConstituentInterest, ContactMethod, \
     Petition, PetitionManager, PetitionIssue, PetitionVote, \
+    Frequency, Via, \
     Argument, ArgumentManager, ArgumentRating, Note, NoteManager, Story, StoryManager, MC
 from dico.titlecase import titlecase
 
@@ -433,9 +434,12 @@ def newConstituent(request):
         
         districtInfo = getDistrict(streetAddress + " " + zipCode)
 
-        contactFrequency = request.POST['contactFrequency']
-        contactVia = request.POST['contactVia']
+        contactFrequency = request.POST.get('contactFrequency', 1)
+        contactVia = request.POST.get('contactVia', 2)
         contactPhoneNumber = request.POST['contactPhone']
+        
+        newFrequency = Frequency.objects.filter(pk=contactFrequency).get()
+        newVia = Via.objects.filter(pk=contactVia).get()
         
         with transaction.atomic():
             constituent = Constituent.objects.create_constituent(username='Default user', password=password, email=username,
@@ -444,8 +448,10 @@ def newConstituent(request):
                                                                  district=districtInfo[0]["district"], state = districtInfo[0]["state"]
                                                                  )
                                                              
-            contactMethod = ContactMethod.objects.create(user=constituent.user, frequency=contactFrequency,
-                                                         via=contactVia, phonenumber = contactPhoneNumber)
+            contactMethod = ContactMethod.objects.create(user=constituent.user, 
+                                                         frequency=newFrequency,
+                                                         via=newVia, 
+                                                         phonenumber = contactPhoneNumber)
                                                      
             user = authenticate(username=username, password=password)
             if user is not None:
@@ -484,11 +490,17 @@ def updateConstituent(request):
         newLastName = POST.get('newLastName', '')
         newStreetAddress = POST.get('newStreetAddress', '')
         newZipCode = POST.get('newZipcode', '')
-        newFrequency = int(POST.get('newContactFrequency', 0))
-        newVia = int(POST.get('newContactVia', 0))
+        if 'newContactFrequency' in POST:
+            newFrequency = Frequency.objects.filter(pk=POST['newContactFrequency']).get()
+        else:
+            newFrequency = None
+        if 'newContactVia' in POST:
+            newVia = Via.objects.filter(pk=POST['newContactVia']).get()
+        else:
+            newVia = None
         newPhoneNumber = POST.get('newContactPhone', '')
         
-        constituent = Constituent.get_constituent(request.user)
+        constituent = Constituent.get_constituent(request.user)          
         with transaction.atomic():
             if constituent is None:
                 districtInfo = getDistrict(newStreetAddress + " " + newZipCode)
@@ -509,9 +521,17 @@ def updateConstituent(request):
         
             contactMethod = ContactMethod.get_contact_method(request.user)
             if contactMethod is None:
-                ContactMethod.objects.create(frequency=newFrequency, via=newVia, phonenumber=newPhoneNumber)
+                if newFrequency is None:
+                    newFrequency = Frequency.objects.filter(pk=1).get()
+                if newVia is None:
+                    newVia = Via.objects.filter(pk=2).get()
+                ContactMethod.objects.create(frequency=newFrequency, 
+                                             via=newVia, 
+                                             phonenumber=newPhoneNumber)
             else:
-                contactMethod.update_fields(newFrequency, newVia, newPhoneNumber)
+                contactMethod.update_fields(newFrequency, 
+                                            newVia, 
+                                            newPhoneNumber)
 
         results = {'success':True}
     except IntegrityError as e:

@@ -167,8 +167,8 @@
         		$('.alert').parent().html('');
         	}
         	
-        	 $("input[name=frequencyOptions][value={{contactMethod.frequency}}]").attr("checked", true);
-        	 $("input[name=viaOptions][value={{contactMethod.via}}]").attr("checked", true);
+        	 $("input[name=frequencyOptions][value={{contactMethod.frequency.id}}]").attr("checked", true);
+        	 $("input[name=viaOptions][value={{contactMethod.via.id}}]").attr("checked", true);
 			
 			$("form").on('submit', function (e) {
 				closealert();

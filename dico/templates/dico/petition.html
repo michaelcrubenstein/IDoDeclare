@@ -1410,7 +1410,6 @@
 	function resize_vote_map() {
 		init_map_width();
 		resize_map("#mapFrame");			
-		show_vote_map(getscope());
 	}
 	
 	function getscope() {
@@ -1427,7 +1426,9 @@
 		show_map("#mapFrame", $("#district_label"), $("#district_span"), 
 				 "{% static "dico/us.json" %}",
 				 "{% static "dico/us-congress-113.json" %}",
-				 function() {change_vote($('input[name="mapVoteOptions"]:checked').val(), newScope); }, 
+				 function() {
+				 	change_vote($('input[name="mapVoteOptions"]:checked').val(), newScope); 
+				 }, 
 				 newScope);
 	}
 	

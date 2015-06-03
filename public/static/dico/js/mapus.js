@@ -214,46 +214,18 @@ function show_map(mapFrameID, districtLabel, districtSpan, usjsonfile, congressj
 	
 		pathNodes = null;	
 		if (newScope == districtScope) {
-			  pathNodes = district.data(topojson.feature(congress, districts).features)
-			.enter().append("path")
-			  .attr("d", path)
-			  .attr("class", "district")
-			  .on("mouseover", mouseoverdistrict)
-			  .on("mouseout", mouseoutdistrict)
-			  .each(function(d){
-					// Get the centroid or, if the centroid is degenerate, the bounds.
-					centroid = path.centroid(d);
-					if (isNaN(centroid[0]))
-						centroid = path.bounds(d);
-
-					if (!isNaN(centroid[0])) {
-						circleData[i] = {"cx": centroid[0], "cy": centroid[1], "r": 0, "id": d.id};
-						i++;
-					}
-				});
+			pathNodes = district.data(topojson.feature(congress, districts).features)
+				.enter().append("path")
+				.attr("class", "district")
+				.on("mouseover", mouseoverdistrict)
+				.on("mouseout", mouseoutdistrict);
 		} else {
 			pathNodes = district.data(topojson.feature(us, us.objects.states).features)
 				.enter().append("path")
-				.attr("d", path)
 				.attr("class", "state")
 				.on("mouseover", mouseoverstate)
-				.on("mouseout", mouseoutstate)
-				.each(function(d){
-						// Get the centroid or, if the centroid is degenerate, the bounds.
-					centroid = path.centroid(d);
-					if (isNaN(centroid[0]))
-						centroid = path.bounds(d);
-
-					if (!isNaN(centroid[0])) {
-						circleData[i] = {"cx": centroid[0], "cy": centroid[1], "r": 0, "id": d.id};
-						i++;
-					}
-				});
+				.on("mouseout", mouseoutstate);
 		}
-
-		pathNodes
-		  .append("title")
-		  .text(function(d) { return d.id; });
 
 		if (newScope == districtScope) {
 		  svg.append("path")
@@ -266,18 +238,29 @@ function show_map(mapFrameID, districtLabel, districtSpan, usjsonfile, congressj
 		  .attr("class", "border border--state")
 		  .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
 		  .attr("d", path);
-  
-		circles = svg.selectAll("circle")
-			.data(circleData)
-			.enter()
-			.append("circle")
-				.attr("class", "bubble")
-				.attr("cx", function(d, i) { return d.cx; })
-				.attr("cy", function(d) { return d.cy; })
-				.attr("r", function(d) { return d.r; })
-				.attr("id", function(d) { return d.id; })
-				.call(showDataFunc);
-		
+  		
+  		// Make sure the circles are added after the borders so that they are on top.
+		pathNodes.attr("d", path)
+				 .each(function(d, i){
+						// Get the centroid or, if the centroid is degenerate, the bounds.
+					centroid = path.centroid(d);
+					if (isNaN(centroid[0]))
+						centroid = path.bounds(d);
+
+					if (!isNaN(centroid[0])) {
+						svg.append("circle")
+						   .attr("class", "bubble")
+						   .attr("cx", centroid[0])
+						   .attr("cy", centroid[1])
+						   .attr("r", 0)
+						   .attr("id", d.id);
+					}
+				})
+		  .append("title")
+		  .text(function(d) { return d.id; });
+		  
+		showDataFunc();
+
 		spinner.stop();
 	}
 
@@ -317,9 +300,48 @@ function resize_map(mapFrameID) {
 
 	var svg = d3.select(mapFrameID).select("svg");
 
+	svg.attr("width", width)
+	   .attr("height", height);
+	   
 	// add the path for all of the us land.
 	svg.select("defs").select("path")
 	  .attr("d", path);
+
+	// Update the paths for the district and state borders.
+	svg.selectAll("path").attr("d", path);
+	
+	// Update the paths for all of the areas within.
+	pathNodes = svg.select("g").selectAll("path");
+	
+	pathNodes.attr("d", path)
+		 .each(function(d, i){
+				// Get the centroid or, if the centroid is degenerate, the bounds.
+			centroid = path.centroid(d);
+			if (isNaN(centroid[0]))
+				centroid = path.bounds(d);
+
+			var circle = $(".bubble#"+d.id);
+			
+			if (!isNaN(centroid[0])) {
+				if (circle.length > 0)
+				{
+					d3.select(circle.get(0))
+						.attr("cx", centroid[0])
+					    .attr("cy", centroid[1]);
+				}
+				else
+					svg.append("circle")
+					   .attr("class", "bubble")
+					   .attr("cx", centroid[0])
+					   .attr("cy", centroid[1])
+					   .attr("r", 0)
+					   .attr("id", d.id);
+			}
+			else if (circle.length > 0)
+			{
+				circle.remove();
+			}
+		})
 }
 
 function initmapheight(mapFrameID)

@@ -467,6 +467,7 @@
 	var debateShown = false;
 	var storiesShown = false;
 	var choicesInitialized = false;
+	var mapRadiosInitialized = false;
 	var inEditMode = false;			// True if currently editing.
 	
 	$(document).ready (function(e) {
@@ -571,6 +572,25 @@
 			{% endif %}
 		});
 		
+		function setup_map_radios()
+		{
+			if (!mapRadiosInitialized) {
+				$("#id_supportRadio").change( function() {
+					change_vote($(this).val(), getscope());
+				});
+				$("#id_opposeRadio").change( function() {
+					change_vote($(this).val(), getscope());
+				});
+				$("#byDistrictRadio").change( function() {
+					show_vote_map(districtScope);
+				});
+				$("#byStateRadio").change( function() { 
+					show_vote_map(stateScope);
+				});
+				mapRadiosInitialized = true;
+			}
+		}
+		
 		$("#id_mapsButton").click(
 			function() {
 				if (!petitionVotesShown) {
@@ -578,13 +598,13 @@
 					show_petition_votes(true);
 					petitionVotesShown = true;
 				}
-				setup_petition_radios();
 				if (!mapsShown) {
 					initmapheight("#mapFrame");
 					init_map_width();
 					show_petition_maps();
 					mapsShown = true;
 				}
+				setup_map_radios();
 			});
 			
 		
@@ -1408,8 +1428,11 @@
 	}
 
 	function resize_vote_map() {
-		init_map_width();
-		resize_map("#mapFrame");			
+		$("#mapFrame").queue(function() {
+			init_map_width();
+			resize_map("#mapFrame");
+			$("#mapFrame").dequeue();
+		});			
 	}
 	
 	function getscope() {

@@ -42,7 +42,7 @@
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
 				<div class="pull-left">
-					<span id="done_button" class="navbar-link dico-navbar-link">Cancel</span>
+					<div id="cancel_button" class="navbar-link dico-navbar-link">Cancel</div>
 				</div>
 				<div class="dico-navbar-commands">
 					<div class="dico-title dico-fill"><span class="dico-inner-fill">Explore An Issue</span></div>
@@ -113,7 +113,7 @@
 			// Display the interests of the currently logged-in user.
 			show_my_interests();
 			
-			$("#done_button").click(function(e) {
+			$("#cancel_button").click(function(e) {
 				window.location = "{{ backURL }}";
 				e.preventDefault();
 			});

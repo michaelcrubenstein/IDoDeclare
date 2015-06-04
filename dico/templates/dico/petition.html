@@ -89,15 +89,15 @@
 			<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 				<div class="container-fluid">
 					<div class="pull-left">
-						<a class="navbar-link dico-navbar-link" href="{{ backURL }}">
+						<div id="id_backButton" class="navbar-link dico-navbar-link" onClick="go_back()">
 							<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}
-						</a>
+						</div>
 					</div>
 					{% if user.is_authenticated %}
 					<div class="pull-right">
-						<span id="id_editButton" class="navbar-link dico-navbar-link" onClick="edit_action()"}>
+						<div id="id_editButton" class="navbar-link dico-navbar-link" onClick="edit_action()"}>
 							Edit
-						</span>
+						</div>
 					</div>
 					{% endif %}
 					<div class="dico-navbar-commands">
@@ -111,9 +111,9 @@
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="pull-right">
-					<span id="id_deleteActionButton" class="dico-navbar-link text-danger"}>
+					<div id="id_deleteActionButton" class="dico-navbar-link text-danger"}>
 						Delete Action
-					</span>
+					</div>
 				</div>
 			</div>
 			{% endif %}
@@ -122,37 +122,37 @@
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="pull-left">
-					<span class="navbar-link dico-navbar-link" onClick="add_supporting_argument()"}>
+					<div class="navbar-link dico-navbar-link" onClick="add_supporting_argument()"}>
 						Add Supporting Argument
-					</span>
+					</div>
 				</div>
 				<div class="pull-right">
-					<span class="navbar-link dico-navbar-link" onClick="add_opposing_argument()"}>
+					<div class="navbar-link dico-navbar-link" onClick="add_opposing_argument()"}>
 						Add Opposing Argument
-					</span>
+					</div>
 				</div>
 			</div>
 			<div id="id_notesNav" class="container-fluid panelNav" section="id_notesSection">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="pull-left">
-					<span class="navbar-link dico-navbar-link" onClick="add_issue()"}>
+					<div class="navbar-link dico-navbar-link" onClick="add_issue()"}>
 						Add Issue
-					</span>
+					</div>
 				</div>
 				<div class="pull-right">
-					<span class="navbar-link dico-navbar-link" onClick="add_note()"}>
+					<div class="navbar-link dico-navbar-link" onClick="add_note()"}>
 						Add Note
-					</span>
+					</div>
 				</div>
 			</div>
 			<div id="id_storyNav" class="container-fluid panelNav" section="id_storySection">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
 				<div class="pull-left">
-					<span class="navbar-link dico-navbar-link" onClick="add_story()"}>
+					<div class="navbar-link dico-navbar-link" onClick="add_story()"}>
 						Share Your Story
-					</span>
+					</div>
 				</div>
 			</div>
 			{% endif %}
@@ -1035,6 +1035,10 @@
 		var backURL = encodeURIComponent("{{backURL}}");
 		var backName = encodeURIComponent("{{backName}}");
 		window.location = "{% url 'docRatings' %}?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+	}
+	
+	function go_back() {
+		window.location.href = "{{ backURL }}";
 	}
 	
 	function edit_action() {

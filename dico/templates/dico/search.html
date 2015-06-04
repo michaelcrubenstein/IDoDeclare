@@ -27,8 +27,12 @@
 		}
 		.dico-fill {
 			width: 70%;
+			padding-top: 3px;
 		}
-		.dico-pull-left {
+		.pull-left {
+			min-width: 85px;
+		}
+		.pull-right {
 			min-width: 85px;
 		}
 		th {
@@ -45,11 +49,11 @@
 			<div class="container-fluid">
 				<div class="nav navbar-header">
 					<div class="dico-navbar-commands">
-						<span class="dico-pull-left">
-							<span id="id_homeButton" class="navbar-text navbar-link pull-left dico-navbar-text">
+						<div class="pull-left">
+							<div id="id_homeButton" class="navbar-link dico-navbar-link">
 								<span class="glyphicon glyphicon-chevron-left"></span>Home
-							</span>
-						</span>
+							</div>
+						</div>
 						<div class="dico-fill">
 							<span class="dico-inner-fill">
 								<span class="input-group">
@@ -62,8 +66,8 @@
 								</span>
 							</span>
 						</div>
-						<span class="dico-pull-left">
-							<span id="cancel_button" class="navbar-text navbar-link pull-left dico-navbar-text dico-spacer">
+						<span class="pull-right">
+							<span id="cancel_button" class="navbar-link dico-navbar-link dico-spacer">
 								<span class="glyphicon glyphicon-chevron-left"></span>Home
 							</span>
 						</span>

@@ -41,18 +41,22 @@
 	<!-- Scripts for this web page -->
 	<script type="text/JavaScript">
 		$(document).ready (function(e) {
-			var backURL = encodeURIComponent("{{backURL}}");
-			var backName = encodeURIComponent("{{backName}}");
-			$("#id_done_anchor").attr("href", "/dico/{{petition.id}}/petition/?debate;backURL="+backURL+";backName="+backName);
+			$("#id_done_anchor").click(function(e) {
+				var backURL = encodeURIComponent("{{backURL}}");
+				var backName = encodeURIComponent("{{backName}}");
+				window.location.href = "/dico/{{petition.id}}/petition/?debate;backURL="+backURL+";backName="+backName;
+				e.preventDefault();
+			});
 		});
 	</script>
 
 	<div id='container' class="container-fluid">
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
-				<div class="pull-left">
-				  <a id="id_done_anchor" class="navbar-link dico-navbar-link">
-					Done</a>
+				<div class="pull-right">
+					<div id="id_done_anchor" class="navbar-link dico-navbar-link">
+						Done
+					</div>
 				</div>
 				<div class="dico-navbar-commands">
 					<div class="dico-title dico-fill"><span class="dico-inner-fill">Rating Arguments</span></div>

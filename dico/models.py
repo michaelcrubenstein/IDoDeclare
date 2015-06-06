@@ -364,6 +364,7 @@ class Petition(models.Model):
     
     def get_votes(self, scope='district'):
         with connection.cursor() as c:
+#         TODO: Handle no opinion vote.
             if scope == 'district':
                 sql = "SELECT a.state, a.district,SUM(a.support_count),SUM(a.oppose_count) FROM " + \
                     "(SELECT state, district, COUNT(*) as support_count, 0 as oppose_count" + \
@@ -377,7 +378,7 @@ class Petition(models.Model):
                     " FROM dico_petitionvote, dico_constituent" + \
                     " WHERE %s = dico_petitionvote.petition_id" + \
                     " AND   dico_petitionvote.constituent_id = dico_constituent.user_id" + \
-                    " AND   dico_petitionvote.vote = 0" + \
+                    " AND   (dico_petitionvote.vote = -1)" + \
                     " GROUP BY state, district) as a" + \
                     " GROUP BY state, district" + \
                     " ORDER BY state, district"
@@ -394,7 +395,7 @@ class Petition(models.Model):
                       " FROM dico_petitionvote, dico_constituent" + \
                       " WHERE %s = dico_petitionvote.petition_id" + \
                       " AND   dico_petitionvote.constituent_id = dico_constituent.user_id" + \
-                      " AND   dico_petitionvote.vote = 0" + \
+                      " AND   (dico_petitionvote.vote = -1)" + \
                       " GROUP BY state) as a" + \
                       " GROUP BY state" + \
                       " ORDER BY state"

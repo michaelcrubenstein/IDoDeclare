@@ -148,8 +148,10 @@
 					.selectAll("td")
 					.data(function(d) {
 						chevronHTML = '<span class="glyphicon glyphicon-chevron-right"></span>'
-						if (d['vote'] === 0) {
+						if (d['vote'] === -1) {
 							html1 = '<span class="label label-danger">Oppose</span>';
+						} else if (d['vote'] === 0) {
+							html1 = '<span class="label label-warning">No Opinion</span>';
 						} else if (d['vote'] === 1) {
 							html1 = '<span class="label label-success">Support</span>';
 						} else {

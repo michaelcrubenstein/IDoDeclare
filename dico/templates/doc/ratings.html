@@ -42,9 +42,7 @@
 	<script type="text/JavaScript">
 		$(document).ready (function(e) {
 			$("#id_done_anchor").click(function(e) {
-				var backURL = encodeURIComponent("{{backURL}}");
-				var backName = encodeURIComponent("{{backName}}");
-				window.location.href = "/dico/{{petition.id}}/petition/?debate;backURL="+backURL+";backName="+backName;
+				window.location.href = "{{backURL}}";
 				e.preventDefault();
 			});
 		});

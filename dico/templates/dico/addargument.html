@@ -25,9 +25,16 @@
 	<!-- Styles for this web page -->
 	<style>
 		body {
-		  padding-top: 55px;
+		  padding-top: 50px;
+		  background:#EEE;
 		}
-		.lead {
+		.descriptionRow {
+			background:#FFF;
+		}
+		.descriptionRow>div>p {
+			margin-top:10px;
+		}
+		section {
 			padding-top: 10px;
 		}
 	</style>
@@ -71,9 +78,7 @@
 			});
 			
 			$("#cancel_button").click(function(e) {
-				var backURL = encodeURIComponent("{{backURL}}");
-				var backName = encodeURIComponent("{{backName}}");
-				window.location.href = "/dico/{{petition.id}}/petition/?debate;edit;backURL="+backURL+";backName="+backName;
+				window.location.href = "{{backURL}}";
 				e.preventDefault();
 			});
 
@@ -96,9 +101,7 @@
 			  .done(function(json, textStatus, jqXHR)
 				{
 					if (json['success']) {
-						var backURL = encodeURIComponent("{{backURL}}");
-						var backName = encodeURIComponent("{{backName}}");
-						window.location.href = "/dico/{{petition.id}}/petition/?debate;edit;backURL="+backURL+";backName="+backName;
+						window.location.href = "{{backURL}}";
 					}
 					else {
 						bootstrap_alert.warning(json['error']);
@@ -139,7 +142,7 @@
 					<div id="id_add_argument_button" class="navbar-link dico-navbar-link">Add</div>
 				</div>
 				<div class="dico-navbar-commands">
-					<div class="dico-title dico-fill"><span class="dico-inner-fill">Add {{voteLabel}} Argument</span></div>
+					<div class="dico-title dico-fill"><span class="dico-inner-fill"><strong>New {{voteLabel}} Argument</strong></span></div>
 				</div>
 			</div>
 		</nav>
@@ -148,23 +151,28 @@
 	    	<div id="myAlert" class="col-xs-12"></div>
 		</div>
 
-		<div class="row">
+		<div class="row descriptionRow">
 			<div class="col-xs-12">
-				<p><strong>{{petition.description}}</strong></p>
+				<p>{{petition.description}}</p>
 			</div>
 		</div>
-			
+		
 		<div class="row">
-		{% if voteLabel == "Opposing" %}
-			<div class="col-xs-12 col-md-6"></div>
-		{% endif %}
-			<div class="col-xs-12 col-md-6">
-				<label for="new_issue_input_group"">New {{ voteLabel }} Argument</label>
-				<textarea id="id_new_argument_text" rows="4" maxlength="254" class="form-control"
-					 onKeyPress="enter_new_argument(event, this)"></textarea>
-				<a class="btn btn-link btn-xs" href="##" onClick="showTips()">Tips for writing arguments</a>
-				<div id="tipsAlert"></div>
-			</div>
+			<hr class="simple-separator" />
 		</div>
+
+		<section>
+			<div class="row">
+			{% if voteLabel == "Opposing" %}
+				<div class="col-xs-12 col-md-6"></div>
+			{% endif %}
+				<div class="col-xs-12 col-md-6">
+					<textarea id="id_new_argument_text" rows="4" maxlength="254" class="form-control"
+						 onKeyPress="enter_new_argument(event, this)"></textarea>
+					<a class="btn btn-link btn-xs" href="##" onClick="showTips()">Tips for writing arguments</a>
+					<div id="tipsAlert"></div>
+				</div>
+			</div>
+		</section>
 	</div>
 </body>

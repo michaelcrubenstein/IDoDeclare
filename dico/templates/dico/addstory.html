@@ -25,9 +25,16 @@
 	<!-- Styles for this web page -->
 	<style>
 		body {
-		  padding-top: 55px;
+		  padding-top: 50px;
+		  background:#EEE;
 		}
-		.lead {
+		.descriptionRow {
+			background:#FFF;
+		}
+		.descriptionRow>div>p {
+			margin-top:10px;
+		}
+		section {
 			padding-top: 10px;
 		}
 		#id_new_story_link {
@@ -49,35 +56,40 @@
 					<div id="id_add_story_button" class="navbar-link dico-navbar-link">Add</div>
 				</div>
 				<div class="dico-navbar-commands">
-					<div class="dico-title dico-fill"><span class="dico-inner-fill">Share Your Story</span></div>
+					<div class="dico-title dico-fill"><span class="dico-inner-fill"><strong>Share Your Story</strong></span></div>
 				</div>
 			</div>
 		</nav>
 
+		<div class="row descriptionRow">
+			<div class="col-xs-12">
+				<p>{{petition.description}}</p>
+			</div>
+		</div>
+		
 		<div class="row">
-	    	<div id="myAlert" class="col-xs-12"></div>
+			<hr class="simple-separator" />
 		</div>
 
-		<div class="row">
-			<div class="col-xs-12">
-				<p><strong>{{petition.description}}</strong></p>
+		<section>	
+			<div class="row">
+				<div id="myAlert" class="col-xs-12"></div>
 			</div>
-		</div>
-			
-		<div class="row">
-			<div class="col-xs-12">
-				<label for="id_new_story_text">Share Your Story</label>
-				<textarea id="id_new_story_text" rows="4" maxlength="2048" class="form-control"></textarea>
+
+			<div class="row">
+				<div class="col-xs-12">
+					<textarea id="id_new_story_text" rows="4" maxlength="2048" class="form-control"></textarea>
+				</div>
+				<div class="col-xs-12">
+					<label for="id_new_story_link">Link to a picture or video:</label>
+					<input type="text" id="id_new_story_link" ></input>
+				</div>
+				<div class="col-xs-12">
+					<a class="btn btn-link btn-xs" href="##" onClick="showTips()">Tips for writing stories</a>
+					<div id="tipsAlert"></div>
+				</div>
 			</div>
-			<div class="col-xs-12">
-				<label for="id_new_story_link">Link to a picture or video:</label>
-				<input type="text" id="id_new_story_link" ></input>
-			</div>
-			<div class="col-xs-12">
-				<a class="btn btn-link btn-xs" href="##" onClick="showTips()">Tips for writing stories</a>
-				<div id="tipsAlert"></div>
-			</div>
-		</div>
+		</section>
 	</div>
 </body>
 
@@ -114,9 +126,7 @@
 		});
 		
 		$("#cancel_button").click(function(e) {
-			var backURL = encodeURIComponent("{{backURL}}");
-			var backName = encodeURIComponent("{{backName}}");
-			window.location.href = "/dico/{{petition.id}}/petition/?story;edit;backURL="+backURL+";backName="+backName;
+			window.location.href = "{{backURL}}";
 			e.preventDefault();
 		});
 
@@ -139,9 +149,7 @@
 		  .done(function(json, textStatus, jqXHR)
 			{
 				if (json['success']) {
-					var backURL = encodeURIComponent("{{backURL}}");
-					var backName = encodeURIComponent("{{backName}}");
-					window.location.href = "/dico/{{petition.id}}/petition/?story;edit;backURL="+backURL+";backName="+backName;
+					window.location.href = "{{backURL}}";
 				}
 				else {
 					bootstrap_alert.warning(json['error']);

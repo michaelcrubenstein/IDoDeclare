@@ -24,10 +24,31 @@
 	<!-- Styles for this web page -->
 	<style>
 		body {
-		  padding-top: 55px;
+		  padding-top: 50px;
+		  background:#EEE;
 		}
-		.lead {
+		.descriptionRow {
+			background:#FFF;
+		}
+		.descriptionRow>div>p {
+			margin-top:10px;
+		}
+		section {
 			padding-top: 10px;
+		}
+		#id_petition_issues>span:last-child>.comma {
+			display: none;
+		}
+		.issueLabel {
+			margin: 0;
+			line-height: 100%;
+		}
+		#id_petition_issues {
+			line-height: 100%;
+		}
+		.issueParagraph {
+			text-indent: -0.5em;
+			padding-left: 1em;
 		}
 	</style>
 
@@ -61,9 +82,7 @@
 
 		$(document).ready (function(e) {
 			$("#id_done_anchor").click( function(e) {
-				var backURL = encodeURIComponent("{{backURL}}");
-				var backName = encodeURIComponent("{{backName}}");
-				window.location.href = "/dico/{{petition.id}}/petition/?notes;edit;backURL="+backURL+";backName="+backName;
+				window.location.href = "{{backURL}}";
 			});
 		});
 
@@ -95,9 +114,7 @@
 		  	{
 				if (json['success']) {
 					closealert();
-					var backURL = encodeURIComponent("{{backURL}}");
-					var backName = encodeURIComponent("{{backName}}");
-					window.location.href = "/dico/{{petition.id}}/petition/?notes;edit;backURL="+backURL+";backName="+backName;
+					window.location.href = "{{backURL}}";
 				}
 				else {
 					bootstrap_alert.warning("Sorry, " + json['error']);
@@ -124,39 +141,45 @@
 	<div id='container' class="container-fluid">
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid">
-				<div class="pull-right">
-					<div id="id_done_anchor" class="navbar-link dico-navbar-link">Done</div>
+				<div class="pull-left">
+					<div id="id_done_anchor" class="navbar-link dico-navbar-link">Cancel</div>
 				</div>
 				<div class="dico-navbar-commands">
-					<div class="dico-title dico-fill"><span class="dico-inner-fill">Add Issue</span></div>
+					<div class="dico-title dico-fill"><span class="dico-inner-fill"><strong>Add Related Issue</strong></span></div>
 				</div>
 			</div><!-- /.container-fluid -->
 		</nav>
 
-	    <div id="myAlert" class="row"></div>
-
-		<div class="row">
+		<div class="row descriptionRow">
 			<div class="col-xs-12">
-				<p><strong>{{petition.description}}</strong></p>
+				<p>{{petition.description}}</p>
 			</div>
 		</div>
+		
 		<div class="row">
-			<div class="col-xs-12 container">
-				<div class="issue-column">
-					<div class="row">
-						<div class="col-xs-9">
-							<label for="id_petition_issues" class="toplabel">Related Issues</label>
-							{% for issue in petition.issues.all %}
-							<div class="row" />
-								<div class="col-xs-12"><span class="btn btn-xs">{{ issue.name }}</span></div>
-							</div>
-							{% endfor %}
-						</div>
-					</div>
-					<div id='id_petition_issues'> </div>
+			<hr class="simple-separator" />
+		</div>
+
+		<section>
+			<div class="row">
+				<div id="myAlert" class="col-xs-12"></div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
+					<p class="issueParagraph">
+					<label for="id_petition_issues" class="issueLabel"><small>Related Issues: </small></label>
+					<span id='id_petition_issues'>
+						{% for issue in petition.issues.all %}
+						<span>
+							<span class="small text-muted">{{ issue.name }}</span><span class="small text-muted comma">, </span>
+						</span>
+						
+						{% endfor %}
+					</span>
+					</p>
 				</div>
 			</div>
-		</div>
+		</section>
 			
 		<div class="row bottom-padding">
 			<div class="col-xs-12 col-sm-6">

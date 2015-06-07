@@ -1,15 +1,5 @@
-.lead {
-	padding-top: 10px;
-}
-
-.toplabel {
-	padding-top: 10px;
-	vertical-align: text-top;
-	margin: 0 auto;
-}
-
 .simple-separator {
-	background:#AAA; border:0; height:2px;
+	background:#DDD; border:0; height:1px;
 	margin-top: 0px;
 	margin-bottom: 0px;
 }

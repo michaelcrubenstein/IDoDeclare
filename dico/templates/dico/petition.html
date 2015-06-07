@@ -25,8 +25,24 @@
 	<!-- Styles for this web page -->
 	<style>
 		body {
-		  padding-top: 55px;
+		  padding-top: 50px;
 		  padding-bottom: 55px;
+		  background:#EEE;
+		}
+		.descriptionRow {
+			background:#FFF;
+		}
+		.descriptionRow>div>p {
+			margin-top:10px;
+		}
+		.voteRow {
+			padding-bottom: 10px;
+			background:#FFF;
+		}
+		#id_voteGroup {
+			display: block;
+			margin: 0 auto;
+			width: 368px;
 		}
 		section>section {
 			padding-top: 10px;
@@ -43,11 +59,6 @@
 			line-height: 16px;
 			padding-top: 4px;
 		}
-		#id_voteGroup {
-			display: block;
-			margin: 0 auto;
-			width: 368px;
-		}
 		.btn-group>.btn-nextto-spacer {
 			border-top-left-radius:4px;
 			border-bottom-left-radius:4px;
@@ -60,16 +71,35 @@
 			border-color:#fff;
 		}
 		#id_nextlink {
-			margin-top:10px;
-			width:100%;
-			text-align:center;
+			margin-left: 15px;
 		}
 		#id_nextlink:hover {
 			text-decoration: none;
 			cursor: pointer;
 		}
+		.disabledNextLink {
+			opacity: 50%;
+		}
 		.panelNav {
 			display: none;
+		}
+		#id_petition_notes {
+			background:#fff;
+		}
+		.dico-pull {
+			padding-top: 6px;
+			padding-bottom: 2px;
+		}
+		.dico-pull>div {
+			display: inline;
+			margin-left: 10px;
+			margin-right: 10px;
+		}
+		.dico-pull>div:first-child {
+			margin-left: 0px;
+		}
+		.dico-pull>div:last-child {
+			margin-right: 0px;
 		}
 	</style>
 	<style>
@@ -101,6 +131,21 @@
 							<span class="glyphicon glyphicon-chevron-left"></span>{{ backName }}
 						</div>
 					</div>
+					<div class="pull-left">
+						<div id="id_nextlink" class="navbar-link dico-navbar-link" onclick="go_to_next_petition()"> 
+							{% if nextPetition %}
+							<span><span>Next Action </span><span class="glyphicon glyphicon-chevron-down"></span></span>
+							{% else %}
+								{% if showDoneVoting %}
+<!-- 
+								<span class="disabledNextLink">
+								<span class="glyphicon glyphicon-chevron-down"></span>
+								</span>
+ -->
+								{% endif %}
+							{% endif %}
+						</div>
+					</div>
 					{% if user.is_authenticated %}
 					<div class="pull-right">
 						<div id="id_editButton" class="navbar-link dico-navbar-link" onClick="edit_action()"}>
@@ -115,51 +160,45 @@
 				</div>
 			</nav>
 		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
-			{% if user.id == petition.constituent.user.id or user.is_superuser %}
-			<div id="id_voteNav" class="container-fluid panelNav" section="id_voteSection">
-				<!-- Brand and toggle get grouped for better mobile display -->
-				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="pull-right">
-					<div id="id_deleteActionButton" class="dico-navbar-link text-danger"}>
-						Delete Action
-					</div>
-				</div>
-			</div>
-			{% endif %}
 			{% if user.is_authenticated %}
-			<div id="id_debateNav" class="container-fluid panelNav" section="id_debateSection">
+			<div class="container-fluid panelNav" section="id_debateSection">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="pull-left">
+				<div class="dico-pull pull-left">
 					<div class="navbar-link dico-navbar-link" onClick="add_supporting_argument()"}>
 						Add Supporting Argument
 					</div>
 				</div>
-				<div class="pull-right">
+				<div class="dico-pull pull-right">
 					<div class="navbar-link dico-navbar-link" onClick="add_opposing_argument()"}>
 						Add Opposing Argument
 					</div>
 				</div>
 			</div>
-			<div id="id_notesNav" class="container-fluid panelNav" section="id_notesSection">
+			<div class="container-fluid panelNav" section="id_voteSection">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="pull-left">
-					<div class="navbar-link dico-navbar-link" onClick="add_issue()"}>
+				<div class="dico-pull pull-left">
+					<div class="navbar-link dico-navbar-link" onClick="add_issue()">
 						Add Issue
 					</div>
-				</div>
-				<div class="pull-right">
-					<div class="navbar-link dico-navbar-link" onClick="add_note()"}>
+					<div class="navbar-link dico-navbar-link" onClick="add_note()">
 						Add Note
 					</div>
 				</div>
+				{% if user.id == petition.constituent.user.id or user.is_superuser %}
+				<div class="dico-pull pull-right">
+					<div class="navbar-link dico-navbar-link" onClick="delete_action()">
+						<span class="text-danger">Delete Action</span>
+					</div>
+				</div>
+				{% endif %}
 			</div>
-			<div id="id_storyNav" class="container-fluid panelNav" section="id_storySection">
+			<div class="container-fluid panelNav" section="id_storySection">
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="pull-left">
-					<div class="navbar-link dico-navbar-link" onClick="add_story()"}>
+				<div class="dico-pull pull-left">
+					<div class="navbar-link dico-navbar-link" onClick="add_story()">
 						Share Your Story
 					</div>
 				</div>
@@ -171,7 +210,6 @@
 						<!-- Collect the nav links, forms, and other content for toggling -->
 				<ul id="id_petitionNav" class="nav nav-tabs pull-left" role="navigation" aria-label="actionButtons">
 					<li section="id_voteSection"><a id="id_voteButton" href="#">Vote</a></li>
-					<li section="id_notesSection"><a id="id_notesButton" href="#">Notes</a></li>
 					<li section="id_debateSection"><a id="id_debateButton" href="#">Debate</a></li>
 					<li section="id_statsSection"><a id="id_mapsButton" href="#">Stats</a></li>
 					<li section="id_storySection"><a id="id_storyButton" href="#">Stories</a></li>
@@ -182,18 +220,47 @@
 		<div class="row">
 	    	<div id="myAlert" class="col-xs-12"></div>
 		</div>
-		<div class="row">
+		<div class="row descriptionRow">
 			<div class="col-xs-12">
 				<p>{{petition.description}}</p>
 			</div>
 		</div>
 		
+		{% if user.is_authenticated %}
+			<div class="row voteRow">
+				<div class="col-xs-12">
+						<div id="id_voteGroup" class="btn-group" data-toggle="buttons">
+							<label id="noVoteButton" class="btn btn-default btn-nextto-spacer" 
+									checkedclass="btn-info">
+							  <input type="radio" name="voteOptions" id="noVoteRadio" value=-2 /><small>No Vote</small>
+							</label>
+							<label class="btn btn-default btn-spacer">
+							</label>
+							<label id="opposeButton" class="btn btn-default btn-nextto-spacer" 
+									checkedclass="btn-danger">
+							  <input type="radio" name="voteOptions" id="opposeRadio" value=-1 />
+							  <small><span class="glyphicon glyphicon-thumbs-down"></span> Oppose</small>
+							</label>			
+							<label id="noOpinionButton" class="btn btn-default" 
+									checkedclass="btn-warning">
+							  <input type="radio" name="voteOptions" id="noOpinionRadio" value=0 /><small>No Opinion</small>
+							</label>
+							<label id="supportButton" class="btn btn-default" 
+									checkedclass="btn-success">
+							  <input type="radio" name="voteOptions" id="supportRadio" value=1 />
+							  <small><span class="glyphicon glyphicon-thumbs-up"></span> Support</small>
+							</label>
+						</div>
+				</div>
+			</div>
+		{% endif %}
+
 		<div class="row">
-				<hr class="simple-separator" />
+			<hr class="simple-separator" />
 		</div>
 
 		<section id="id_petitionSections">
-			<section id="id_notesSection" class="row">
+			<section id="id_voteSection" class="row">
 				<div class="col-xs-12">
 					<div class="row">
 						<div class="col-xs-12">
@@ -227,61 +294,16 @@
 					</div>
 					<div class="row">
 						<div class="col-xs-12">
-							<table class="table table-condensed table-striped">
-								<thead>
-									<tr>
-										<th class"editTool" style="width:1px"></th>
-										<th style:"width:100%">Notes</th>
-									</tr>
-								</thead>
-								<tbody id='id_petition_notes'></tbody>
+							<table class="table table-condensed">
+								<tbody id='id_petition_notes'>
+									<tr><td>Loading Notes...</td></tr>
+								</tbody>
 							</table>
 						</div>
 					</div>
 					
 				</div>
-			</section>
-			<section id="id_voteSection" class="row">
 			{% if user.is_authenticated %}
-				<div class="col-xs-12">
-						<div id="id_voteGroup" class="btn-group" data-toggle="buttons">
-							<label id="noVoteButton" class="btn btn-default btn-nextto-spacer" 
-									checkedclass="btn-info">
-							  <input type="radio" name="voteOptions" id="noVoteRadio" value=-2 /><small>No Vote</small>
-							</label>
-							<label class="btn btn-default btn-spacer">
-							</label>
-							<label id="opposeButton" class="btn btn-default btn-nextto-spacer" 
-									checkedclass="btn-danger">
-							  <input type="radio" name="voteOptions" id="opposeRadio" value=-1 />
-							  <small><span class="glyphicon glyphicon-thumbs-down"></span> Oppose</small>
-							</label>			
-							<label id="noOpinionButton" class="btn btn-default" 
-									checkedclass="btn-warning">
-							  <input type="radio" name="voteOptions" id="noOpinionRadio" value=0 /><small>No Opinion</small>
-							</label>
-							<label id="supportButton" class="btn btn-default" 
-									checkedclass="btn-success">
-							  <input type="radio" name="voteOptions" id="supportRadio" value=1 />
-							  <small><span class="glyphicon glyphicon-thumbs-up"></span> Support</small>
-							</label>
-						</div>
-				</div>
-				<div class="col-xs-12">
-					<div>
-						<div id="id_nextlink" class="text-muted" onclick="go_to_next_petition()"> 
-							{% if nextPetition %}
-							Next Action
-							<span class="glyphicon glyphicon-chevron-right"></span>
-							{% else %}
-								{% if showDoneVoting %}
-								Done Voting
-								<span class="glyphicon glyphicon-chevron-right"></span>
-								{% endif %}
-							{% endif %}
-						</div>
-					</div>
-				</div>
 			{% else %}
 				<footer>
 					<h3>Log in to Vote!</h3>
@@ -519,9 +541,10 @@
 			remove_petition();
 		});
 		
-		$("#id_deleteActionButton").click(function() {
+		// Respond to the click of the delete action button.
+		function delete_action() {
 			$("#id_deleteActionDialog").modal('show');
-		});		
+		}	
 				
 		var a = $("#id_petitionNav");
 		var kids = a.children();
@@ -588,7 +611,7 @@
 			}
 		});
 		
-		$("#id_notesButton").click( function() {
+		$("#id_voteButton").click( function() {
 			if (!labelShown) {
 				// Display the issues associated with the current petition.
 				show_petition_issues();
@@ -607,22 +630,22 @@
 		inEditMode = {{inEditMode}};
 		$("{{initialButton}}").click();
 		
+		if (!petitionVotesShown) {	
+			show_petition_votes(true);
+			petitionVotesShown = true;
+		}
 	});
 	
 	function setup_edit() {
 		{% if user.is_authenticated %}
 			// Return the display for editingnav's associated with the specified item.
 			function editNavDisplay(id) {
-				if (inEditMode) 
-					return $(id).css("display"); 
-				else 
-					return "none";
+				return $(id).css("display"); 
 			}
 		
 			// Set up the text of the Edit button ("", Edit or Done),
 			$("#id_editButton").text(function() {
-			if ($("#id_voteSection").css("display") != "none" ||
-				$("#id_statsSection").css("display") != "none")
+			if ($("#id_statsSection").css("display") != "none")
 				return "";
 			else if (inEditMode)
 				return "Done";
@@ -660,7 +683,7 @@
 		{% if nextPetition %}
 			var backURL = encodeURIComponent("{{backURL}}");
 			var backName = encodeURIComponent("{{backName}}");
-			window.location.href = "/dico/{{nextPetition.id}}/petition/?vote;showNext;backURL="+backURL+";backName="+backName;
+			window.location.href = "/dico/{{nextPetition.id}}/petition/?tab=vote;showNext;backURL="+backURL+";backName="+backName;
 		{% else %}
 			window.location.href = "{{backURL}}"
 		{% endif %}
@@ -691,7 +714,7 @@
 					if (inEditMode)
 					{
 						closealert();
-						remove_issue($(this).parent(), $(this).attr("issueID"));
+						remove_issue($(this).parent().parent(), $(this).attr("issueID"));
 					}
 				});
 
@@ -720,9 +743,8 @@
 	}
 	
 	function add_issue() {
-		var backURL = encodeURIComponent("{{backURL}}");
-		var backName = encodeURIComponent("{{backName}}");
-		window.location.href = "/dico/{{petition.id}}/addpetitionissue/?backURL="+backURL+";backName="+backName;
+		var backURL = encodeURIComponent(window.location.origin+window.location.pathname+window.location.search+";tab=vote");
+		window.location.href = "/dico/{{petition.id}}/addpetitionissue/?backURL="+backURL;
 	}
 	
 	function remove_issue(li, issue_id) {
@@ -736,12 +758,11 @@
 	}
 	
 	function show_petition_notes() {
-		$("#id_petition_notes").empty();
-	
 	  $.post("{% url 'getPetitionNotes' %}", { csrfmiddlewaretoken: storedcsrftoken, "id" : "{{petition.id}}" }, function(json){
 		if (json['success']) {
 			notes = json['notes'];
 			
+			$("#id_petition_notes").empty();
 			if (notes.length == 0)
 			{
 				var rows = d3.select("#id_petition_notes")
@@ -814,9 +835,8 @@
 	}
 	
 	function add_note() {
-		var backURL = encodeURIComponent("{{backURL}}");
-		var backName = encodeURIComponent("{{backName}}");
-		window.location.href = "{% url 'addNote' %}?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+		var backURL = encodeURIComponent(window.location.origin+window.location.pathname+window.location.search+";tab=vote");
+		window.location.href = "{% url 'addNote' %}?petition={{petition.id}};backURL="+backURL;
 	}
 	
 	function remove_note(li, note_id) {
@@ -830,9 +850,8 @@
 	}
 	
 	function add_story() {
-		var backURL = encodeURIComponent("{{backURL}}");
-		var backName = encodeURIComponent("{{backName}}");
-		window.location.href = "{% url 'addStory' %}?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+		var backURL = encodeURIComponent(window.location.origin+window.location.pathname+window.location.search+";tab=story");
+		window.location.href = "{% url 'addStory' %}?petition={{petition.id}};backURL="+backURL;
 	}
 	
 	function show_petition_arguments() {
@@ -872,12 +891,19 @@
 	
 	function append_zero_arguments(containerObj) {
 		li = document.createElement("tr");
+		row = $(li);
 		containerObj.append(li);
 		textdiv = document.createElement("td");
-		$(li).append(textdiv);
+		row.append(textdiv);
+		textdiv = document.createElement("td");
+		row.append(textdiv);
 		$(textdiv).html("None");
-		$(li).append(document.createElement("td"));
-		$(li).append(document.createElement("td"));
+		$(textdiv).css("width", "100%");
+		textdiv = document.createElement("td");
+		groupDiv = document.createElement("div");
+		row.append(textdiv);
+		$(textdiv).append(groupDiv);
+		$(groupDiv).addClass("btn-group");
 	}
 	
 	ratingData = [ {'text' : 'Central', 'value' : 5},
@@ -909,8 +935,9 @@
 		}
 
 		newParagraph = li.append("td")
+						 .style("width", "100%")
 						 .text(htmlEncode(arg['description']));
-		
+				
 		ratingGroupDiv = li.append("td").append("div")
 								   .classed("btn-group", true);
 		set_rating_button(ratingGroupDiv, arg['rating_vote'], arg['id']);
@@ -993,21 +1020,18 @@
 	}
 	
 	function add_supporting_argument() {
-		var backURL = encodeURIComponent("{{backURL}}");
-		var backName = encodeURIComponent("{{backName}}");
-		window.location = "{% url 'addSupportingArgument' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+		var backURL = encodeURIComponent(window.location.origin+window.location.pathname+window.location.search+";tab=debate");
+		window.location = "{% url 'addSupportingArgument' %}/?petition={{petition.id}};backURL="+backURL;
 	}
 	
 	function add_opposing_argument() {
-		var backURL = encodeURIComponent("{{backURL}}");
-		var backName = encodeURIComponent("{{backName}}");
-		window.location = "{% url 'addOpposingArgument' %}/?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+		var backURL = encodeURIComponent(window.location.origin+window.location.pathname+window.location.search+";tab=debate");
+		window.location = "{% url 'addOpposingArgument' %}/?petition={{petition.id}};backURL="+backURL;
 	}
 	
 	function doc_ratings() {
-		var backURL = encodeURIComponent("{{backURL}}");
-		var backName = encodeURIComponent("{{backName}}");
-		window.location = "{% url 'docRatings' %}?petition={{petition.id}};backURL="+backURL+";backName="+backName;
+		var backURL = encodeURIComponent(window.location.origin+window.location.pathname+window.location.search+";tab=debate");
+		window.location = "{% url 'docRatings' %}?petition={{petition.id}};backURL="+backURL;
 	}
 	
 	function go_back() {

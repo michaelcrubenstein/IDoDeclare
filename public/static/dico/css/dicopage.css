@@ -8,16 +8,6 @@
 	margin-bottom: 0px;
 	min-height: 40px;
 }
-.dico-navbar-text {
-	margin-top: 15px;
-	margin-bottom: 15px;
-	margin-left: 15px;
-	margin-right: 15px;
-}
-.dico-navbar-text:hover {
-	text-decoration: none;
-	cursor: pointer;
-}
 
 /* Titles go in the lower center of the nav bar. */
 .dico-title {

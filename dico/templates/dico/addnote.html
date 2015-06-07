@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>I Do Declare - Add Note</title>
+    <title>I Do Declare - New Note</title>
 
     <!-- Bootstrap -->
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
@@ -25,13 +25,24 @@
 	<!-- Styles for this web page -->
 	<style>
 		body {
-		  padding-top: 55px;
+		  padding-top: 50px;
+		  background:#EEE;
 		}
-		.lead {
+		.descriptionRow {
+			background:#FFF;
+		}
+		.descriptionRow>div>p {
+			margin-top:10px;
+		}
+		section {
 			padding-top: 10px;
+		}
+		#id_new_note_text {
+			margin-top:10px;
 		}
 		#id_new_note_link {
 			width: 100%;
+			background:#FFF;
 		}
 	</style>
 
@@ -49,7 +60,7 @@
 					<div id="id_add_note_button" class="navbar-link dico-navbar-link">Add</div>
 				</div>
 				<div class="dico-navbar-commands">
-					<div class="dico-title dico-fill"><span class="dico-inner-fill">Add Note</span></div>
+					<div class="dico-title dico-fill"><span class="dico-inner-fill"><strong>New Note</strong></span></div>
 				</div>
 			</div>
 		</nav>
@@ -58,25 +69,31 @@
 	    	<div id="myAlert" class="col-xs-12"></div>
 		</div>
 
-		<div class="row">
+		<div class="row descriptionRow">
 			<div class="col-xs-12">
-				<p><strong>{{petition.description}}</strong></p>
+				<p>{{petition.description}}</p>
 			</div>
 		</div>
-			
+		
 		<div class="row">
-			<div class="col-xs-12">
-				<textarea id="id_new_note_text" rows="4" maxlength="2048" class="form-control"></textarea>
-			</div>
-			<div class="col-xs-12">
-				<label for="id_new_note_link">Link to more information:</label>
-				<input type="text" id="id_new_note_link" ></input>
-			</div>
-			<div class="col-xs-12">
-				<a class="btn btn-link btn-xs" href="##" onClick="showTips()">Tips for writing notes</a>
-				<div id="tipsAlert"></div>
-			</div>
+			<hr class="simple-separator" />
 		</div>
+
+		<section>
+			<div class="row">
+				<div class="col-xs-12">
+					<textarea id="id_new_note_text" rows="4" maxlength="2048" class="form-control"></textarea>
+				</div>
+				<div class="col-xs-12">
+					<label for="id_new_note_link">Link to more information:</label>
+					<input type="text" id="id_new_note_link" ></input>
+				</div>
+				<div class="col-xs-12">
+					<a class="btn btn-link btn-xs" href="##" onClick="showTips()">Tips for writing notes</a>
+					<div id="tipsAlert"></div>
+				</div>
+			</div>
+		</section>
 	</div>
 </body>
 
@@ -113,9 +130,7 @@
 		});
 		
 		$("#cancel_button").click(function(e) {
-			var backURL = encodeURIComponent("{{backURL}}");
-			var backName = encodeURIComponent("{{backName}}");
-			window.location.href = "/dico/{{petition.id}}/petition/?notes;edit;backURL="+backURL+";backName="+backName;
+			window.location.href = "{{backURL}}";
 			e.preventDefault();
 		});
 
@@ -138,9 +153,7 @@
 		  .done(function(json, textStatus, jqXHR)
 			{
 				if (json['success']) {
-					var backURL = encodeURIComponent("{{backURL}}");
-					var backName = encodeURIComponent("{{backName}}");
-					window.location.href = "/dico/{{petition.id}}/petition/?notes;edit;backURL="+backURL+";backName="+backName;
+					window.location.href = "{{backURL}}";
 				}
 				else {
 					bootstrap_alert.warning(json['error']);

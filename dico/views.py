@@ -1239,14 +1239,13 @@ def petition(request, petition_id):
     
     backURL = request.GET.get(u'backURL', '/dico/')
     backName = request.GET.get('backName', 'Home')
+    initialTab = request.GET.get('tab', 'vote')
     
-    if 'debate' in request.GET:
+    if initialTab == 'debate':
         initialButton = "#id_debateButton"
-    elif 'notes' in request.GET:
-        initialButton = "#id_notesButton"
-    elif 'maps' in request.GET:
+    elif initialTab == 'maps':
         initialButton = "#id_mapsButton"
-    elif 'story' in request.GET:
+    elif initialTab == 'story':
         initialButton = "#id_storyButton"
     else:
         initialButton = "#id_voteButton"

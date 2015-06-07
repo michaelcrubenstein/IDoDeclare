@@ -126,7 +126,7 @@
 					.enter()
 					.append("tr")
 					.attr("href", function(d) {
-							return "/dico/" + d['id'] + "/petition/?{{actionPanel}};backURL="+backURL+";backName="+backName;						
+							return "/dico/" + d['id'] + "/petition/?tab={{actionPanel}};backURL="+backURL+";backName="+backName;						
 						})
 					.selectAll("td")
 					.data(function(d) {

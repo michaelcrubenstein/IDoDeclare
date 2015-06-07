@@ -541,11 +541,6 @@
 			remove_petition();
 		});
 		
-		// Respond to the click of the delete action button.
-		function delete_action() {
-			$("#id_deleteActionDialog").modal('show');
-		}	
-				
 		var a = $("#id_petitionNav");
 		var kids = a.children();
 		
@@ -689,6 +684,11 @@
 		{% endif %}
 	}
 
+	// Respond to the click of the delete action button.
+	function delete_action() {
+		$("#id_deleteActionDialog").modal('show');
+	}	
+			
 	function show_petition_issues() {
 	  $.post("{% url 'getPetitionIssues' %}", { csrfmiddlewaretoken: storedcsrftoken, "petition" : "{{petition.id}}" }, function(json){
 		if (json['success']) {

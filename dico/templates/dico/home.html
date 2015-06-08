@@ -30,8 +30,8 @@
 	<div id='container' class="container-fluid">
 		<style>
 			body {
-				padding-top: 55px;
-				padding-bottom: 220px;
+				padding-top: 51px;
+				padding-bottom: 40px;
 			}
 			header {
 				position: fixed;
@@ -69,6 +69,21 @@
 				padding-top: 10px;
 				padding-bottom: 10px;
 			}
+			.dico-pull {
+				padding-top: 6px;
+				padding-bottom: 2px;
+			}
+			.dico-pull>div {
+				display: inline;
+				margin-left: 10px;
+				margin-right: 10px;
+			}
+			.dico-pull>div:first-child {
+				margin-left: 0px;
+			}
+			.dico-pull>div:last-child {
+				margin-right: 0px;
+			}
 		</style>
 		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
 			<div class="container-fluid visible-xs-block">
@@ -94,8 +109,9 @@
 				<!~~ Collect the nav links, forms, and other content for toggling ~~>
 				<div class="collapse navbar-collapse" id="id_navbarCollapse">
 				    <ul class="nav navbar-nav pull-right">
-						<li><a class="accountSettingsLink">Change Account</a></li>
+						<li><a class="accountSettingsLink">Account Settings</a></li>
 						<li><a class="changePasswordLink">Change Password</a></li>
+						<li><a class="editInterestsLink">Identify Your Issues</a></li>
 						<li class="divider"></li>
 						<li><a class="signOutLink">Sign Out</a></li>
 					</ul>
@@ -124,7 +140,8 @@
 						<ul class="dropdown-menu dropdown-menu-right" role="menu">
 							<li class="text-muted"><a class="accountSettingsLink">Change Account</a></li>
 							<li class="text-muted"><a class="changePasswordLink">Change Password</a></li>
-							<li class="divider"></li>
+							<li class="text-muted"><a class="editInterestsLink">Identify Your Issues</a></li>
+						<li class="divider"></li>
 							<li class="text-muted"><a class="signOutLink">Sign Out</a></li>
 						</ul>
 					</li>
@@ -148,64 +165,52 @@
 			</div>
 		</nav>
 		
-		<style>
-			footer {
-				position: fixed;
-				top: calc(100% - 100px);
-				left: 0;
-				height: 220px;
-				width: 100%;
-				z-index: 999;
-				background: #D1E1FF;
-			}
-			footer > span {
-				position: fixed;
-			}
-			footer > span > a:hover {
-				text-decoration: none;
-				cursor: pointer;
-			}
-			footer > span > a {
-				display: inline-block;
-			}
-			#id_createActionSpan {
-				top: calc(100% - 90px);
-				left: calc(50% - 150px);
-				text-align: center;
-				width: 300px;
-			}
-			#id_learnActionSpan {
-				top: calc(100% - 60px);
-				left: 0px;
-				width: 40%;
-				text-align: right;
-			}
-			#id_changeVoteSpan {
-				top: calc(100% - 60px);
-				left: 60%;
-				text-align: left;
-				width: 40%;
-			}
-			#id_shareStorySpan {
-				top: calc(100% - 30px);
-				left: 0px;
-				width: 40%;
-				text-align: right;
-			}
-			#id_editInterestsSpan {
-				top: calc(100% - 30px);
-				left: 60%;
-				width: 40%;
-				text-align: left;
-			}
-		</style>
-		<footer>
-			<span id="id_createActionSpan" class="text-muted"><a id="id_createActionLink">Create an Action</a></span>
-			<span id="id_learnActionSpan" class="text-muted"><a id="id_learnActionLink">Explore an Issue</a></span>
-			<span id="id_changeVoteSpan" class="text-muted"><a id="id_changeVoteLink">Your Voting History</a></span>
-			<span id="id_shareStorySpan" class="text-muted"><a id="id_shareStoryLink">Share a Story</a></span>
-			<span id="id_editInterestsSpan" class="text-muted"><a id="id_editInterestsLink">Identify Your Interests</a></span>
-		</footer>
+		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
+			<div class="container-fluid visible-xs-block">
+				<!~~ Brand and toggle get grouped for better mobile display ~~>
+				<div class="dico-pull pull-left">
+					<div class="createActionLink navbar-link dico-navbar-link">
+						Create an Action
+					</div>
+				</div>
+				<div class="dico-pull pull-right">
+					<div class="learnActionLink navbar-link dico-navbar-link">
+						Explore an Issue
+					</div>
+				</div>
+			</div>
+			<div class="container-fluid visible-xs-block">
+				<!~~ Brand and toggle get grouped for better mobile display ~~>
+				<div class="dico-pull pull-left">
+					<div class="shareStoryLink navbar-link dico-navbar-link">
+						Share Your Story
+					</div>
+				</div>
+				<div class="dico-pull pull-right">
+					<div class="changeVoteLink navbar-link dico-navbar-link">
+						Your Voting History
+					</div>
+				</div>
+			</div>
+			<div class="container-fluid hidden-xs">
+				<div class="dico-pull pull-left">
+					<div class="createActionLink navbar-link dico-navbar-link">
+						Create an Action
+					</div>
+					<div class="shareStoryLink navbar-link dico-navbar-link">
+						Share Your Story
+					</div>
+				</div>
+				<div class="dico-pull pull-right">
+					<div class="changeVoteLink navbar-link dico-navbar-link">
+						Your Voting History
+					</div>
+					<div class="learnActionLink navbar-link dico-navbar-link">
+						Explore an Issue
+					</div>
+				</div>
+			</div>
+		</nav>
 		
 		<div class="row">
 			<div class="col-xs-12 col-md-9">
@@ -285,12 +290,18 @@
 	$(document).ready (function() {
 		var encodedRef = encodeURIComponent(window.location.href);
 		
-		$("#id_editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
-		$("#id_createActionLink").attr("href", "{% url 'createPetition' %}?back="+encodedRef);
-		$("#id_changeVoteLink").attr("href", "{% url 'votingHistory' %}?backURL="+encodedRef+";backName=Home");
-		$("#id_shareStoryLink").attr("href", "{% url 'issues' %}?actionPanel=story;backURL="+encodedRef+";backName=Home");
-		$("#id_learnActionLink").attr("href", "{% url 'issues' %}?actionPanel=debate;backURL="+encodedRef+";backName=Home");
-		$(".signOutLink").attr("href", "{% url 'signout' %}");
+		$(".createActionLink").click(function() {
+			window.location.href = "{% url 'createPetition' %}?back="+encodedRef;
+		});
+		$(".changeVoteLink").click(function() {
+			window.location.href = "{% url 'votingHistory' %}?backURL="+encodedRef+";backName=Home";
+		});
+		$(".shareStoryLink").click(function() {
+			window.location.href = "{% url 'issues' %}?actionPanel=story;backURL="+encodedRef+";backName=Home";
+		});
+		$(".learnActionLink").click(function() {
+			window.location.href = "{% url 'issues' %}?actionPanel=debate;backURL="+encodedRef+";backName=Home";
+		});
 		
 		if ($.cookie("authenticator") == "email")
 		{
@@ -302,6 +313,9 @@
 			$(".accountSettingsLink").attr("href", "{% url 'constituentSettings' %}?back="+encodedRef+";next="+encodedRef);
 			$(".changePasswordLink").css("display", "none");
 		}
+		$(".editInterestsLink").attr("href", "{% url 'editInterests' %}?back="+encodedRef);
+		$(".signOutLink").attr("href", "{% url 'signout' %}");
+
 		$(".petition-news-item").click(function(e) {
 			window.location.href="/dico/" + $(this).attr("petition") + "/petition/?showNext;backURL="+encodedRef+";backName=Home"
 		});

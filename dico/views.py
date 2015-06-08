@@ -1157,14 +1157,21 @@ def issues(request):
     actionPanel = request.GET.get('actionPanel', defaultPanel);
     
     helpTexts = { 'vote': 'Select an issue that is related to the action you want to vote on.', \
-                  'debate': 'Select an issue that you want to explore.', \
-                  'issues': 'Select an issue that is related to the action you want to label.', \
+                  'debate': 'Select the issue that you want to explore.', \
                   'maps': 'Select an issue that is related to the action you want to analyze.', \
-                  'story': 'Select an issue that is related to the action you want to create a story for.' }
+                  'story': 'Select the issue that is related to the action you want to create a story for.' }
+    titleTexts = {'vote': 'Explore an Issue', \
+                  'debate': 'Explore an Issue', \
+                  'story': 'Share Your Story' }
     if actionPanel in helpTexts:
         helpText = helpTexts[actionPanel]
     else:
         helpText = 'Select an issue that is related to the action you want.'
+        
+    if actionPanel in titleTexts:
+        titleText = titleTexts[actionPanel]
+    else:
+        titleText = 'Select Issue'
         
     context = RequestContext(request, {
         'user': request.user,
@@ -1172,6 +1179,7 @@ def issues(request):
         'backName': backName,
         'actionPanel': actionPanel,
         'helpText': helpText,
+        'titleText': titleText,
     })
     return HttpResponse(template.render(context))
 

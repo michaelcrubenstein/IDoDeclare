@@ -32,12 +32,26 @@
 		.descriptionRow {
 			background:#FFF;
 		}
-		.descriptionRow>div>p {
-			margin-top:10px;
+		.descriptionRow>div {
+			display:table;
 		}
-		.descriptionRow>button {
-			margin-top: 10px;
+		.descriptionRow>div {
+			margin-top:10px;
+			margin-bottom:10px;
+		}
+		.description {
+			width:100%;
+			display:table-cell;
+		}
+		.descriptionEditTool {
+			width: 60px;
 			display:none;
+			text-align:right;
+			padding: 0;
+		}
+		.descriptionEditTool:hover {
+			text-decoration: none;
+			cursor: pointer;
 		}
 		.voteRow {
 			padding-bottom: 10px;
@@ -227,12 +241,12 @@
 		<div class="row descriptionRow">
 			<div class="col-xs-12">
 				<p class="description">{{petition.description}}</p>
+				{% if canEditDescription %}
+				<span class="btn btn-link descriptionEditTool", onClick="edit_description()">
+					Edit <span class="glyphicon glyphicon-chevron-right"></span>
+				</span>
+				{% endif %}
 			</div>
-			{% if canEditDescription %}
-			<button class="col-xs-1 btn btn-link descriptionEditTool pull-right", onClick="edit_description()">
-				Edit <span class="glyphicon glyphicon-chevron-right"></span>
-			</button>
-			{% endif %}
 		</div>
 		
 		{% if user.is_authenticated %}
@@ -706,14 +720,12 @@
 			
 			{% if canEditDescription %}
 				if (inEditMode) {
-					$(".descriptionEditTool").css("display", "inline");
-					$(".descriptionRow>div").removeClass("col-xs-12");
-					$(".descriptionRow>div").addClass("col-xs-11");
+					$(".descriptionEditTool").css("display", "table-cell");
+					$(".description").css("width", "calc(100% - 3px - "+$(".descriptionEditTool").css("width")+")");
 				}
 				else
 				{
-					$(".descriptionRow>div").removeClass("col-xs-11");
-					$(".descriptionRow>div").addClass("col-xs-12");
+					$(".description").css("width", "100%");
 					$(".descriptionEditTool").css("display", "none");
 				}
 			{% endif %}

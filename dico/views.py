@@ -1266,6 +1266,8 @@ def petition(request, petition_id):
     else:
         nextPetition = None
         showDoneVoting = False
+    
+    vote = Constituent.get_vote(request.user, petition_id)  
         
     filter = Petition.objects.filter(id=petition_id)
     context = RequestContext(request, {
@@ -1277,7 +1279,8 @@ def petition(request, petition_id):
         'nextPetition': nextPetition,
         'inEditMode': inEditMode,
         'showDoneVoting': showDoneVoting,
-        'facebookAppID': settings.FACEBOOK_APP_ID, 
+        'facebookAppID': settings.FACEBOOK_APP_ID,
+        'vote': vote, 
     })
     return HttpResponse(template.render(context))
     
@@ -1578,13 +1581,9 @@ def getPetitionVoteTotals(request):
         # Return the results.
         results = {'success':True, 'votes':voteCounts}
         
-        if request.user.is_authenticated:
-            constituent = Constituent.get_constituent(request.user)
-            if constituent is not None:
-                query_set = PetitionVote.objects.filter(petition_id=petition_id). \
-                    filter(constituent_id=constituent.user.id)
-                if (query_set.count() > 0):
-                    results['userVote'] = query_set.get().vote
+        vote = Constituent.get_vote(request.user, petition_id)
+        if (vote != -2):
+            results['userVote'] = vote
             
     except Exception as e:
         log = open('exception.log', 'a')

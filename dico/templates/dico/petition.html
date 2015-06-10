@@ -2,25 +2,25 @@
 <html lang="en">
 {% load staticfiles %}
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>I Do Declare - Action</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>I Do Declare - Action</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+	<!-- Bootstrap core CSS -->
+	<link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
-    <!-- Custom styles for this template -->
-    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
-    <link href="{% static "dico/css/mapus.css" %}" rel="stylesheet">
-    <link href="{% static "dico/css/petition.css" %}" rel="stylesheet">
+	<!-- Custom styles for this template -->
+	<link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
+	<link href="{% static "dico/css/mapus.css" %}" rel="stylesheet">
+	<link href="{% static "dico/css/petition.css" %}" rel="stylesheet">
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	  <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+	  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	<![endif]-->
 
 	<!-- Styles for this web page -->
 	<style>
@@ -218,7 +218,7 @@
 		</nav>
 
 		<div class="row">
-	    	<div id="myAlert" class="col-xs-12"></div>
+			<div id="myAlert" class="col-xs-12"></div>
 		</div>
 		<div class="row descriptionRow">
 			<div class="col-xs-12">
@@ -230,24 +230,60 @@
 			<div class="row voteRow">
 				<div class="col-xs-12">
 						<div id="id_voteGroup" class="btn-group" data-toggle="buttons">
-							<label id="noVoteButton" class="btn btn-default btn-nextto-spacer" 
-									checkedclass="btn-info">
-							  <input type="radio" name="voteOptions" id="noVoteRadio" value=-2 /><small>No Vote</small>
+							<label id="noVoteButton" 
+								   {% if vote == -2 %}
+										class="btn btn-default btn-nextto-spacer active btn-info" 
+								   {% else %}
+										class="btn btn-default btn-nextto-spacer" 
+								   {% endif %}
+								   checkedclass="btn-info" >
+							  <input type="radio" name="voteOptions" id="noVoteRadio" value=-2 
+								   {% if vote == -2 %}
+										checked
+								   {% endif %}
+									/><small>No Vote</small>
 							</label>
 							<label class="btn btn-default btn-spacer">
 							</label>
-							<label id="opposeButton" class="btn btn-default btn-nextto-spacer" 
+							<label id="opposeButton" 
+								   {% if vote == -1 %}
+								   		class="btn btn-default btn-nextto-spacer active btn-danger" 
+								   {% else %}
+								   		class="btn btn-default btn-nextto-spacer" 
+								   {% endif %}
 									checkedclass="btn-danger">
-							  <input type="radio" name="voteOptions" id="opposeRadio" value=-1 />
+							  <input type="radio" name="voteOptions" id="opposeRadio" 
+								   {% if vote == -1 %}
+								   		checked
+								   {% endif %}
+							  		value=-1 />
 							  <small><span class="glyphicon glyphicon-thumbs-down"></span> Oppose</small>
 							</label>			
-							<label id="noOpinionButton" class="btn btn-default" 
+							<label id="noOpinionButton" 
+								   {% if vote == 0 %}
+								   		class="btn btn-default active btn-warning" 
+								   {% else %}
+								   		class="btn btn-default" 
+								   {% endif %}
 									checkedclass="btn-warning">
-							  <input type="radio" name="voteOptions" id="noOpinionRadio" value=0 /><small>No Opinion</small>
+							  <input type="radio" name="voteOptions" id="noOpinionRadio" 
+								   {% if vote == 0 %}
+								   		checked
+								   {% endif %}
+							  		value=0 /><small>No Opinion</small>
 							</label>
-							<label id="supportButton" class="btn btn-default" 
+							<label id="supportButton" 
+								   {% if vote == 1 %}
+								   		class="btn btn-default active btn-success" 
+								   {% else %}
+								   		class="btn btn-default" 
+								   {% endif %}
 									checkedclass="btn-success">
-							  <input type="radio" name="voteOptions" id="supportRadio" value=1 />
+							  <input type="radio" name="voteOptions" id="supportRadio" 
+								   {% if vote == 1 %}
+								   		checked
+								   {% endif %}
+							  		 value=1 />
 							  <small><span class="glyphicon glyphicon-thumbs-up"></span> Support</small>
 							</label>
 						</div>
@@ -499,7 +535,7 @@
 	var storedcsrftoken = "{{ csrf_token }}";
 	var elementToDelete = null;
 	
-	var petitionVotesShown = false;	// Covers totals and current user's vote.
+	var petitionVotesShown = false; // Covers totals and current user's vote.
 	var labelShown = false;
 	var mapsShown = false;
 	var debateShown = false;
@@ -591,11 +627,6 @@
 			
 		
 		$("#id_voteButton").click( function() {
-			if (!petitionVotesShown) {
-				// Show the votes for the current petition.
-				show_petition_votes(true);
-				petitionVotesShown = true;
-			}
 		});
 		
 		$("#id_debateButton").click( function() {
@@ -656,7 +687,7 @@
 			
 			// In edit mode, edit tools are visible.
 			// When not in edit mode, issue texts can link to issues.
-			if (inEditMode)	{		   
+			if (inEditMode) {		   
 				$(".editTool").css("display", "table-cell");
 				$(".issueText").removeClass("issueLink");
 			} else {
@@ -937,13 +968,16 @@
 		newParagraph = li.append("td")
 						 .style("width", "100%")
 						 .text(htmlEncode(arg['description']));
-				
-		ratingGroupDiv = li.append("td").append("div")
+		
+		ratingGroupCell = li.append("td");		
+		ratingGroupDiv = ratingGroupCell.append("div")
 								   .classed("btn-group", true);
-		set_rating_button(ratingGroupDiv, arg['rating_vote'], arg['id']);
+		set_rating_button(ratingGroupCell, ratingGroupDiv, arg['rating_vote'], arg['id']);
 	}
 	
-	function set_rating_button(ratingGroupDiv, ratingVote, argumentID) {
+	function set_rating_button(ratingGroupCell, ratingGroupDiv, ratingVote, argumentID) {
+		var theDiv = ratingGroupDiv;
+		var theCell = ratingGroupCell;
 		ratingGroupDiv.html('');
 		if (ratingVote === null || ratingVote == -1)
 			ratingText = 'Rate Now';
@@ -958,7 +992,7 @@
 					 .classed("caret", true);
 		ratingMenu = ratingGroupDiv.append("ul")
 								   .classed("dropdown-menu", true)
-					 			   .attr("role", "menu");
+								   .attr("role", "menu");
 		
 		ratingItemButtons = ratingMenu.selectAll("li")
 				  .data(ratingData)
@@ -969,8 +1003,7 @@
 				  .attr("argumentId", argumentID)
 				  .attr("value", function(d) { return d.value; })
 				  .on ('click', function() { 
-								 theDiv = $(this).parents(".btn-group")[0];
-								 rate_argument(d3.select(theDiv), $(this).attr("argumentId"), $(this).val());
+								 rate_argument(theCell, theDiv, $(this).attr("argumentId"), $(this).val());
 								 });
 		ratingItemButtons
 				  .append("span")
@@ -991,8 +1024,7 @@
 					  .text("Remove this rating")
 					  .attr("value", -1)
 					  .on ('click', function() { 
-								 theDiv = $(this).parents(".btn-group")[0];
-								 rate_argument(d3.select(theDiv), $(this).attr("argumentId"), $(this).val());
+								 rate_argument(theCell, theDiv, $(this).attr("argumentId"), $(this).val());
 								 });
 		}
 	}
@@ -1215,7 +1247,7 @@
 			});
 	}
 	
-	function rate_argument(li, argument_id, rating) {
+	function rate_argument(theCell, ratingGroupDiv, argument_id, rating) {
 		var deferredObject;
 		if (rating == -1)
 			deferredObject = $.post("{% url 'unrateArgument' %}", { csrfmiddlewaretoken: storedcsrftoken, 
@@ -1228,7 +1260,7 @@
 		deferredObject.done(function(json, textStatus, jqXHR)
 			{
 				if (json['success']) {
-					set_rating_button(li, rating, argument_id);
+					set_rating_button(theCell, ratingGroupDiv, rating, argument_id);
 				}
 				else {
 					bootstrap_alert.warning(json['error']);
@@ -1396,9 +1428,9 @@
 			td = tr.selectAll("td")
 					.data(function(d) { 
 						if (newScope == districtScope)
-							area =  d['state'] + "-" + d['district'];
+							area =	d['state'] + "-" + d['district'];
 						else
-							area =  d['state'];
+							area =	d['state'];
 						return [area, d['support_count'], d['oppose_count']];
 					})
 					.enter()
@@ -1431,7 +1463,7 @@
 				 "{% static "dico/us.json" %}",
 				 "{% static "dico/us-congress-113.json" %}",
 				 function() {
-				 	change_vote($('input[name="mapVoteOptions"]:checked').val(), newScope); 
+					change_vote($('input[name="mapVoteOptions"]:checked').val(), newScope); 
 				 }, 
 				 newScope);
 	}
@@ -1439,7 +1471,7 @@
 </script>
 
 <!-- Scripts for this web page -->
-<script type="text/JavaScript">	
+<script type="text/JavaScript"> 
 	{% if user.is_authenticated %}
 	{% else %}
 		var isDocumentReady = false;
@@ -1448,7 +1480,7 @@
 		$(document).ready (function(e) {		
 			isDocumentReady = true;
 		
-			if (document.domain == "127.0.0.1")	// Do not try for facebook if running in localHost.
+			if (document.domain == "127.0.0.1") // Do not try for facebook if running in localHost.
 			{
 				isFacebookLoginChecked = true;
 			}
@@ -1463,12 +1495,12 @@
 				  }(document, 'script', 'facebook-jssdk'));
 				window.fbAsyncInit = function() {
 					FB.init({
-						appId      : '{{facebookAppID}}',
-						status     : true,
-						cookie     : true,  // enable cookies to allow the server to access 
+						appId	   : '{{facebookAppID}}',
+						status	   : true,
+						cookie	   : true,	// enable cookies to allow the server to access 
 											// the session
-						xfbml      : true,  // parse social plugins on this page
-						version    : 'v2.3' // use version 2.3
+						xfbml	   : true,	// parse social plugins on this page
+						version	   : 'v2.3' // use version 2.3
 					});
 
 					FB.getLoginStatus(function(response) {

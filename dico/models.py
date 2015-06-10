@@ -215,6 +215,18 @@ class Constituent(models.Model):
                 petitions.append({'section': 'petition', 'id': i[0], 'description': i[1], 'creation_time': i[2], 'vote': i[3]})
             return petitions
             
+    def get_vote(user, petition_id):
+        with connection.cursor() as c:
+            sql = "SELECT pv.vote" + \
+                  " FROM dico_petitionvote pv" + \
+                  " WHERE pv.petition_id = %s AND pv.constituent_id = %s"
+            c.execute(sql, (petition_id, user.id))
+            row = c.fetchone()
+            if row:
+                return row[0]
+            else:
+                return -2
+
     def get_members(user):
         constituent = Constituent.get_constituent(user)
         if constituent is None:

@@ -64,7 +64,13 @@
 								<th>Your vote</th>
 							</tr>
 						</thead>
-						<tbody id='id_actions'></tbody>
+						<tbody id='id_actions'>
+							<tr>
+								<td>
+									Loading your voting history...
+								</td>
+							</tr>
+						</tbody>
 					</table>
 				</div>
 			</div>
@@ -115,12 +121,12 @@
 		});
 
 		function show_actions() {
-			$("#id_actions").empty();
 		  $.post("{% url 'getVotingHistory' %}", { csrfmiddlewaretoken: storedcsrftoken }, function(json){
 			if (json['success']) {
 				var backName = encodeURIComponent("Voting History");
 				var backURL = encodeURIComponent(window.location.href);
 		
+				$("#id_actions").empty();
 				d3.select("#id_actions").selectAll("tr")
 					.data(json['actions'])
 					.enter()

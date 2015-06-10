@@ -227,6 +227,31 @@ def createPetition(request):
     })
     return HttpResponse(template.render(context))
 
+# Displays a web page in which a user can edit the description of an action.
+def editPetition(request):
+    if not request.user.is_authenticated:
+        return signin(request)
+    
+    template = loader.get_template('dico/editPetition.html')
+    backURL = request.GET.get('back', '/dico/')
+    petition_id = request.GET.get('petition', 0)
+    
+    if petition_id == 0:
+        raise Exception('The petition is not specified')
+        
+    petition = Petition.objects.get(pk=petition_id)
+    if petition.constituent.user != request.user and not (request.user.is_superuser):
+        raise Exception('The current login does not have permission to change this action');
+       
+    voteCount = petition.get_vote_count()
+    context = RequestContext(request, {
+        'user': request.user,
+        'petition': petition,
+        'backURL': backURL,
+        'voteCount': voteCount,
+    })
+    return HttpResponse(template.render(context))
+
 def hasIssue(issues, issue):
     testName = issue['name']
     for i in issues:
@@ -609,6 +634,40 @@ def newPetition(request):
     
     return JsonResponse(results)
 
+def updatePetition(request):
+    results = {'success':False, 'error': 'updatePetition failed'}
+    try:
+        if request.method != "POST":
+            raise Exception("updatePetition only responds to POST requests")
+        if not request.user.is_authenticated:
+            raise Exception("The current login is invalid")
+
+        # Get the petition info.
+        petition_id = request.POST['petition']
+        description = request.POST['description']
+
+        constituent = Constituent.get_constituent(request.user)
+        if constituent is None:
+            raise Exception('The current login is not a constituent');
+            
+        petition = Petition.objects.get(pk=petition_id)
+        if petition.constituent != constituent and not (request.user.is_superuser):
+            raise Exception('The current login does not have permission to change this action');
+            
+        # Do the model operation
+        with transaction.atomic():
+            petition.update_description(description);
+        
+        # Return the results.
+        results = {'success':True, 'petition':petition_id}
+    except Exception as e:
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
+        results = {'success':False, 'error': str(e)}
+    
+    return JsonResponse(results)
+
 def deletePetition(request):
     results = {'success':False, 'error': 'deletePetition failed'}
     try:
@@ -622,30 +681,6 @@ def deletePetition(request):
 
         # Do the model operation
         Petition.objects.filter(id=petition_id).delete();
-        
-        # Return the results.
-        results = {'success':True}
-    except Exception as e:
-        log = open('exception.log', 'a')
-        log.write("%s\n" % traceback.format_exc())
-        log.flush()
-        results = {'success':False, 'error': str(e)}
-    
-    return JsonResponse(results)
-
-def updatePetition(request):
-    results = {'success':False, 'error': 'updatePetition failed'}
-    try:
-        if request.method != "POST":
-            raise Exception("updatePetition only responds to POST requests")
-        if not request.user.is_authenticated:
-            raise Exception("The current login is invalid")
-
-        # Get the petition info.
-        petition_id = request.POST['id']
-        description = request.POST['description']
-
-        # Do the model operation
         
         # Return the results.
         results = {'success':True}
@@ -1267,12 +1302,16 @@ def petition(request, petition_id):
         nextPetition = None
         showDoneVoting = False
     
-    vote = Constituent.get_vote(request.user, petition_id)  
-        
+    vote = Constituent.get_vote(request.user, petition_id) 
+    
     filter = Petition.objects.filter(id=petition_id)
+    petition = filter.get()
+    
+    canEditDescription = request.user.is_superuser or request.user == petition.constituent.user
+
     context = RequestContext(request, {
         'user': request.user,
-        'petition': filter.get(),
+        'petition': petition,
         'backURL' : backURL,
         'backName': backName,
         'initialButton': initialButton,
@@ -1281,6 +1320,7 @@ def petition(request, petition_id):
         'showDoneVoting': showDoneVoting,
         'facebookAppID': settings.FACEBOOK_APP_ID,
         'vote': vote, 
+        'canEditDescription': canEditDescription,
     })
     return HttpResponse(template.render(context))
     

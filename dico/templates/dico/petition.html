@@ -35,6 +35,10 @@
 		.descriptionRow>div>p {
 			margin-top:10px;
 		}
+		.descriptionRow>button {
+			margin-top: 10px;
+			display:none;
+		}
 		.voteRow {
 			padding-bottom: 10px;
 			background:#FFF;
@@ -222,8 +226,13 @@
 		</div>
 		<div class="row descriptionRow">
 			<div class="col-xs-12">
-				<p>{{petition.description}}</p>
+				<p class="description">{{petition.description}}</p>
 			</div>
+			{% if canEditDescription %}
+			<button class="col-xs-1 btn btn-link descriptionEditTool pull-right", onClick="edit_description()">
+				Edit <span class="glyphicon glyphicon-chevron-right"></span>
+			</button>
+			{% endif %}
 		</div>
 		
 		{% if user.is_authenticated %}
@@ -694,6 +703,20 @@
 				$(".editTool").css("display", "none");
 				$(".issueText").addClass("issueLink");
 			}
+			
+			{% if canEditDescription %}
+				if (inEditMode) {
+					$(".descriptionEditTool").css("display", "inline");
+					$(".descriptionRow>div").removeClass("col-xs-12");
+					$(".descriptionRow>div").addClass("col-xs-11");
+				}
+				else
+				{
+					$(".descriptionRow>div").removeClass("col-xs-11");
+					$(".descriptionRow>div").addClass("col-xs-12");
+					$(".descriptionEditTool").css("display", "none");
+				}
+			{% endif %}
 				
 			// Set up the pointers over the issue links.
 			if (inEditMode)
@@ -771,6 +794,20 @@
 		else
 			bootstrap_alert.warning(json['error']);
 	  });
+	}
+	
+	function edit_description() {
+		var href = window.location.origin+window.location.pathname+window.location.search+";tab="
+		if ($("#id_debateSection").css("display") != "none")
+			href += "debate";
+		if ($("#id_statsSection").css("display") != "none")
+			href += "stats";
+		if ($("#id_storySection").css("display") != "none")
+			href += "story";
+		else
+			href += "vote";
+		backURL = encodeURIComponent(href);
+		window.location.href = "{% url 'editPetition' %}?petition={{petition.id}};back="+backURL;
 	}
 	
 	function add_issue() {

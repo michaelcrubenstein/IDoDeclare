@@ -297,7 +297,7 @@ class PetitionManager(models.Manager):
     def create_petition(self, constituent, description):
         petition = self.create(constituent=constituent, description=description)
         return petition
-    
+            
     def get_petitions(issue_id, user=None):
         with connection.cursor() as c:
             petitions = []
@@ -350,6 +350,11 @@ class Petition(models.Model):
     
     objects = PetitionManager()
     
+    def update_description(self, description):
+        self.description = description
+        self.save()
+        PetitionVote.objects.filter(petition_id=self.id).delete()
+        
     def add_issue(self, issue, constituent):
         pi = PetitionIssue(petition=self, issue=issue, constituent=constituent)
         pi.save()
@@ -359,8 +364,16 @@ class Petition(models.Model):
         if query_set.count() == 0:
             raise ValueError('the issue "{}" is not recognized'.format(issueName))
         else:
-            self.add_issue(query_set.get(), constituent);
+            self.add_issue(query_set.get(), constituent)
 
+    def get_vote_count(self):
+        with connection.cursor() as c:
+            sql = "SELECT COUNT(*)" + \
+                  " FROM dico_petitionvote" + \
+                  " WHERE dico_petitionvote.petition_id = %s"
+            c.execute(sql, [self.pk])
+            return c.fetchone()[0]
+    
     def get_vote_totals(petition_id):
         with connection.cursor() as c:
             sql = "SELECT vote, COUNT(*) as vote_count" + \
@@ -592,6 +605,22 @@ class ConstituentInterest(models.Model):
             
     def __str__(self):
         return str(self.constituent) + ': ' + str(self.issue)
+
+class Message(models.Model):
+    subject = models.CharField(max_length=200, db_index=True)
+    body = models.TextField()
+    petition = models.ForeignKey(Petition, db_index=True, db_column='petition_id', null=True)
+    constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
+    creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+    via = models.ForeignKey(Via, db_index=True, null=True) # 1 - sms, 2 - email
+
+class MessageTouch(models.Model):
+    message = models.ForeignKey(Message, db_index=True, db_column='message_id')
+    constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
+    creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+    executionTime = models.DateTimeField(db_index=True, null=True)
+    via = models.ForeignKey(Via, db_index=True, null=True) # 1 - sms, 2 - email
+    address = models.CharField(max_length=100)
 
 class MCInterest(models.Model):
     mc = models.ForeignKey(MC, db_index=True, db_column='mc_id');

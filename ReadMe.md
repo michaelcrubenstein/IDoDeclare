@@ -13,23 +13,44 @@ completed is maintained in doc/tasks.txt.
 ============================================================
 Installation Instructions
 ==============================
-1. Make sure all of the python environment is loaded:
-	1a. Downloaded and installed mysql-connector-python-2.0.3-osx10.9.dmg
-	1b. Moved the mysql site-package from the python2.7 site-packages to the 
-		python3.4 site-packages.
-	1c. Install django - pip3 install django
-    1d. Install the sunlight package - pip3 install sunlight
-    1e. Install mysql-connector-python - pip3 install mysql-connector-python --allow-external mysql-connector-python
-    1f. Install pillow - pip3 install pillow
-    1g. Install pygeocoder - pip3 install pygeocoder
-    1g. Add "export PATH=$HOME/opt/python-3.4.2/bin:$PATH" to .bash_profile and .bashrc
-2. Download all files from PyDico
-3. Open a terminal window
-4. Navigate to the folder in the terminal window
-5. Update the custom_user/settings file with the correct database information for the
+1. BUILD INSTRUCTIONS FOR PYTHON
+	Create tmp folder next to website folder
+	Upload Python-3.4.2 gz tar file into temp folder
+	Extract the files from the tar archive
+		$ tar -xf Python-3.4.2.tar
+	Go to the python directory
+		$ cd ../Python-3.4.2
+	Make the target directory
+		$ mkdir $HOME/opt
+		$ mkdir $HOME/opt/python-3.4.2
+	Run the commands to build python
+		$ ./configure --prefix=$HOME/opt/python-3.4.2
+		$ make
+		$ make install
+	More instructions at http://wiki.dreamhost.com/Python
+
+2. Add "export PATH=$HOME/opt/python-3.4.2/bin:$PATH" to .bash_profile and .bashrc
+
+3. Load all of the modules:
+pip3 install django
+pip3 install sunlight
+pip3 install mysql-connector-python --allow-external mysql-connector-python
+pip3 install pillow
+pip3 install pygeocoder
+	3f. Downloaded and installed mysql-connector-python-2.0.3-osx10.9.dmg
+	3g. Moved the mysql site-package from the python2.7 site-packages 
+			(Macintosh HD:Library:Python:2.7:site-packages) 
+			to the python3.4 site-packages
+			(Macintosh HD:Library:Frameworks:Python.Framework:Versions:3.4:lib:python3.4:site-packages).
+	
+	3f. Temporarily: pip3 install --upgrade git+https://github.com/multiplay/mysql-connector-python	
+4. Download all files from PyDico
+4. Open a terminal window
+5. Navigate to the folder in the terminal window
+6. Update the custom_user/settings file with the correct database information for the
 	default database.
-6. Make the public/static directory in idodeclare.org - mkdir public/static
-	6a. mkdir public/static/admin
+7. Make the public/static directory in idodeclare.org - mkdir public/static
+	7a. mkdir public/static/admin
 	    mkdir public/static/admin/css
 	    mkdir public/static/admin/img
 	    mkdir public/static/admin/img/gis
@@ -41,9 +62,11 @@ Installation Instructions
 	    cp env/lib/python3.4/site-packages/django/contrib/admin/static/admin/js/* public/static/admin/js/
 	    cp env/lib/python3.4/site-packages/django/contrib/admin/static/admin/js/admin/* public/static/admin/js/admin/
         	    
-	6b. mkdir public/static/dico
+	7b. mkdir public/static/dico
         cp custom_user/static/dico/*.json public/static/dico
         
-7. Move all of the files from 
-6. Execute the command: python3 manage.py migrate --database=dbname
-7. Execute the command: python3 manage.py runserver
+8. Move all of the files from 
+
+If running on a local Mac
+9. Execute the command: python3 manage.py migrate --database=dbname
+10. Execute the command: python3 manage.py runserver

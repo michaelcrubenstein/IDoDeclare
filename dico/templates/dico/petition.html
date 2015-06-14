@@ -151,7 +151,7 @@
 					</div>
 					<div class="pull-left">
 						<div id="id_nextlink" class="navbar-link dico-navbar-link" onclick="go_to_next_petition()"> 
-							{% if nextPetition %}
+							{% if nextPetitionID %}
 							<span><span>Next Action </span><span class="glyphicon glyphicon-chevron-down"></span></span>
 							{% else %}
 								{% if showDoneVoting %}
@@ -740,10 +740,10 @@
 	}
 	
 	function go_to_next_petition() {
-		{% if nextPetition %}
+		{% if nextPetitionID %}
 			var backURL = encodeURIComponent("{{backURL}}");
 			var backName = encodeURIComponent("{{backName}}");
-			window.location.href = "/dico/{{nextPetition.id}}/petition/?tab=vote;showNext;backURL="+backURL+";backName="+backName;
+			window.location.href = "/dico/{{nextPetitionID}}/petition/?tab=vote;showNext;backURL="+backURL+";backName="+backName;
 		{% else %}
 			window.location.href = "{{backURL}}"
 		{% endif %}

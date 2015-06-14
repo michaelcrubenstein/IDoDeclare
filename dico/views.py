@@ -1296,10 +1296,10 @@ def petition(request, petition_id):
     inEditMode = int('edit' in request.GET)
         
     if 'showNext' in request.GET:
-        nextPetition = Petition.objects.get_next_petition(petition_id=petition_id, user=request.user)
+        nextPetitionID = Petition.objects.get_next_petition_id(petition_id=petition_id, user=request.user)
         showDoneVoting = True
     else:
-        nextPetition = None
+        nextPetitionID = None
         showDoneVoting = False
     
     vote = Constituent.get_vote(request.user, petition_id) 
@@ -1315,7 +1315,7 @@ def petition(request, petition_id):
         'backURL' : backURL,
         'backName': backName,
         'initialButton': initialButton,
-        'nextPetition': nextPetition,
+        'nextPetitionID': nextPetitionID,
         'inEditMode': inEditMode,
         'showDoneVoting': showDoneVoting,
         'facebookAppID': settings.FACEBOOK_APP_ID,

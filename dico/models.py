@@ -323,7 +323,7 @@ class PetitionManager(models.Manager):
 
             return petitions
             
-    def get_next_petition(self, petition_id, user):
+    def get_next_petition_id(self, petition_id, user):
         with connection.cursor() as c:
             sql = "SELECT p.id, p.creation_time" + \
                   " FROM dico_petition p, (SELECT creation_time from dico_petition WHERE id = %s) p2" + \
@@ -338,7 +338,7 @@ class PetitionManager(models.Manager):
             c.execute(sql, [petition_id, petition_id, user.id, user.id])
             row = c.fetchone()
             if row:
-                return self.get(pk=row[0])
+                return row[0]
             else:
                 return None
 

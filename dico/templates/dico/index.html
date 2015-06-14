@@ -157,7 +157,7 @@
 				$("footer").css("visibility", "visible");
 			}
 		
-			if (document.domain !== "127.0.0.1")
+			if (window.location.protocol !== "http:")
 				$(".social-login").css("display", "static");
 			else
 				$(".social-login").css("display", "none");
@@ -219,7 +219,7 @@
 		
 		isDocumentReady = true;
 		
-		if (document.domain == "127.0.0.1")	// Do not try for facebook if running in localHost.
+		if (window.location.protocol == "http:")	// Do not try for facebook if running in localHost.
 		{
 			isFacebookLoginChecked = true;
 		}

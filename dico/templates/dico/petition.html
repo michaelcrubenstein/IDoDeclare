@@ -676,7 +676,9 @@
 			}
 		});
 		
+		{% if inEditMode %}
 		inEditMode = {{inEditMode}};
+		{% endif %}
 		
 		// Now that the votes are set up, add change functions.
 		setup_petition_radios();

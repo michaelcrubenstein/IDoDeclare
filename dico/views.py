@@ -1340,16 +1340,24 @@ def vote(request):
     nextPetition = None
     showDoneVoting = False
         
+    vote = Constituent.get_vote(request.user, id) 
+    
     filter = Petition.objects.filter(id=id)
+    petition = filter.get()
+    
+    canEditDescription = request.user.is_superuser or request.user == petition.constituent.user
+
     context = RequestContext(request, {
         'user': request.user,
-        'petition': filter.get(),
+        'petition': petition,
         'backURL' : backURL,
         'backName': backName,
         'initialButton': initialButton,
         'nextPetition': nextPetition,
         'showDoneVoting': showDoneVoting,
         'facebookAppID': settings.FACEBOOK_APP_ID, 
+        'vote': vote, 
+        'canEditDescription': canEditDescription,
     })
     return HttpResponse(template.render(context))
     

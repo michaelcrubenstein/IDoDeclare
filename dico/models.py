@@ -614,7 +614,10 @@ class Message(models.Model):
     creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
     via = models.ForeignKey(Via, db_index=True, null=True) # 1 - sms, 2 - email
 
-class MessageTouch(models.Model):
+    def __str__(self):
+        return str(self.subject)
+
+class Envelope(models.Model):
     message = models.ForeignKey(Message, db_index=True, db_column='message_id')
     constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
     creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)

@@ -56,11 +56,11 @@ pip3 install pygeocoder
 	    mkdir public/static/admin/img/gis
 	    mkdir public/static/admin/js
 	    mkdir public/static/admin/js/admin
-	    cp env/lib/python3.4/site-packages/django/contrib/admin/static/admin/css/* public/static/admin/css/
-	    cp env/lib/python3.4/site-packages/django/contrib/admin/static/admin/img/* public/static/admin/img/
-	    cp env/lib/python3.4/site-packages/django/contrib/admin/static/admin/img/gis/* public/static/admin/img/gis/
-	    cp env/lib/python3.4/site-packages/django/contrib/admin/static/admin/js/* public/static/admin/js/
-	    cp env/lib/python3.4/site-packages/django/contrib/admin/static/admin/js/admin/* public/static/admin/js/admin/
+	    cp $SITE_PACKAGES_PATH/django/contrib/admin/static/admin/css/* public/static/admin/css/
+	    cp $SITE_PACKAGES_PATH/django/contrib/admin/static/admin/img/* public/static/admin/img/
+	    cp $SITE_PACKAGES_PATH/django/contrib/admin/static/admin/img/gis/* public/static/admin/img/gis/
+	    cp $SITE_PACKAGES_PATH/django/contrib/admin/static/admin/js/* public/static/admin/js/
+	    cp $SITE_PACKAGES_PATH/django/contrib/admin/static/admin/js/admin/* public/static/admin/js/admin/
         	    
 	7b. mkdir public/static/dico
         cp custom_user/static/dico/*.json public/static/dico

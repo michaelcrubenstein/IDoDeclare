@@ -97,18 +97,18 @@ class PasswordReset(models.Model):
     def updatePassword(self, email, password):
         if self.email != email:
             PasswordReset.objects.filter(reset_key=self.reset_key).delete()
-            raise ResetKeyValidError();
+            raise PasswordReset.ResetKeyExpiredErrorResetKeyValidError();
             
         if timezone.now() - datetime.timedelta(minutes=30) > self.creation_time:
             PasswordReset.objects.filter(reset_key=self.reset_key).delete()
-            raise ResetKeyExpiredError()
+            raise PasswordReset.ResetKeyExpiredError()
             
         if len(password) == 0:
-            raise NullPasswordError()
+            raise PasswordReset.NullPasswordError()
         
         query_set = AuthUser.objects.filter(email=email)
         if query_set.count == 0:
-            raise EmailValidError();
+            raise PasswordReset.EmailValidError();
                 
         user = query_set.get()
         user.set_password(password)  

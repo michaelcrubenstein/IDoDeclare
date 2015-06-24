@@ -290,7 +290,7 @@ def resetPassword(request):
     results = {'success':False, 'error': u'request format invalid'}
     try:
         if request.method != "POST":
-            raise Exception("newInterest only responds to POST requests")
+            raise Exception("resetPassword only responds to POST requests")
 
         POST = request.POST
         email = request.POST['email']
@@ -310,12 +310,11 @@ def resetPassword(request):
         
         Emailer.sendResetPasswordEmail(email, settings.PASSWORD_RESET_URL + "?key=" + newKey)
         
-        # Set the new issue to titlecase and remove extraneous spaces.
         results = {'success':True}
     except Exception as e:
-        log = open('exception.log', 'a')
-        log.write("%s\n" % traceback.format_exc())
-        log.flush()
+        with open('exception.log', 'a') as log:
+            log.write("%s\n" % traceback.format_exc())
+            log.flush()
         results = {'success':False, 'error': str(e)}
             
     return JsonResponse(results)

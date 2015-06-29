@@ -24,11 +24,11 @@ The I Do Declare Team
             [recipientEMail], fail_silently=False, html_message=htmlMessage)
     
     def merge(html, dir):
-		p = re.compile(r'{{\s*([^}\s]+)\s*}}')
-		def f(match):
-			s = match.group(1)
-			if s in dir:
-				return dir[s]
-			else:
-				return s
-		return p.sub(f, html)
+        p = re.compile(r'{{\s*([^}\s]+)\s*}}')
+        def f(match):
+            s = match.group(1)
+            if s in dir:
+                return dir[s]
+            else:
+                return s
+        return p.sub(f, html)

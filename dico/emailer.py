@@ -22,3 +22,13 @@ The I Do Declare Team
         
         send_mail('Password Reset', message, 'feedback@idodeclare.org',
             [recipientEMail], fail_silently=False, html_message=htmlMessage)
+    
+    def merge(html, dir):
+		p = re.compile(r'{{\s*([^}\s]+)\s*}}')
+		def f(match):
+			s = match.group(1)
+			if s in dir:
+				return dir[s]
+			else:
+				return s
+		return p.sub(f, html)

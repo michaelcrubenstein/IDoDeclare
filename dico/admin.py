@@ -7,7 +7,7 @@ from django.contrib import admin
 # Register your models here.
 from dico.models import Issue, Constituent, ConstituentInterest, ContactMethod, \
     Petition, PetitionIssue, PetitionVote, Argument, ArgumentRating, Note, Story, \
-    Frequency, Via, Message, Envelope, \
+    Frequency, Via, Message, Mailbag, Envelope, \
     MC, Event, MCInterest, EventIssue
     
 class ArgumentRatingInline(admin.TabularInline):
@@ -48,10 +48,6 @@ class ConstituentVoteInline(admin.StackedInline):
     model = PetitionVote
     extra = 1
 
-class EnvelopeInline(admin.StackedInline):
-    model = Envelope
-    extra = 1
-
 class ConstituentAdmin(admin.ModelAdmin):
 ##    fieldsets = [
 ##        (None, {'fields': ['firstName', 'lastName', 'email']}),
@@ -59,6 +55,14 @@ class ConstituentAdmin(admin.ModelAdmin):
 ##    ]
 ##    list_display = ('firstName', 'lastName', 'email', 'streetAddress', 'zipCodeStr', 'state', 'district',)
     inlines = [ConstituentInterestInline, ConstituentVoteInline]
+
+class MailbagInline(admin.StackedInline):
+    model = Mailbag
+    extra = 1
+
+class EnvelopeInline(admin.StackedInline):
+    model = Envelope
+    extra = 1
 
 class MCInterestInline(admin.StackedInline):
     model = MCInterest
@@ -85,6 +89,9 @@ class EventAdmin(admin.ModelAdmin):
     inlines = [EventIssueInline]
 
 class MessageAdmin(admin.ModelAdmin):
+    inlines = [MailbagInline]
+
+class MailbagAdmin(admin.ModelAdmin):
     inlines = [EnvelopeInline]
 
 admin.site.register(Issue, IssueAdmin)
@@ -99,3 +106,4 @@ admin.site.register(Story)
 admin.site.register(Frequency)
 admin.site.register(Via)
 admin.site.register(Message, MessageAdmin)
+admin.site.register(Mailbag, MailbagAdmin)

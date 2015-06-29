@@ -89,6 +89,7 @@ class ContactMethod(models.Model):
     frequency = models.ForeignKey(Frequency, db_index=True, default=0) # 0 - never, 1 - daily, 2 - weekly
     via = models.ForeignKey(Via, db_index=True, null=True) # 1 - sms, 2 - email
     phonenumber = models.CharField(max_length=25, null=True)
+    lastcontacttime = models.DateTimeField(db_index=True, null=True)
     
     def get_contact_method(user):
         if user is None or not user.is_active:
@@ -115,6 +116,12 @@ class ContactMethod(models.Model):
         ContactMethod.objects.filter(user_id=self.user.id) \
             .update(frequency=newFrequency, via=newVia, phonenumber=newPhoneNumber)
 
+    def update_last_contact_time(contact_method_id):
+        with connection.cursor() as c:
+            sql = "UPDATE dico_contactmethod SET lastcontacttime = Now()" + \
+                  " WHERE user_id = %s"
+            c.execute(sql, [contact_method_id])
+    
     def __str__(self):
         return str(self.user)
 
@@ -614,16 +621,104 @@ class Message(models.Model):
     creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
     via = models.ForeignKey(Via, db_index=True, null=True) # 1 - sms, 2 - email
 
+    # Get a list of messages that match the query.
+    # Users match the query and are interested in an issue associated with the message petition.
+    # Users are also set to receive the message through the form indicated.
+    def get_search_results(query):
+        with connection.cursor() as c:
+            sql = "SELECT m.id, m.subject, m.creation_time, m.via_id" + \
+                  " FROM dico_message m" + \
+                  " WHERE ((m.subject LIKE CONCAT('%', %s, '%')) OR (m.body LIKE CONCAT('%', %s, '%')))" + \
+                  " ORDER BY subject, creation_time"
+            c.execute(sql, (query, query))
+            messages = []
+            for i in c.fetchall():
+                messages.append({'id': i[0], 'subject': i[1], 'creationTime': i[2], 'via': i[3]})
+            return messages
+
+    # Get a list of users who could receive this message.
+    # Users match the query and are interested in an issue associated with the message petition.
+    # Users are also set to receive the message through the form indicated.
+    def get_message_search_results(message_id, query):
+        with connection.cursor() as c:
+            if query is None or len(query) == 0:
+                sql = "SELECT u.id, CONCAT(u.first_name, ' ', u.last_name) name, Now() - cm.lastcontacttime ts, f.name" + \
+                      " FROM custom_user_authuser u" + \
+                      "      LEFT JOIN dico_contactmethod cm ON cm.user_id = u.id" + \
+                      "      LEFT JOIN dico_frequency f ON f.id = cm.frequency_id," + \
+                      "      dico_message m" + \
+                      " WHERE m.id = %s" + \
+                      " AND   cm.via_id = m.via_id" + \
+                      " AND   EXISTS(SELECT 1 FROM dico_constituentinterest ci, dico_petitionissue pi" + \
+                      "              WHERE ci.constituent_id = u.id" + \
+                      "              AND   ci.issue_id = pi.issue_id AND pi.petition_id = m.petition_id)" + \
+                      " AND f.id <> 0" + \
+                      " ORDER BY lastcontacttime DESC"
+                c.execute(sql, (message_id))
+            else:
+                sql = "SELECT u.id, CONCAT(u.first_name, ' ', u.last_name) name, Now() - cm.lastcontacttime ts, f.name" + \
+                      " FROM custom_user_authuser u" + \
+                      "      LEFT JOIN dico_contactmethod cm ON cm.user_id = u.id" + \
+                      "      LEFT JOIN dico_frequency f ON f.id = cm.frequency_id," + \
+                      "      dico_message m" + \
+                      " WHERE m.id = %s" + \
+                      " AND   cm.via_id = m.via_id" + \
+                      " AND   EXISTS(SELECT 1 FROM dico_constituentinterest ci, dico_petitionissue pi" + \
+                      "              WHERE ci.constituent_id = u.id" + \
+                      "              AND   ci.issue_id = pi.issue_id AND pi.petition_id = m.petition_id)" + \
+                      " AND ((u.first_name LIKE CONCAT('%', %s, '%')) OR (u.last_name LIKE CONCAT('%', %s, '%')))" + \
+                      " AND f.id <> 0" + \
+                      " ORDER BY cm.lastcontacttime DESC"
+                c.execute(sql, (message_id, query, query))
+            users = []
+            for i in c.fetchall():
+                users.append({'id': i[0], 'name': i[1], 'timespan': i[2], 'frequency': i[3]})
+            return users
+
     def __str__(self):
         return str(self.subject)
+        
+class Mailbag(models.Model):
+    message = models.ForeignKey(Message, db_index=True, db_column='message_id')
+    via = models.ForeignKey(Via, db_index=True, null=True) # 1 - sms, 2 - email
+    creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
+    droptime = models.DateTimeField(db_column='drop_time', db_index=True, null=True)
+
+    def __str__(self):
+        return str(self.message)+"@"+str(self.creationTime)
+        
+    # Get a list of users who could receive this message.
+    # Users match the query and are interested in an issue associated with the message petition.
+    # Users are also set to receive the message through the form indicated.
+    def get_unsent_mailbags():
+        with connection.cursor() as c:
+            sql = "SELECT m.id, message.subject, m.creation_time, e.c" + \
+                  " FROM dico_mailbag m" + \
+                  "      LEFT JOIN dico_message message ON m.message_id = message.id" + \
+                  "      LEFT JOIN (SELECT mailbag_id, COUNT(*) c FROM dico_envelope group by mailbag_id) e" + \
+                  "           ON e.mailbag_id = m.id" + \
+                  " WHERE m.drop_time IS NULL" + \
+                  " ORDER BY m.creation_time DESC"
+            c.execute(sql)
+            mailbags = []
+            for i in c.fetchall():
+                mailbags.append({'id': i[0], 'name': i[1], 'creationTime': i[2], 'envelopeCount': i[3]})
+            return mailbags
+            
+    def dropped(self):
+        with connection.cursor() as c:
+            sql = "UPDATE dico_mailbag SET drop_time = Now() WHERE id = %s"
+            c.execute(sql, [self.id])
+            sql = "UPDATE dico_contactmethod SET lastcontacttime = Now()" + \
+                  " WHERE id IN (SELECT constituent_id FROM dico_envelope where mailbag_id = %s)"
+            c.execute(sql, [self.id])
 
 class Envelope(models.Model):
-    message = models.ForeignKey(Message, db_index=True, db_column='message_id')
+    mailbag = models.ForeignKey(Mailbag, db_index=True, db_column='mailbag_id')
     constituent = models.ForeignKey(Constituent, db_index=True, db_column='constituent_id')
-    creationTime = models.DateTimeField(db_column='creation_time', db_index=True, auto_now_add=True)
-    executionTime = models.DateTimeField(db_index=True, null=True)
-    via = models.ForeignKey(Via, db_index=True, null=True) # 1 - sms, 2 - email
-    address = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return str(self.message) + " to " + str(self.constituent)
 
 class MCInterest(models.Model):
     mc = models.ForeignKey(MC, db_index=True, db_column='mc_id');

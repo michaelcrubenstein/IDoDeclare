@@ -6,6 +6,7 @@ urlpatterns = patterns(
     '',
     url(r'^$', views.index, name='home'),
     url(r'^reports/', include('dico.reports.urls')),
+    url(r'^touch/', include('dico.touch.urls')),
     # ex: /dico/signin/
     url(r'^signin/', views.signin, name='signin'),
     # ex: /dico/submitsignin/

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>I Do Declare - Send Mailbag</title>
+
+<!--     Bootstrap core CSS -->
+
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static "dico/css/dicopage.css" %}" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+	<!-- Styles for this web page -->
+	<style>
+		body {
+		  padding-top: 55px;
+		}
+		th {
+			white-space: nowrap;
+		}
+		.align-right-column {
+		  text-align: right;
+		}
+		.dl-horizontal {
+			width: 100%;
+		}
+		.dt-label {
+			padding-top: 6px;
+			padding-bottom: 6px;
+		}
+		#id_subject {
+			margin-bottom: 5px;
+		}
+		#id_description {
+			margin-bottom: 5px;
+		}
+	</style>
+
+  </head>
+
+  <body>
+
+    <div class="container-fluid">
+		<nav class="navbar navbar-default navbar-fixed-top dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="pull-left">
+					<div id="cancel_button" class="navbar-link dico-navbar-link">Cancel</div>
+				</div>
+				<div class="pull-right">
+					<div id="id_submitbutton" class="navbar-link dico-navbar-link">Send</div>
+				</div>
+				<div class="dico-navbar-commands">
+					<div class="dico-title dico-fill"><span class="dico-inner-fill"><strong>Send Mailbag</strong></span></div>
+				</div>
+			</div>
+		</nav>
+		<nav class="navbar navbar-default navbar-fixed-bottom dico-navbar" role="navigation">
+			<div class="container-fluid">
+				<div class="dico-pull pull-right">
+					<div class="navbar-link dico-navbar-link" onClick="delete_mailbags()">
+						<span class="text-danger">Delete</span>
+					</div>
+				</div>
+			</div>
+		</nav>
+		
+		<div class="row">
+			<div id="myAlert" class="col-xs-12"></div>
+		</div>
+		<form id="id_form">
+			<div class="row">
+				<label class="col-xs-12" for="id_pickedUsers">Choose mailbags to send</label>
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
+					<table class="table table-condensed table-striped">
+						<thead>
+							<tr>
+								<th><input id="id_selectAllCheckBox" type="checkbox"></input></th>
+								<th>Mailbag</th>
+								<th>Envelope Count</th>
+								<th>Time Created</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+		</form>
+
+    </div> <!-- /container -->
+
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+	<script src="{% static "d3/d3.v3.min.js" %}"></script>
+
+	<!-- Scripts for this web page -->
+	<script type="text/JavaScript">
+	
+		var storedcsrftoken = "{{ csrf_token }}";
+
+		function htmlEncode(input){
+			return $('<div>').text(input).html();
+		}
+	
+		/// Gives a checkbox the inderminate state and the right
+		/// checked state so that it becomes checked on click
+		/// on click on IE, Chrome and Firefox 5+
+		function makeIndeterminate(checkbox)
+		{
+			checkbox.prop("checked", getCheckedStateForIndeterminate());
+			checkbox.prop("indeterminate", true);
+		}
+		
+		/// Determine the checked state to give to a checkbox
+		/// with indeterminate state, so that it becomes checked
+		/// on click on IE, Chrome and Firefox 5+
+		function getCheckedStateForIndeterminate()
+		{
+			// Create a unchecked checkbox with indeterminate state
+			var test = document.createElement("input");
+			test.type = "checkbox";
+			test.checked = false;
+			test.indeterminate = true;
+
+			// Try to click the checkbox
+			var body = document.body;
+			body.appendChild(test); // Required to work on FF
+			test.click();
+			body.removeChild(test); // Required to work on FF
+
+			// Check if the checkbox is now checked and cache the result
+			if (test.checked)
+			{
+				getCheckedStateForIndeterminate = function () { return false; };
+				return false;
+			}
+			else
+			{
+				getCheckedStateForIndeterminate = function () { return true; };
+				return true;
+			}
+		}
+
+		function hasPicked()
+		{
+			return $("tbody>tr>td>input:checked").length > 0;
+		}
+		
+		function hasUnpicked()
+		{
+			return $("tbody>tr>td>input:not(:checked)").length > 0;
+		}
+		
+		function selectAll()
+		{
+			$("tbody>tr>td>input").prop("checked", true);
+		}
+		
+		function selectNone()
+		{
+			$("tbody>tr>td>input").prop("checked", false);
+		}
+		
+		$(document).ready (function(e) {
+			<!-- Block of code for an alert area at the top of the window -->
+			$(".close").click(function(){
+				$(this).parent().alert();
+			});
+		
+			bootstrap_alert = function() {}
+			bootstrap_alert.show = function(parentDiv, message, alertClass) {
+				parentDiv.html('<div class="alert ' + alertClass + ' alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button><span>'+message+'</span></div>')
+			}
+			bootstrap_alert.warning = function(message) {
+				bootstrap_alert.show($('#myAlert'), message, "alert-danger");
+			}
+			closealert = function() { 
+				$('.alert').parent().html('');
+			}
+			
+			function submitform() {
+				closealert();
+		
+				$.post("{% url 'dropMailbags' %}", 
+					{ csrfmiddlewaretoken: '{{ csrf_token }}', 
+						"mailbag_id": getMailbagIDs(),
+					})
+				  .done(function(json, textStatus, jqXHR)
+					{
+						if (json['success']) {
+							closealert();
+							if (parseInt(json['count']) == 1)
+								message = "Sent 1 Mailbag"
+							else
+								message = "Sent " + json['count'] + " Mailbags";
+							bootstrap_alert.show($('#myAlert'), message, "alert-success");
+						}
+						else {
+							bootstrap_alert.warning(json['error']);
+						}
+					})
+				  .fail(function(jqXHR, textStatus, errorThrown) {
+		    		bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+					console.log( "error: " + textStatus + "; " + errorThrown + ";");
+					console.log( jqXHR.status + "; " + jqXHR.statusText);
+				  });
+			}
+			
+			$("#id_selectAllCheckBox").on('click', function(e) {
+				if ($(this).prop("checked"))
+					selectAll();
+				else
+					selectNone();
+			});
+			
+			$("#id_form").on('submit', function (e) {
+				if (!hasPicked()) {
+					bootstrap_alert.warning("Pick at least one mailbag.");
+				}
+				else
+				{
+					submitform();
+				}
+
+			   //stop form submission
+			   e.preventDefault();
+			});
+			
+			$("#cancel_button").click(function(e) {
+				window.location = "{{ backURL }}";
+				e.preventDefault();
+			});
+			$("#id_submitbutton").click(function(e) {
+				submitform();
+				e.preventDefault();
+			});
+			
+			$("body").css("padding-bottom", $(".navbar-fixed-bottom").height());
+			
+			show_mailbags();
+		});
+
+		function checkSelectAllCheckBox() {
+			if ($(this).prop("checked"))
+			{
+				if (hasUnpicked())
+					makeIndeterminate($("#id_selectAllCheckBox"));
+				else
+				{
+					$("#id_selectAllCheckBox").prop("checked", true);
+					$("#id_selectAllCheckBox").prop("indeterminate", false);
+				}
+			}
+			else
+			{
+				if (hasPicked())
+					makeIndeterminate($("#id_selectAllCheckBox"));
+				else
+				{
+					$("#id_selectAllCheckBox").prop("checked", false);
+					$("#id_selectAllCheckBox").prop("indeterminate", false);
+				}
+			}
+		}
+			
+		function show_mailbags() {
+			$("#id_userSearchResults").empty();
+		  $.getJSON("{% url 'getUnsentMailbags' %}", { csrfmiddlewaretoken: storedcsrftoken }, function(json){
+		  	if (json['success']) {
+			
+				d3.select("tbody").selectAll("tr")
+					.data(json['mailbags'])
+					.enter()
+					.append("tr")
+					.attr("mailbag_id", function(d) {
+							return d['id'];						
+						})
+					.selectAll("td")
+					.data(function(d) {
+						checkboxHTML = '<input type="checkbox" value='+d['id']+'>';
+						chevronHTML = '<span class="glyphicon glyphicon-chevron-right"></span>';
+							 
+						return [checkboxHTML, htmlEncode(d['name']), d['envelopeCount'], d['creationTime']];
+					})
+					.enter()
+					.append("td")
+					.html(function(d, i) { return d; });
+				$("#id_userSearchResults>tr>td>input").click(checkSelectAllCheckBox);
+			}
+			else
+				bootstrap_alert.warning(json['error']);
+		  });
+		}
+		
+		function getMailbagIDs()
+		{
+			return $("tbody>tr>td>input:checked").map(function() 
+				{
+					return parseInt($(this).val())
+				}).get();
+		}
+		
+		function delete_mailbags() {
+			closealert();
+			
+			mailbagIDs = getMailbagIDs();
+			if (mailbagIDs.length == 0)
+				bootstrap_alert.warning("Select at least one mailbag to delete.");
+			else
+			{
+				$.post("{% url 'deleteMailbags' %}", 
+					{ csrfmiddlewaretoken: '{{ csrf_token }}', 
+						"mailbag_id": mailbagIDs,
+					})
+				  .done(function(json, textStatus, jqXHR)
+					{
+						if (json['success']) {
+							closealert();
+							if (parseInt(json['count']) == 1)
+								message = "Deleted 1 Mailbag"
+							else
+								message = "Deleted " + json['count'] + " Mailbags";
+							bootstrap_alert.show($('#myAlert'), message, "alert-success");
+							$("tbody>tr>td>input:checked").parent().parent().remove();
+						}
+						else {
+							bootstrap_alert.warning(json['error']);
+						}
+					})
+				  .fail(function(jqXHR, textStatus, errorThrown) {
+					bootstrap_alert.warning(jqXHR.status + "; " + jqXHR.statusText);
+					console.log( "error: " + textStatus + "; " + errorThrown + ";");
+					console.log( jqXHR.status + "; " + jqXHR.statusText);
+				  });
+			}
+		}
+		
+	</script>
+
+<!--     IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="{% static "bootstrap/assets/js/ie10-viewport-bug-workaround.js" %}"></script>
+  </body>
+</html>

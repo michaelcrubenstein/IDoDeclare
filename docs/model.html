@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>I Do Declare - Data Model</title>
+  </head>
+
+<body>
+	<h1>Data Model</h1>
+	<h3 id="custom_user_authuser">custom_user_authuser</h3>
+	<table>
+		<p>Users who are authorized to connect to this system.</p>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id            </td><td> int(11)      </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> password      </td><td> varchar(128) </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> a hash of the user's password </td>
+			</tr>
+			<tr><td> last_login    </td><td> datetime     </td><td> YES  </td><td>     </td><td> NULL    </td>
+				<td> the time the user last successfully logged in </td>
+			</tr>
+			<tr><td> is_superuser  </td><td> tinyint(1)   </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> 1 if the user is a superuser; 0 otherwise.</td>
+			</tr>
+			<tr><td> username      </td><td> varchar(20)  </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> an unused field </td>
+			</tr>
+			<tr><td> email         </td><td> varchar(255) </td><td> NO   </td><td> UNI </td><td> NULL    </td>
+				<td> the email address of the user, which serves as a unique identifier. </td>
+			</tr>
+			<tr><td> first_name    </td><td> varchar(30)  </td><td> YES  </td><td>     </td><td> NULL    </td>
+				<td> the first name of the user. </td>
+			</tr>
+			<tr><td> last_name     </td><td> varchar(50)  </td><td> YES  </td><td>     </td><td> NULL    </td>
+				<td> the last name of the user. </td>
+			</tr>
+			<tr><td> date_joined   </td><td> datetime     </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> the time the user was added to this system </td>
+			</tr>
+			<tr><td> is_active     </td><td> tinyint(1)   </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> true if the user is active in the system </td>
+			</tr>
+			<tr><td> is_staff      </td><td> tinyint(1)   </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> 1 if the user is a staff member; 0 otherwise </td>
+			</tr>
+			<tr><td> profile_image </td><td> varchar(100) </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> a url that contains an image of the user. Currently, this field is unused. </td>
+			</tr>
+			<tr><td> user_bio      </td><td> varchar(600) </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> a biographical description of the user. Currently, this field is unused. </td>
+			</tr>
+		</tbody>
+	</table>
+
+
+<h3 id="custom_user_passwordreset">custom_user_passwordreset</h3>
+	<p>Email messages sent to users which contain links back to the system for resetting user passwords
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id            </td><td> int(11)      </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> email         </td><td> varchar(255) </td><td> NO   </td><td> UNI </td><td> NULL    </td>
+				<td> the email address to which the password reset message was sent </td>
+			</tr>
+			<tr><td> reset_key     </td><td> varchar(50)  </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> the unique identifier sent in the password reset message </td>
+			</tr>
+			<tr><td> creation_time </td><td> datetime     </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time at which the password reset message was sent </td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_argument">dico_argument</h3>
+	<p>Arguments made by users in support of or opposition to a petition
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id             </td><td> int(11)  </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> description    </td><td> longtext </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> the text of the argument </td>
+			</tr>
+			<tr><td> vote           </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> 1 if the argument is in support; 0 if the argument is in opposition. 
+					 <br>Note that the value of an opposition argument is not the same as the value of an opposition vote. </td>
+			</tr>
+			<tr><td> creation_time  </td><td> datetime </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time at which the argument was created </td>
+			</tr>
+			<tr><td> constituent_id </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to the <a href="#dico_constituent">dico_constituent</a> table 
+					 (or the <a href="#custom_user_authuser">custom_user_authuser</a> table) 
+				</td>
+			</tr>
+			<tr><td> petition_id    </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to the <a href="#dico_petition">dico_petition</a> table </td>
+			</tr>
+		</tbody>
+	</table>
+
+
+<h3 id="dico_argumentrating">dico_argumentrating</h3>
+	<p> Ratings given by users as to the value of specific arguments.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id                 </td><td> int(11)  </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> vote               </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> a number that represents the rating given by this constituent to this argument. </td>
+			</tr>
+			<tr><td> creation_time      </td><td> datetime </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time at which this argument rating was created </td>
+			</tr>
+			<tr><td> last_modified_time </td><td> datetime </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time at which this argument rating was last modified </td>
+			</tr>
+			<tr><td> argument_id        </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to the <a href="#dico_argument">dico_argument</a> table to which this rating applies
+				</td>
+			</tr>
+			<tr><td> constituent_id     </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to the <a href="#dico_constituent">dico_constituent</a> table 
+					 (or the <a href="#custom_user_authuser">custom_user_authuser</a> table) 
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+
+<h3 id="dico_constituent">dico_constituent</h3>
+	<p>Information used to associate users with specific political entities.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> street_address </td><td> varchar(100) </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> a location of the user for establishing their political jurisdiction</td>
+			</tr>
+			<tr><td> zip_code       </td><td> varchar(5)   </td><td> YES  </td><td>     </td><td> NULL    </td>
+				<td> the postal code of the user for establishing their political jurisdiction.<br>Note that typically a street number, street name and zip code are sufficient for establishing a location</td>
+			</tr>
+			<tr><td> district       </td><td> int(11)      </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the congressional district of the specified user</td>
+			</tr>
+			<tr><td> state          </td><td> varchar(2)   </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the state of the specified user</td>
+			</tr>
+			<tr><td> user_id        </td><td> int(11)      </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> foreign key to a <a href="#custom_user_authuser">custom_user_authuser</a> record 
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_constituentinterest">dico_constituentinterest</h3>
+	<p> Associations between constituents and issues that they are interested in.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id             </td><td> int(11) </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> constituent_id </td><td> int(11) </td><td> YES  </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_constituent">dico_constituent</a> record 
+					 (or a <a href="#custom_user_authuser">custom_user_authuser</a> record) 
+				</td>
+			</tr>
+			<tr><td> issue_id       </td><td> int(11) </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_issue">dico_issue</a> record that indicates the issue
+					 the specified constituent is interested in
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_contactmethod">dico_contactmethod</h3>
+	<p>
+		Information for each user about how they can be contacted by the system.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> user_id         </td><td> int(11)              </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> foreign key to the <a href="#custom_user_authuser">custom_user_authuser</a> table 
+				</td>
+			</tr>
+			<tr><td> frequency_id    </td><td> smallint(5) unsigned </td><td> YES  </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to the <a href="#dico_frequency">dico_frequency</a> table to identify the frequency
+					 with which this user wants to be contacted
+				</td>
+			</tr>
+			<tr><td> via_id          </td><td> smallint(5) unsigned </td><td> YES  </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_via">dico_via</a> record to identify how this user wants to be contacted</td>
+			</tr>
+			<tr><td> phonenumber     </td><td> varchar(25)          </td><td> YES  </td><td>     </td><td> NULL    </td>
+				<td> the phone number at which this user wants to be contacted for SMS messages</td>
+			</tr>
+			<tr><td> lastcontacttime </td><td> datetime             </td><td> YES  </td><td> MUL </td><td> NULL    </td>
+				<td> the last time this user was contacted</td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_envelope">dico_envelope</h3>
+	<p> Instances of messages sent to a particular constituent from a particular mailbag
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id             </td><td> int(11) </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> constituent_id </td><td> int(11) </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to the <a href="#dico_constituent">dico_constituent</a> table 
+					 (or the <a href="#custom_user_authuser">custom_user_authuser</a> table) 
+				</td>
+			</tr>
+			<tr><td> mailbag_id     </td><td> int(11) </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to the <a href="#dico_mailbag">dico_mailbag</a> record that contains this envelope</td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_event">dico_event</h3>
+	<p>
+		Records of events that were undertaken by representatives. <br>Currently, this table is unused.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id          </td><td> int(11)      </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> description </td><td> longtext     </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> the description of this event </td>
+			</tr>
+			<tr><td> link        </td><td> varchar(200) </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> a URL associated with this event </td>
+			</tr>
+			<tr><td> event_time  </td><td> datetime     </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time at which this event was created </td>
+			</tr>
+			<tr><td> mc_id       </td><td> int(11)      </td><td> YES  </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_mc">dico_mc</a> record for the representative 
+					 responsible for this event</td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_eventissue">dico_eventissue</h3>
+	<p>
+		Associations of events with issues. <br>Currently, this table is unused.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id       </td><td> int(11) </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> event_id </td><td> int(11) </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to the <a href="#dico_event">dico_event</a> table </td>
+			</tr>
+			<tr><td> issue_id </td><td> int(11) </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to the <a href="#dico_issue">dico_issue</a> table for an issue
+					 associated with this event</td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_frequency">dico_frequency</h3>
+	<p>Frequencies with which users may be contacted by the system. Current frequencies are daily and weekly.</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id    </td><td> smallint(5) unsigned </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> a unique identifier for this frequency </td>
+			</tr>
+			<tr><td> name  </td><td> varchar(25)          </td><td> YES  </td><td>     </td><td> NULL    </td>
+				<td> the text used to describe this frequency </td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_issue">dico_issue</h3>
+	<p>Policy areas that may be associated with specific petitions, events or constituents</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id    </td><td> int(11)     </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> name  </td><td> varchar(50) </td><td> YES  </td><td> UNI </td><td> NULL    </td>
+				<td> the text used to describe this issue </td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_mailbag">dico_mailbag</h3>
+	<p>Groups of envelopes that are all distributed at the same time with the same message
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id            </td><td> int(11)              </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> creation_time </td><td> datetime             </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time this mailbag was created </td>
+			</tr>
+			<tr><td> drop_time     </td><td> datetime             </td><td> YES  </td><td> MUL </td><td> NULL    </td>
+				<td> the time this mailbag was sent out </td>
+			</tr>
+			<tr><td> message_id    </td><td> int(11)              </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to the <a href="#dico_message">dico_message</a> table to identify the message sent
+					 in this mailbag</td>
+			</tr>
+			<tr><td> via_id        </td><td> smallint(5) unsigned </td><td> YES  </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_via">dico_via</a> record to identify the mechanism used to 
+					 send the envelopes in this mailbag</td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_mc">dico_mc</h3>
+	<p>Political information about members of Congress. <br>Currently this table is unused.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> district </td><td> int(11)    </td><td> YES  </td><td> MUL </td><td> NULL    </td>
+				<td> the congressional district of a representative, or NULL for a senator.</td>
+			</tr>
+			<tr><td> state    </td><td> varchar(2) </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the state which a senator represents or the state delegation of which a representative is part.</td>
+			</tr>
+			<tr><td> user_id  </td><td> int(11)    </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> foreign key to a <a href="#custom_user_authuser">custom_user_authuser</a> record 
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_mcinterest">dico_mcinterest</h3>
+	<p>Associations of representatives and the issues they are interest in.<br>Currently, this table is unused.
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id         </td><td> int(11)  </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> entry_time </td><td> datetime </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time which this record was created</td>
+			</tr>
+			<tr><td> issue_id   </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_issue">dico_issue</a> record for an issue this
+					 representative is interested in</td>
+			</tr>
+			<tr><td> mc_id      </td><td> int(11)  </td><td> YES  </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_mc">dico_mc</a> record</td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_message">dico_message</h3>
+	<p> Messages that can be sent to groups of users from this system.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id             </td><td> int(11)              </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> subject        </td><td> varchar(200)         </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the subject line of a message sent via email </td>
+			</tr>
+			<tr><td> body           </td><td> longtext             </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> the html body (for email) or text (for SMS) of the message </td>
+			</tr>
+			<tr><td> creation_time  </td><td> datetime             </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time at which this message was created </td>
+			</tr>
+			<tr><td> constituent_id </td><td> int(11)              </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_constituent">dico_constituent</a> record 
+					 (or a <a href="#custom_user_authuser">custom_user_authuser</a> record) for the creator of this message 
+				</td>
+			</tr>
+			<tr><td> via_id         </td><td> smallint(5) unsigned </td><td> YES  </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_via">dico_via</a> record to identify how this message should be sent</td>
+			</tr>
+			<tr><td> petition_id    </td><td> int(11)              </td><td> YES  </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_petition">dico_petition</a> record associated with this message </td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_note">dico_note</h3>
+	<p> Notes associated with petitions.
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id             </td><td> int(11)  </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> description    </td><td> longtext </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> the text of the note </td>
+			</tr>
+			<tr><td> link           </td><td> longtext </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> an optional URL that can be associated with this note </td>
+			</tr>
+			<tr><td> creation_time  </td><td> datetime </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time at which this note was created </td>
+			</tr>
+			<tr><td> constituent_id </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_constituent">dico_constituent</a> record 
+					 (or a <a href="#custom_user_authuser">custom_user_authuser</a> record) of the constituent who created this note
+				</td>
+			</tr>
+			<tr><td> petition_id    </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_petition">dico_petition</a> record with which this note is associated </td>
+			</tr>
+		</tbody>
+	</table>
+
+
+<h3 id="dico_petition">dico_petition</h3>
+	<p> An action that can be contemplated by constituents and legislators.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id             </td><td> int(11)  </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> description    </td><td> longtext </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> text describing the action to be taken </td>
+			</tr>
+			<tr><td> constituent_id </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_constituent">dico_constituent</a> record 
+					 (or a <a href="#custom_user_authuser">custom_user_authuser</a> record) for the user who created this action. 
+				</td>
+			</tr>
+			<tr><td> creation_time  </td><td> datetime </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time at which this action was created </td>
+			</tr>
+		</tbody>
+	</table>
+
+
+<h3 id="dico_petitionissue">dico_petitionissue</h3>
+	<p>
+		Associations of petitions with issues.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id             </td><td> int(11) </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> issue_id       </td><td> int(11) </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_issue">dico_issue</a> record associated with the
+					 specified petition </td>
+			</tr>
+			<tr><td> petition_id    </td><td> int(11) </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_petition">dico_petition</a> record associated with the
+					 specified issue </td>
+			</tr>
+			<tr><td> constituent_id </td><td> int(11) </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_constituent">dico_constituent</a> record 
+					 (or a <a href="#custom_user_authuser">custom_user_authuser</a> record) 
+					 for the user who created this association
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_petitionvote">dico_petitionvote</h3>
+	<p>
+		Votes that users take on specific actions.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id                 </td><td> int(11)  </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> vote               </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> The vote that a particular user takes on the specified action. 1 to support; -1 to oppose; 0 for no opinion. </td>
+			</tr>
+			<tr><td> petition_id        </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_petition">dico_petition</a> record </td> of the action being voted on
+			</tr>
+			<tr><td> constituent_id     </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_constituent">dico_constituent</a> record 
+					 (or a <a href="#custom_user_authuser">custom_user_authuser</a> record) of the constituent voting
+				</td>
+			</tr>
+			<tr><td> creation_time      </td><td> datetime </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time at which this vote was created </td>
+			</tr>
+			<tr><td> last_modified_time </td><td> datetime </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time at which this vote was last modified </td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_story">dico_story</h3>
+	<p>
+		User stories associated with actions.
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id             </td><td> int(11)  </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> auto_increment </td>
+			</tr>
+			<tr><td> description    </td><td> longtext </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> the text of the story </td>
+			</tr>
+			<tr><td> link           </td><td> longtext </td><td> NO   </td><td>     </td><td> NULL    </td>
+				<td> an optional URL that can be associated with this story </td>
+			</tr>
+			<tr><td> creation_time  </td><td> datetime </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> the time at which this story was created </td>
+			</tr>
+			<tr><td> constituent_id </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_constituent">dico_constituent</a> record 
+					 (or a <a href="#custom_user_authuser">custom_user_authuser</a> record) of the constituent who created this story
+				</td>
+			</tr>
+			<tr><td> petition_id    </td><td> int(11)  </td><td> NO   </td><td> MUL </td><td> NULL    </td>
+				<td> foreign key to a <a href="#dico_petition">dico_petition</a> record with which this story is associated </td>
+			</tr>
+		</tbody>
+	</table>
+
+<h3 id="dico_via">dico_via</h3>
+	<p>Ways in which users may be contacted by the system. Current ways are SMS and Email.</p>
+	<table>
+		<thead>
+			<tr>
+				<th>Field</th><th>Type</th><th>Null</th><th>Key</th><th>Default</th><th>Extra</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr><td> id    </td><td> smallint(5) unsigned </td><td> NO   </td><td> PRI </td><td> NULL    </td>
+				<td> the unique identifier for this way of contacting </td>
+			</tr>
+			<tr><td> name  </td><td> varchar(25)          </td><td> YES  </td><td>     </td><td> NULL    </td>
+				<td> the text used to describe this way of contacting </td>
+			</tr>
+		</tbody>
+	</table>
+
+
+</body>

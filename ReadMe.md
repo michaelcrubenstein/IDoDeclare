@@ -1,8 +1,10 @@
 README
 ==============================
-PyDico is a python and Django implementation of a project initially conceived at
-Hack4Congress in Cambridge, MA. With PyDico, users can create accounts and identify 
-issues that they are interested in seeing action by their members of Congress.
+I Do Declare is a python and Django implementation of a project initially conceived at
+Hack4Congress in Cambridge, MA. The original name of the team was Dico. 
+
+With I Do Declare, users can create accounts and identify issues that they are interested 
+in seeing action by their members of Congress.
 
 The User dashboard currently identifies the members of Congress for a user based on 
 their street address and zip code.
